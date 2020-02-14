@@ -43,6 +43,7 @@ typedef struct {
 	Debugger debug;
 } Context;
 
-extern DarkSkyTask darkSkyTasks[];
+extern Context darkSkyContext;
+extern DarkSkyTask darkSkyTasks[TASK_NUM_TASKS];
 
 #endif /* DARKSKY_H_ */

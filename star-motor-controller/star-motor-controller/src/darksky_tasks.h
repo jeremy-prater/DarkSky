@@ -11,11 +11,11 @@
 
 #include <portmacro.h>
 
-typedef void (EntryPoint)(void*);
+typedef void (*EntryPoint)(void*);
 
 typedef struct
 {
-	EntryPoint *entryPoint;
+	EntryPoint entryPoint;
 	const char * name;
 	unsigned short stackSize;
 	void * context;
@@ -28,9 +28,8 @@ typedef struct
 typedef enum
 {
 	TASK_DarkSkyMain,
+	TASK_JSONComm,
 	TASK_NUM_TASKS
 } DarkSkyTaskIDs;
-
-extern EntryPoint DarkSkyMain;
 
 #endif /* DARKSKY_TASKS_H_ */

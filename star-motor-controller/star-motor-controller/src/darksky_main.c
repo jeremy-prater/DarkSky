@@ -9,18 +9,35 @@
 #include "darksky.h"
 #include <FreeRTOSConfig.h>
 
-DarkSkyTask darkSkyTasks[] = {
+extern void DarkSkyMain(void * data);
+extern void JSONComm(void * data);
+
+DarkSkyTask darkSkyTasks[TASK_NUM_TASKS] = {
 	{
 		//entryPoint
 		DarkSkyMain,
 		//name
-		"Main Task",
+		"Main",
 		//stackSize
-		100,
+		400,
 		//context
-		DarkSkyMain,
+		&darkSkyContext,
+		//priority [0,4]
+		4,
+		//taskHandle
+		NULL
+	},
+	{
+		//entryPoint
+		JSONComm,
+		//name
+		"JSONComm",
+		//stackSize
+		400,
+		//context
+		&darkSkyContext,
 		//priority
-		configLIBRARY_LOWEST_INTERRUPT_PRIORITY,
+		4,
 		//taskHandle
 		NULL
 	}

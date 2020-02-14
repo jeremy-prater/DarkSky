@@ -26,16 +26,18 @@
 * Atmel Software Framework (ASF).
 */
 /*
-* Support and FAQ: visit <a href="https://www.microchip.com/support/">Microchip Support</a>
+* Support and FAQ: visit <a href="https://www.microchip.com/support/">Microchip
+* Support</a>
 */
+#include "darksky.h"
 #include <asf.h>
 #include <leds.h>
-#include "darksky.h"
 
 const uint32_t delay = 100;
 
-int main(void)
-{
+Context darkSkyContext;
+
+int main(void) {
 	/* Insert system clock initialization code here (sysclk_init()). */
 
 	sysclk_init();
@@ -60,20 +62,15 @@ int main(void)
 	// 	delay_ms(delay);
 	// }
 
-	for (uint8_t taskNum = 0; taskNum < TASK_NUM_TASKS; ++taskNum)
-	{
+	for (uint32_t taskNum = 0; taskNum < (uint32_t)TASK_NUM_TASKS; taskNum++) {
 		DarkSkyTask *task = &darkSkyTasks[taskNum];
-		xTaskCreate(task->taskHandle,
-		(const signed char*)task->name,
-		task->stackSize,
-		task->context,
-		task->priority,
+		xTaskCreate(task->entryPoint,
+		task->name, task->stackSize, task->context, task->priority,
 		&task->taskHandle);
 	}
 
 	vTaskStartScheduler();
 
-	while (1)
-	{
+	while (1) {
 	}
 }
