@@ -2,7 +2,7 @@
 
 Darksky is a satellite tracking and low quality radio telescope project
 
-![System Diagram](/diagrams/DarkSky System.png)
+![System Diagram](/diagrams/DarkSky_System.png)
 
 By re-using a Ku band LNB and a parabolic satellite dish along with some basic micro-controllers, tracking objects in the sky should be relatively easy.
 
