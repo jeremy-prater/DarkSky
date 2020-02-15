@@ -60,8 +60,8 @@
 #include <freertos_peripheral_control.h>
 #include <freertos_peripheral_control_private.h>
 
-// From module: FreeRTOS - UART Interface Layer
-#include <freertos_uart_serial.h>
+// From module: FreeRTOS - USART Interface Layer
+#include <freertos_usart_serial.h>
 
 // From module: FreeRTOS - kernel 10.0.0
 #include <FreeRTOS.h>
