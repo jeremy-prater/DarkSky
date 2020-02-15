@@ -10,6 +10,7 @@
 #include <FreeRTOSConfig.h>
 
 #include "darksky.h"
+#include "leds.h"
 
 DarkSkyTask darkSkyTasks[TASK_NUM_TASKS] = {{// entryPoint
                                              DarkSkyMain,
@@ -41,6 +42,7 @@ void DarkSkyMain(void *data) {
   for (;;) {
     // Show some sign of life!
     vTaskDelay(1000 / portTICK_RATE_MS);
+	ioport_toggle_pin_level(IOPORT_LED_0);
   }
   vTaskDelete(NULL);
 }

@@ -37,6 +37,7 @@
     <option id="common.services.ioport" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.drivers.pio" value="Add" config="" content-id="Atmel.ASF" />
     <option id="thirdparty.os.freertos.version" value="Add" config="10.0.0" content-id="Atmel.ASF" />
+    <option id="common.services.layer.freertos.uart" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.applications.user_application" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.utils.cmsis.sam3x.source.template" value="Add" config="" content-id="Atmel.ASF" />
   </options>
@@ -238,6 +239,8 @@
     <file path="src/ASF/thirdparty/freertos/freertos-10.0.0/Source/portable/MemMang/heap_1.c" framework="" version="3.47.0" source="thirdparty\freertos\freertos-10.0.0\Source\portable\MemMang\heap_1.c" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/common/services/freertos/sam/freertos_usart_serial.c" framework="" version="3.47.0" source="common\services\freertos\sam\freertos_usart_serial.c" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/common/services/freertos/sam/freertos_usart_serial.h" framework="" version="3.47.0" source="common\services\freertos\sam\freertos_usart_serial.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/freertos/sam/freertos_uart_serial.c" framework="" version="3.47.0" source="common\services\freertos\sam\freertos_uart_serial.c" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/freertos/sam/freertos_uart_serial.h" framework="" version="3.47.0" source="common\services\freertos\sam\freertos_uart_serial.h" changed="False" content-id="Atmel.ASF" />
   </files>
   <documentation help="http://asf.atmel.com/docs/3.47.0/common.applications.user_application.arduino_due_x/html/index.html" />
   <offline-documentation help="" />
@@ -602,6 +605,12 @@
     <Compile Include="src\ASF\common\services\freertos\sam\freertos_peripheral_control.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\ASF\common\services\freertos\sam\freertos_uart_serial.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\common\services\freertos\sam\freertos_uart_serial.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\ASF\common\services\freertos\sam\freertos_usart_serial.c">
       <SubType>compile</SubType>
     </Compile>
