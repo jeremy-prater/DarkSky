@@ -1,3 +1,4 @@
 **/.vs
+.vscode
 star-motor-controller/star-motor-controller/Debug
 star-motor-controller/star-motor-controller/Release

@@ -9,7 +9,7 @@
 #define DARKSKY_H_
 
 #include <asf.h>
-#include <freertos_usart_serial.h>
+#include <freertos_uart_serial.h>
 #include <queue.h>
 #include <semphr.h>
 
@@ -18,6 +18,7 @@
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 #define JSON_BUFFER_SIZE 500
+
 typedef enum {
 	MOTOR_UNKNOWN,
 	MOTOR_ENCODER_A,
@@ -34,10 +35,11 @@ typedef struct {
 } Motor;
 
 typedef struct {
+	//freertos_usart_if freertos_usart;
 	freertos_uart_if freertos_uart;
-	freertos_usart_if freertos_usart;
 	xSemaphoreHandle txMutex;
 } JSONComm;
+
 typedef struct {
 	xSemaphoreHandle debugWriteLock;
 	// Queue debugLinesOut;
@@ -53,6 +55,7 @@ typedef struct {
 extern void DarkSkyMain(void *data);
 
 extern void JSONCommInit(Context *context);
+extern status_code_t JSONCommWrite(Context * context, const char *data, size_t length);
 extern void JSONCommTask(void *data);
 
 extern Context darkSkyContext;
