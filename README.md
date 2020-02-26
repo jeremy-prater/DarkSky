@@ -1,6 +1,6 @@
 # DarkSky
 
-Darksky is a satellite tracking and low quality radio telescope project
+Darksky is a satellite tracking and tracking quality radio telescope project
 
 ![System Diagram](/diagrams/DarkSky_System.png)
 
