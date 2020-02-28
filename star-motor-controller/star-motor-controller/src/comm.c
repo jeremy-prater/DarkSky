@@ -15,8 +15,9 @@
 #include "darksky.h"
 #include "leds.h"
 
+static uint8_t application_buffer[COMM_BUFFER_SIZE];
 static uint8_t receive_buffer[COMM_BUFFER_SIZE];
-static char outBuffer[100];
+static char outBuffer[COMM_BUFFER_SIZE + 2];
 
 // Configuration structure.
 static const freertos_peripheral_options_t driver_options = {
@@ -75,43 +76,77 @@ void CommInit() {
 }
 
 // I'm the cool new logging device!
-static const char * startup_sequence = "Communication : startup sequence";
+static const char * startup_sequence = "boot";
+static const char * tick = "tick";
+static const char * eol = "\r\n";
 
 // Helpers!!
+status_code_t SendCommBlob(const uint8_t * blob, size_t length)
+{
+	status_code_t result;
+	xSemaphoreHandle lock = darkSkyContext.comm.txMutex;
+
+	xSemaphoreTake( lock, portMAX_DELAY );
+
+	freertos_uart_write_packet(
+		darkSkyContext.comm.freertos_uart,
+		blob,
+		length,
+		1000 / portTICK_RATE_MS); //context->comm.txMutex);
+
+	xSemaphoreGive( lock );
+
+	return result;
+}
+
 status_code_t SendCommString(const char * message)
 {
 	status_code_t result;
 	xSemaphoreHandle lock = darkSkyContext.comm.txMutex;
 
 	xSemaphoreTake( lock, portMAX_DELAY );
-	
-	strcpy (outBuffer, message);
 
-	result = freertos_uart_write_packet(
+	snprintf(outBuffer, COMM_BUFFER_SIZE + 2, "%s%s", message, eol);
+
+	freertos_uart_write_packet(
 		darkSkyContext.comm.freertos_uart,
 		(const uint8_t *)outBuffer,
 		strlen(outBuffer),
 		1000 / portTICK_RATE_MS); //context->comm.txMutex);
-		
+
+
 	xSemaphoreGive( lock );
-	
+
 	return result;
 }
 
+// Main communication loop
+
 void CommTask(void *data) {
-	Context *context = (Context *)data;
-
-
 	SendCommString(startup_sequence);
 
-
-	const char *output = "I'm a test!\r\n";
-
 	for (;;) {
-		// printf("test!");
-		// Show some sign of life!
-		vTaskDelay(500 / portTICK_RATE_MS);
-		ioport_toggle_pin_level(IOPORT_LED_1);
+		// Attempt to read COMM_BUFFER_SIZE bytes from freertos_uart.
+		// If fewer than COMM_BUFFER_SIZE bytes are available,
+		// then wait a maximum of 100ms for the rest to arrive.
+		//
+		// This is a main communication thread loop.
+		//
+		// All functions here must be memory access protection
+		//
+
+		uint32_t bytes_received = freertos_uart_serial_read_packet(
+			darkSkyContext.comm.freertos_uart,
+			receive_buffer,
+			COMM_BUFFER_SIZE,
+			1000 / portTICK_RATE_MS); //context->comm.txMutex);
+
+		if (bytes_received > 0)
+		{
+			SendCommBlob(receive_buffer, bytes_received);
+			ioport_toggle_pin_level(IOPORT_LED_1);
+		}
+
 	}
 
 	vTaskDelete(NULL);

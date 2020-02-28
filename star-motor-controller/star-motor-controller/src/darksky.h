@@ -17,7 +17,7 @@
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
-#define COMM_BUFFER_SIZE 500
+#define COMM_BUFFER_SIZE 64
 
 typedef enum {
 	MOTOR_UNKNOWN,
