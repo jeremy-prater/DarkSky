@@ -78,7 +78,6 @@ void CommInit() {
 // I'm the cool new logging device!
 static const char * startup_sequence = "boot";
 static const char * tick = "tick";
-static const char * eol = "\r\n";
 
 // Helpers!!
 status_code_t SendCommBlob(const uint8_t * blob, size_t length)
@@ -88,7 +87,7 @@ status_code_t SendCommBlob(const uint8_t * blob, size_t length)
 
 	xSemaphoreTake( lock, portMAX_DELAY );
 
-	freertos_uart_write_packet(
+	result = freertos_uart_write_packet(
 		darkSkyContext.comm.freertos_uart,
 		blob,
 		length,
@@ -106,9 +105,9 @@ status_code_t SendCommString(const char * message)
 
 	xSemaphoreTake( lock, portMAX_DELAY );
 
-	snprintf(outBuffer, COMM_BUFFER_SIZE + 2, "%s%s", message, eol);
+	snprintf(outBuffer, COMM_BUFFER_SIZE + 2, "%s\r\n", message);
 
-	freertos_uart_write_packet(
+	result = freertos_uart_write_packet(
 		darkSkyContext.comm.freertos_uart,
 		(const uint8_t *)outBuffer,
 		strlen(outBuffer),
@@ -132,14 +131,14 @@ void CommTask(void *data) {
 		//
 		// This is a main communication thread loop.
 		//
-		// All functions here must be memory access protection
+		// All functions here must have memory access protection
 		//
 
 		uint32_t bytes_received = freertos_uart_serial_read_packet(
 			darkSkyContext.comm.freertos_uart,
 			receive_buffer,
 			COMM_BUFFER_SIZE,
-			1000 / portTICK_RATE_MS); //context->comm.txMutex);
+			100 / portTICK_RATE_MS); //context->comm.txMutex);
 
 		if (bytes_received > 0)
 		{
