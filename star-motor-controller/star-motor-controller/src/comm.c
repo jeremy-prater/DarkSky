@@ -1,5 +1,5 @@
 /*
-* jsoncomm.c
+* comm.c
 *
 * Created: 2/14/2020 3:09:19 PM
 *  Author: shady
@@ -15,9 +15,8 @@
 #include "darksky.h"
 #include "leds.h"
 
-static uint8_t receive_buffer[JSON_BUFFER_SIZE];
+static uint8_t receive_buffer[COMM_BUFFER_SIZE];
 static char outBuffer[100];
-status_code_t result;
 
 // Configuration structure.
 static const freertos_peripheral_options_t driver_options = {
@@ -27,7 +26,7 @@ static const freertos_peripheral_options_t driver_options = {
 	.receive_buffer = receive_buffer,
 	// receive_buffer_size is set to the size, in bytes, of the buffer
 	// pointed to by the receive_buffer value.
-	.receive_buffer_size = JSON_BUFFER_SIZE,
+	.receive_buffer_size = COMM_BUFFER_SIZE,
 	// The interrupt priority.  The FreeRTOS driver provides the interrupt
 	// service routine, and handles all interrupt interactions.  The
 	// application writer does not need to provide any interrupt handling
@@ -58,39 +57,57 @@ static sam_uart_opt_t uart_settings = {
 	.ul_mode = 0
 };
 
-void JSONCommInit(Context *context) {
+void CommInit() {
 	uart_settings.ul_mck = sysclk_get_cpu_hz();
 
 	sysclk_enable_peripheral_clock(ID_USART0);
 	sysclk_enable_peripheral_clock(ID_UART);
 
-	context->jsonComm.freertos_uart =
+	darkSkyContext.comm.freertos_uart =
 	freertos_uart_serial_init(CONF_UART, &uart_settings, &driver_options);
 
-	configASSERT(context->jsonComm.freertos_uart);
+	configASSERT(darkSkyContext.comm.freertos_uart);
 
-	//context->jsonComm.freertos_usart =
+	//context->comm.freertos_usart =
 	//freertos_usart_serial_init(CONF_USART, &usart_settings, &driver_options);
 
-	vSemaphoreCreateBinary(context->jsonComm.txMutex);
+	vSemaphoreCreateBinary(darkSkyContext.comm.txMutex);
 }
 
-void JSONCommTask(void *data) {
+// I'm the cool new logging device!
+static const char * startup_sequence = "Communication : startup sequence";
+
+// Helpers!!
+status_code_t SendCommString(const char * message)
+{
+	status_code_t result;
+	xSemaphoreHandle lock = darkSkyContext.comm.txMutex;
+
+	xSemaphoreTake( lock, portMAX_DELAY );
+	
+	strcpy (outBuffer, message);
+
+	result = freertos_uart_write_packet(
+		darkSkyContext.comm.freertos_uart,
+		(const uint8_t *)outBuffer,
+		strlen(outBuffer),
+		1000 / portTICK_RATE_MS); //context->comm.txMutex);
+		
+	xSemaphoreGive( lock );
+	
+	return result;
+}
+
+void CommTask(void *data) {
 	Context *context = (Context *)data;
 
+
+	SendCommString(startup_sequence);
+
+
 	const char *output = "I'm a test!\r\n";
-	strcpy (outBuffer, output);
 
 	for (;;) {
-		//freertos_usart_write_packet(
-		//context->jsonComm.freertos_usart, (const uint8_t *)output,
-		//strlen(output) + 1, 100 / portTICK_RATE_MS); //context->jsonComm.txMutex);
-
-		result = freertos_uart_write_packet(
-		context->jsonComm.freertos_uart, (const uint8_t *)outBuffer,
-		strlen(outBuffer), 1000 / portTICK_RATE_MS); //context->jsonComm.txMutex);
-
-
 		// printf("test!");
 		// Show some sign of life!
 		vTaskDelay(500 / portTICK_RATE_MS);

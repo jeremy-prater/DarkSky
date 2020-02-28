@@ -25,9 +25,9 @@ DarkSkyTask darkSkyTasks[TASK_NUM_TASKS] = {{// entryPoint
                                              // taskHandle
                                              NULL},
                                             {// entryPoint
-                                             JSONCommTask,
+                                             CommTask,
                                              // name
-                                             "JSONComm",
+                                             "Comm",
                                              // stackSize
                                              configMINIMAL_STACK_SIZE + 100,
                                              // context

@@ -17,7 +17,8 @@
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
-#define JSON_BUFFER_SIZE 500
+#define COMM_BUFFER_SIZE 500
+
 typedef enum {
 	MOTOR_UNKNOWN,
 	MOTOR_ENCODER_A,
@@ -46,14 +47,14 @@ typedef struct {
 typedef struct {
 	Motor motor1;
 	Motor motor2;
-	JSONComm jsonComm;
+	JSONComm comm;
 	Debugger debug;
 } Context;
 
 extern void DarkSkyMain(void *data);
 
-extern void JSONCommInit(Context *context);
-extern void JSONCommTask(void *data);
+extern void CommInit();
+extern void CommTask(void *data);
 
 extern Context darkSkyContext;
 extern DarkSkyTask darkSkyTasks[TASK_NUM_TASKS];
