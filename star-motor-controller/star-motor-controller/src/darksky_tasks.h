@@ -1,11 +1,3 @@
-/*
-* darksky_tasks.h
-*
-* Created: 2/13/2020 10:15:29 PM
-*  Author: shady
-*/
-
-
 #ifndef DARKSKY_TASKS_H_
 #define DARKSKY_TASKS_H_
 
@@ -28,8 +20,11 @@ typedef struct
 typedef enum
 {
 	TASK_DarkSkyMain,
-	TASK_JSONComm,
+	TASK_Comm,
+	TASK_CommandProcessor,
 	TASK_NUM_TASKS
 } DarkSkyTaskIDs;
+
+extern DarkSkyTask darkSkyTasks[TASK_NUM_TASKS];
 
 #endif /* DARKSKY_TASKS_H_ */

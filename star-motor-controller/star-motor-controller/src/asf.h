@@ -56,6 +56,9 @@
 #include <compiler.h>
 #include <status_codes.h>
 
+// From module: Delay routines
+#include <delay.h>
+
 // From module: FreeRTOS - PDC Interface Layer
 #include <freertos_peripheral_control.h>
 #include <freertos_peripheral_control_private.h>

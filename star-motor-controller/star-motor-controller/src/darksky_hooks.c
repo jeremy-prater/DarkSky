@@ -1,9 +1,4 @@
-/*
-* darksky_hooks.c
-*
-* Created: 2/13/2020 11:56:29 PM
-*  Author: shady
-*/
+#include "leds.h"
 
 void vApplicationMallocFailedHook(void);
 void vApplicationIdleHook(void);
