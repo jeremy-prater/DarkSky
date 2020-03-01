@@ -42,7 +42,11 @@ const serverTick = async socket => {
 console.log(`Server : Start up --> listening on port ${listenPort}`);
 
 const SerialPort = require('serialport');
-const port = new SerialPort('/dev/ttyUSB0');
+
+//const port = new SerialPort('/dev/ttyUSB0');
+
+// macOS identifier for test cable /dev/tty.usbserial-AC01HSL7
+const port = new SerialPort('/dev/tty.usbserial-AC01HSL7');
 
 port.write('main screen turn on', function(err) {
     if (err) {
