@@ -57,7 +57,7 @@ void DarkSkyMain(void *data) {
 
 	for (;;) {
 		// Show some sign of life!
-		//vTaskDelay(250 / portTICK_RATE_MS);
+		vTaskDelay(250 / portTICK_RATE_MS);
 		ioport_toggle_pin_level(IOPORT_LED_0);
 
 		snprintf(outBuffer, 64, "dec_pos:%d", darkSkyContext.motor1.position);
