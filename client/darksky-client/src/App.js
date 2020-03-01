@@ -20,7 +20,6 @@ class App extends Component {
       console.error(`Failed to connect to ${endpoint}`);
     }
 
-    console.log(socket);
     socket.on("FromAPI", data => this.setState({ response: data }));
   }
 
