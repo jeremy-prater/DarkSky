@@ -28,7 +28,6 @@ class App extends Component {
 
         socket.on('comport.update', comports => {
             console.log(comports);
-            this.setState({ response: comports[0].device });
         });
         socket.on('comport.status', comstatus => {
             console.log(comstatus);
