@@ -36,10 +36,8 @@ class App extends Component {
 
     render() {
         return (
-            <div class="App">
-                <StatusBar class="StatusBar"></StatusBar>
-                <div class="View"></div>
-                <div class="BottomBar"></div>
+            <div className="App">
+                <StatusBar />
             </div>
         );
     }

@@ -1,4 +1,8 @@
 .StatusBar {
     background-color: #404040;
-    height: 10vh;
+    height: 64px;
+}
+
+.LogoIcon {
+    padding: 5px;
 }
