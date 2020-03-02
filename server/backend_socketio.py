@@ -3,6 +3,7 @@ import coloredlogs
 import socketio
 import eventlet
 from packet import Packet, PacketCommand
+from mcp_serial import MotorPowerController
 
 class SocketIOBackend:
     instance = None
@@ -16,6 +17,7 @@ class SocketIOBackend:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info("Creating DarkSky Socket.IO server")
+        self.mcp = MotorPowerController.getInstance()
         self.sio = socketio.Server(cors_allowed_origins='*')
         self.app = socketio.WSGIApp(self.sio)
         self.sio.on('connect', self.connect)
@@ -26,11 +28,10 @@ class SocketIOBackend:
 
     def connect(self, sid, environ):
         self.logger.info("Client connected : {}".format(sid))
-        self.SendPacket(Packet(PacketCommand.COMMAND_REBOOT, 0, 0, 0))
+        self.SendPacket('comport.update', self.mcp.GetPorts())
 
     def disconnect(self, sid):
         self.logger.info("Client disconnected : {}".format(sid))
 
-    def SendPacket(self, packet: Packet):
-        payload = packet.GetPayload()
-        self.sio.emit(payload['command'].name, payload)
+    def SendPacket(self, event, payload):
+        self.sio.emit(event, payload)

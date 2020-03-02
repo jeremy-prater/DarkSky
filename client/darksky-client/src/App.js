@@ -1,11 +1,18 @@
 import React, { Component } from 'react';
 import socketIOClient from 'socket.io-client';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import StatusBar from './components/statusbar';
+import './App.css';
 
 class App extends Component {
     constructor() {
         super();
         this.state = {
-            response: false,
+            comports: [],
+            comport: {
+                comport: {},
+                connected: false
+            },
             endpoint: 'http://127.0.0.1:8100'
         };
     }
@@ -19,21 +26,21 @@ class App extends Component {
             console.error(`Failed to connect to ${endpoint}`);
         }
 
-        socket.on('COMMAND_REBOOT', packet => {
-            console.log(packet);
-            this.setState({ response: packet.command });
+        socket.on('comport.update', comports => {
+            console.log(comports);
+            this.setState({ response: comports[0].device });
+        });
+        socket.on('comport.status', comstatus => {
+            console.log(comstatus);
         });
     }
 
     render() {
-        const { response } = this.state;
         return (
-            <div style={{ textAlign: 'center' }}>
-                {response ? (
-                    <p>The response is : {response}</p>
-                ) : (
-                    <p>Loading...</p>
-                )}
+            <div class="App">
+                <StatusBar class="StatusBar"></StatusBar>
+                <div class="View"></div>
+                <div class="BottomBar"></div>
             </div>
         );
     }
