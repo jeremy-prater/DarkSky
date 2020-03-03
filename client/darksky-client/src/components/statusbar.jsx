@@ -10,7 +10,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSatelliteDish, faPlug } from '@fortawesome/free-solid-svg-icons';
+import { faSatelliteDish, faPlug, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import './statusbar.css';
 
 class StatusBar extends Component {
@@ -31,17 +31,17 @@ class StatusBar extends Component {
                         <Nav.Link href="#target">Align to target</Nav.Link>
 
                         <NavDropdown title="Serial Port" id="comport">
-                            <NavDropdown.Item href="#action/3.1">
+                            <NavDropdown.Item href="#com/1">
                                 com1
                             </NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.2">
+                            <NavDropdown.Item href="#com/2">
                                 com2
                             </NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.3">
+                            <NavDropdown.Item href="#com/3">
                                 Something
                             </NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item href="#action/3.4">
+                            <NavDropdown.Item href="#com/usb">
                                 First USB
                             </NavDropdown.Item>
                         </NavDropdown>
@@ -53,24 +53,24 @@ class StatusBar extends Component {
                             />
                         </Button>
 
-                        <NavDropdown title="LNB Power" id="SubMenu1">
-                            <NavDropdown.Item href="#action/3.1">
+                        <NavDropdown title="LNB Power" id="lnb_power">
+                            <NavDropdown.Item href="#lnb/off">
                                 Off
                             </NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.1">
+                            <NavDropdown.Item href="#lnb/auto">
                                 Auto
                             </NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item href="#action/3.1">
+                            <NavDropdown.Item href="#lnb/0">
                                 Mode 0 : +13 vdc @ 0 Hz
                             </NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.1">
+                            <NavDropdown.Item href="#lnb/1">
                                 Mode 1 : +13 vdc @ 22 KHz
                             </NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.1">
+                            <NavDropdown.Item href="#lnb/2">
                                 Mode 2 : +18 vdc @ 22 KHz
                             </NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.1">
+                            <NavDropdown.Item href="#lnb/3">
                                 Mode 3 : +18 vdc @ 0 KHz
                             </NavDropdown.Item>
                         </NavDropdown>
