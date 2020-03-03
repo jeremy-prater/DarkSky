@@ -4,5 +4,10 @@
 }
 
 .LogoIcon {
-    padding: 5px;
+    font-size: 38px;
+}
+
+.LogoText {
+    margin-top: 8px;
+    padding: 6px;
 }

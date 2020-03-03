@@ -18,14 +18,14 @@ import './statusbar.css';
 class StatusBar extends Component {
     render() {
         return (
-            <Navbar bg="dark" expand="lg" className="navbar-dark">
+            <Navbar bg="dark" expand="lg" className="navbar-dark StatusBar">
                 <FontAwesomeIcon
                     icon={faSatelliteDish}
                     size="2x"
                     color="orange"
                     className="LogoIcon"
                 />
-                <Navbar.Brand href="#home">DarkSky</Navbar.Brand>
+                <Navbar.Brand href="#home" className="LogoText"><h2>DarkSky</h2></Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
