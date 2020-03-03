@@ -1,7 +1,4 @@
 import React, { Component } from 'react';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import './statusbar.css';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
@@ -10,7 +7,12 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSatelliteDish, faPlug, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import {
+    faSatelliteDish,
+    faPlug,
+    faPowerOff
+    //faCheckCircle,
+} from '@fortawesome/free-solid-svg-icons';
 import './statusbar.css';
 
 class StatusBar extends Component {
@@ -74,11 +76,11 @@ class StatusBar extends Component {
                                 Mode 3 : +18 vdc @ 0 KHz
                             </NavDropdown.Item>
                         </NavDropdown>
-                        <Button variant="outline-primary">
+                        <Button variant="outline-danger">
                             <FontAwesomeIcon
-                                icon={faPlug}
+                                icon={faPowerOff}
                                 size="lg"
-                                color="orange"
+                                color="gray"
                             />
                         </Button>
                     </Nav>

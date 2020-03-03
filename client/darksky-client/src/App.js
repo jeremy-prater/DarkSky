@@ -27,10 +27,10 @@ class App extends Component {
         }
 
         socket.on('comport.update', comports => {
-            console.log(comports);
+            console.log(`[comport.update] [${comports}]`);
         });
         socket.on('comport.status', comstatus => {
-            console.log(comstatus);
+            console.log(`[comport.status] ${comstatus}`);
         });
     }
 
