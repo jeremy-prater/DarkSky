@@ -27,17 +27,22 @@ class App extends Component {
         }
 
         socket.on('comport.update', comports => {
-            console.log(`[comport.update] [${comports}]`);
+            console.log(`[comport.update]`);
+            this.setState({
+                comports: comports
+            });
+            console.log(this.state.comports);
         });
         socket.on('comport.status', comstatus => {
-            console.log(`[comport.status] ${comstatus}`);
+            console.log(`[comport.status]`);
+            console.log(comstatus);
         });
     }
 
     render() {
         return (
             <div className="App">
-                <StatusBar />
+                <StatusBar comports={this.state.comports} comport={this.state.comport} />
             </div>
         );
     }

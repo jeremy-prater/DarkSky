@@ -16,6 +16,19 @@ import {
 import './statusbar.css';
 
 class StatusBar extends Component {
+    constructor(props) {
+        super(props);
+    }
+
+    getComportList() {
+        console.log(this);
+        // this.props.comports.map(comport => {
+        //     <NavDropdown.Item href="#com/{comport.device}">
+        //         {comport.device}
+        //     </NavDropdown.Item>;
+        // });
+    }
+
     render() {
         return (
             <Navbar bg="dark" expand="lg" className="navbar-dark StatusBar">
@@ -25,7 +38,9 @@ class StatusBar extends Component {
                     color="orange"
                     className="LogoIcon"
                 />
-                <Navbar.Brand href="#home" className="LogoText"><h2>DarkSky</h2></Navbar.Brand>
+                <Navbar.Brand href="#home" className="LogoText">
+                    <h2>DarkSky</h2>
+                </Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
@@ -33,15 +48,7 @@ class StatusBar extends Component {
                         <Nav.Link href="#target">Align to target</Nav.Link>
 
                         <NavDropdown title="Serial Port" id="comport">
-                            <NavDropdown.Item href="#com/1">
-                                com1
-                            </NavDropdown.Item>
-                            <NavDropdown.Item href="#com/2">
-                                com2
-                            </NavDropdown.Item>
-                            <NavDropdown.Item href="#com/3">
-                                Something
-                            </NavDropdown.Item>
+                            {this.getComportList}
                             <NavDropdown.Divider />
                             <NavDropdown.Item href="#com/usb">
                                 First USB
