@@ -14,21 +14,14 @@ import {
     //faCheckCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import './statusbar.css';
+import ComportMenu from './comports';
 
 class StatusBar extends Component {
     constructor(props) {
         super(props);
     }
 
-    getComportList() {
-        console.log(this);
-        // this.props.comports.map(comport => {
-        //     <NavDropdown.Item href="#com/{comport.device}">
-        //         {comport.device}
-        //     </NavDropdown.Item>;
-        // });
-    }
-
+    //<ul>{listItems}</ul>
     render() {
         return (
             <Navbar bg="dark" expand="lg" className="navbar-dark StatusBar">
@@ -44,16 +37,11 @@ class StatusBar extends Component {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
-                        <Nav.Link href="#manuak">Manual Tracking</Nav.Link>
+                        <Nav.Link href="#manual">Manual Tracking</Nav.Link>
                         <Nav.Link href="#target">Align to target</Nav.Link>
 
-                        <NavDropdown title="Serial Port" id="comport">
-                            {this.getComportList}
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item href="#com/usb">
-                                First USB
-                            </NavDropdown.Item>
-                        </NavDropdown>
+                        <ComportMenu state={this.state} />
+
                         <Button variant="outline-danger">
                             <FontAwesomeIcon
                                 icon={faPlug}
