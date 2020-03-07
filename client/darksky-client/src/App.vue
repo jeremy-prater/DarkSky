@@ -16,7 +16,11 @@ export default {
   },
   mounted: function() {
     console.log("Created App");
-    this.$store.commit("loadProject");
+    
+    //
+    // Application entry point for state setup
+    //
+    //this.$store.commit("init-stuff");
   }
 };
 </script>
