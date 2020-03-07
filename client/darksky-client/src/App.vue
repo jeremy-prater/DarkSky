@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="app">
     <NavMenu />
   </div>
 </template>
@@ -16,7 +16,7 @@ export default {
   },
   mounted: function() {
     console.log("Created App");
-    
+
     //
     // Application entry point for state setup
     //
@@ -25,12 +25,10 @@ export default {
 };
 </script>
 
-<style>
-#app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+<style scoped>
+.app {
   text-align: center;
-  color: #2c3e50;
+  background-color: #101010;
+  font-family: "Courier New", Courier, monospace;
 }
 </style>
