@@ -15,7 +15,7 @@
         <b-nav-item href="#">Align To Target</b-nav-item>
       </b-navbar-nav>
 
-      <b-dropdown dropup="true" text="Comm Port" class="darksky-menu">
+      <b-dropdown dropup text="Comm Port" class="darksky-menu">
         <b-dropdown-item href="#">/dev/tty1</b-dropdown-item>
         <b-dropdown-item href="#">/something/else/v2</b-dropdown-item>
       </b-dropdown>
@@ -24,7 +24,7 @@
         <font-awesome-icon :icon="['fas', 'plug']" size="lg" color="orange" />
       </b-button>
 
-      <b-dropdown dropup="true" text="LNB Power" class="darksky-menu">
+      <b-dropdown dropup text="LNB Power" class="darksky-menu">
         <b-dropdown-item href="#">Off</b-dropdown-item>
         <b-dropdown-item href="#">Auto</b-dropdown-item>
         <b-dropdown-item href="#">Mode 0 : +13 vdc @ 0 Hz</b-dropdown-item>
