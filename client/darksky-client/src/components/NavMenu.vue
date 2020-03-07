@@ -16,17 +16,34 @@
       </b-navbar-nav>
 
       <b-dropdown dropup text="Comm Port" class="darksky-menu">
-        <b-dropdown-item href="#">/dev/tty1</b-dropdown-item>
-        <b-dropdown-item href="#">/something/else/v2</b-dropdown-item>
+        <b-dropdown-item
+          v-for="comport in this.state.comports"
+          v-bind:key="comport.device"
+          @click="selectComport(comport)"
+        >{{ comport.device }}</b-dropdown-item>
       </b-dropdown>
 
-      <b-button variant="outline-danger" class="darksky-menu">
-        <font-awesome-icon :icon="['fas', 'plug']" size="lg" color="orange" />
+      <b-button variant="outline-danger" class="darksky-menu" v-if="connected==false">
+        <font-awesome-icon
+          :icon="['fas', 'plug']"
+          size="lg"
+          color="orange"
+          @click="serialConnect()"
+        />
+      </b-button>
+      <b-button variant="outline-success" class="darksky-menu" v-if="connected==true">
+        <font-awesome-icon
+          :icon="['fas', 'link']"
+          size="lg"
+          color="grey"
+          @click="serialDisconnect()"
+        />
       </b-button>
 
       <b-dropdown dropup text="LNB Power" class="darksky-menu">
         <b-dropdown-item href="#">Off</b-dropdown-item>
         <b-dropdown-item href="#">Auto</b-dropdown-item>
+        <b-dropdown-divider />
         <b-dropdown-item href="#">Mode 0 : +13 vdc @ 0 Hz</b-dropdown-item>
         <b-dropdown-item href="#">Mode 1 : +13 vdc @ 22 KHz</b-dropdown-item>
         <b-dropdown-item href="#">Mode 2 : +18 vdc @ 22 KHz</b-dropdown-item>
@@ -56,25 +73,48 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faSatelliteDish,
   faPowerOff,
-  faPlug
+  faPlug,
+  faLink
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 library.add(faSatelliteDish);
 library.add(faPowerOff);
 library.add(faPlug);
+library.add(faLink);
 
 export default {
   name: "NavMenu",
   data() {
-    return {};
+    return {
+      currentComport: undefined,
+      connected: false
+    };
   },
   components: { FontAwesomeIcon },
   computed: mapState({
-    project: state => state.project,
-    currentWorkspace: state => state.currentWorkspace
+    state: state => state
   }),
-  methods: {}
+  methods: {
+    selectComport(comport) {
+      this.$store.commit("selectComport", comport);
+      this.currentComport = comport;
+    },
+    serialConnect() {
+      if (this.currentComport != undefined) {
+        console.log(`Connecting to comport ${this.currentComport.device}`);
+      }
+      else
+      {
+        console.warn('No comport selected!');
+      }
+    },
+    serialDisconnect() {
+      if (this.currentComport != undefined) {
+        console.log(`Disconnecting from comport ${this.currentComport.device}`);
+      }
+    }
+  }
 };
 </script>
 

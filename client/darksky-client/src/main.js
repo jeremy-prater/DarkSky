@@ -27,15 +27,28 @@ import Scanhome from './components/Scanhome.vue';
 const router = new VueRouter({
     mode: 'history',
     base: __dirname,
-    routes: [
-        { path: '/', component: Scanhome },
-    ]
+    routes: [{ path: '/', component: Scanhome }]
 });
 
+const defaultState = function() {
+    return {
+        endpoint: 'http://127.0.0.1:8100',
+        comports: [],
+        currentComport: {}
+    };
+};
+
 const store = new Vuex.Store({
-    state: {
-    },
+    state: defaultState(),
     mutations: {
+        setComports(state, comports) {
+            state.comports = comports;
+            console.log(`setComports(${JSON.stringify(comports)})`);
+        },
+        selectComport(state, comport) {
+            console.log(`selectComport(${JSON.stringify(comport)})`);
+            state.currentComport = comport;
+        }
     }
 });
 
