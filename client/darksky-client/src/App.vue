@@ -1,19 +1,20 @@
 <template>
   <div id="app" class="app">
+    <DarkSkySocketIO ref="darkskysocketio" />
     <NavMenu />
   </div>
 </template>
 
 <script>
 //import NavBar from "./components/NavBar.vue";
-import NavMenu from "./components/NavMenu.vue";
+import NavMenu from "./components/NavMenu";
 import { mapState } from "vuex";
-import socketIOClient from "socket.io-client";
+import DarkSkySocketIO from "./socketio";
 
 export default {
   name: "app",
   components: {
-    //NavBar,
+    DarkSkySocketIO,
     NavMenu
   },
   computed: mapState({
@@ -26,25 +27,6 @@ export default {
     // Application entry point for state setup
     //
     //this.$store.commit("init-stuff");
-    console.log(`Connecting to ${this.state.endpoint}`);
-    const socket = socketIOClient(this.state.endpoint);
-
-    socket.on('connect', () => {
-      console.log('Client Connected!');
-    });
-
-    socket.on('connect_error', (error) => {
-      console.error(`Failed to connect to ${this.state.endpoint} ${error}`);
-    });
-
-    socket.on('comport.update', comports => {
-      this.$store.commit("setComports", comports);
-    });
-
-    socket.on('comport.status', comstatus => {
-      console.log(`[comport.status]`);
-      console.log(comstatus);
-    });
   }
 };
 </script>

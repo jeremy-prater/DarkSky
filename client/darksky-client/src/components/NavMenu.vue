@@ -77,6 +77,7 @@ import {
   faLink
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { EventBus } from "../eventbus.js";
 
 library.add(faSatelliteDish);
 library.add(faPowerOff);
@@ -102,11 +103,9 @@ export default {
     },
     serialConnect() {
       if (this.currentComport != undefined) {
-        console.log(`Connecting to comport ${this.currentComport.device}`);
-      }
-      else
-      {
-        console.warn('No comport selected!');
+        EventBus.$emit("serialPortConnect", this.currentComport);
+      } else {
+        console.warn("No comport selected!");
       }
     },
     serialDisconnect() {
