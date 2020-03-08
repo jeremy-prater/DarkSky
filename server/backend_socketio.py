@@ -22,6 +22,7 @@ class SocketIOBackend:
         self.app = socketio.WSGIApp(self.sio)
         self.sio.on('connect', self.connect)
         self.sio.on('disconnect', self.disconnect)
+        self.sio.on('comport.connect', self.comportConnect)
 
     def Listen(self):
         eventlet.wsgi.server(eventlet.listen(('', 8100)), self.app)
@@ -35,3 +36,6 @@ class SocketIOBackend:
 
     def SendPacket(self, event, payload):
         self.sio.emit(event, payload)
+
+    def comportConnect(self,  sid, comport):
+        MotorPowerController.getInstance().Connect(comport)

@@ -103,7 +103,7 @@ export default {
     },
     serialConnect() {
       if (this.currentComport != undefined) {
-        EventBus.$emit("serialPortConnect", this.currentComport);
+        EventBus.$emit("comport.connect", this.currentComport);
       } else {
         console.warn("No comport selected!");
       }

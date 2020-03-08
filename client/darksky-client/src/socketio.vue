@@ -36,15 +36,12 @@ export default {
       console.log(`comport.status(${JSON.stringify(comstatus)})`);
     });
 
-    EventBus.$on("serialPortConnect", comport =>
-      this.serialPortConnect(comport)
-    );
+    EventBus.$on("comport.connect", comport => {
+      console.log(`comport.connect(${JSON.stringify(comport)})`);
+      this.socket.emit("comport.connect", comport);
+    });
   },
-  methods: {
-    serialPortConnect(comport) {
-      console.log(`serialPortConnect(${JSON.stringify(comport)})`);
-    }
-  }
+  methods: {}
 };
 </script>
 
