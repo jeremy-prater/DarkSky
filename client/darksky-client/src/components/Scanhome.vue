@@ -6,6 +6,7 @@
     @mousedown="mousedown"
     @mouseup="mouseup"
     @mousemove="mousemove"
+    @mousewheel="mousewheel"
   />
 </template>
 
@@ -40,6 +41,7 @@ export default {
       render: {},
       assetFile: "./src/assets/darksky-sphere.gltf",
       viewVector: {
+        zoom: 0,
         dragging: false,
         dx: 0,
         dy: 0,
@@ -75,10 +77,24 @@ export default {
         this.viewVector.dx = event.clientX;
         this.viewVector.dy = event.clientY;
 
-        let scale = 0.01;
+        let scale = (this.viewVector.zoom + 1) * 0.01;
 
         this.viewVector.y += dx * scale;
         this.viewVector.x += dy * scale;
+      }
+    },
+    mousewheel(event) {
+      let scale = 0.001;
+      this.viewVector.zoom += scale * event.deltaY;
+
+      if (this.viewVector.zoom > 0.99)
+      {
+        this.viewVector.zoom = 0.99;
+      }
+
+      if (this.viewVector.zoom < -0.99)
+      {
+        this.viewVector.zoom = -0.99;
       }
     },
     visibilityChanged(isVisible) {
@@ -100,6 +116,8 @@ export default {
         object.rotation.x = this.viewVector.x;
         object.rotation.y = this.viewVector.y;
         object.rotation.z = this.viewVector.z;
+
+        this.render.camera.position.z = this.viewVector.zoom;
       }
       requestAnimationFrame(this.doRender);
     },
@@ -131,7 +149,7 @@ export default {
       this.render.camera = new THREE.PerspectiveCamera(
         60,
         this.render.width / this.render.height,
-        0.1,
+        0.0001,
         10
       );
 
