@@ -1,6 +1,7 @@
 import serial
 import serial.tools.list_ports
 from packet import PacketCommand, Packet
+from mcp_read_thread import MotorPowerControllerReader
 import logging
 import json
 import backend_socketio
@@ -22,6 +23,7 @@ class MotorPowerController:
         self.serial.baudrate = 115200
         self.ports = []
         self.port = {}
+        self.readerThread = None
 
     def GetPorts(self):
         self.ports = []
@@ -31,6 +33,9 @@ class MotorPowerController:
 
     def Connect(self, comport):
         if self.serial.is_open:
+            if self.readerThread != None:
+                self.logger.warn("Destroy Existing Thread reader...");
+                # self.readerThread.shutdown()
             self.serial.close()
 
         self.port = comport
@@ -38,6 +43,7 @@ class MotorPowerController:
         self.serial.port = self.port["device"]
         self.serial.open()
         self.SendStatus()
+        self.readerThread = MotorPowerControllerReader(self.serial);
 
     def SendStatus(self):
         backend_socketio.SocketIOBackend.getInstance().SendPacket('comport.status', self.serial.is_open)
