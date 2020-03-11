@@ -30,11 +30,16 @@ class MotorPowerController:
         return self.ports
 
     def Connect(self, comport):
+        if self.serial.is_open:
+            self.serial.close()
+
         self.port = comport
         self.logger.info("Connecting to comport {}".format(comport))
         self.serial.port = self.port["device"]
         self.serial.open()
-        if self.serial.is_open:
-            backend_socketio.SocketIOBackend.getInstance().SendPacket('comport.status', True)
+        self.SendStatus()
+
+    def SendStatus(self):
+        backend_socketio.SocketIOBackend.getInstance().SendPacket('comport.status', self.serial.is_open)
 
     # def SendPacket(packet: Packet):

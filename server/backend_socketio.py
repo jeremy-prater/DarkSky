@@ -30,6 +30,7 @@ class SocketIOBackend:
     def connect(self, sid, environ):
         self.logger.info("Client connected : {}".format(sid))
         self.SendPacket('comport.update', self.mcp.GetPorts())
+        MotorPowerController.getInstance().SendStatus()
 
     def disconnect(self, sid):
         self.logger.info("Client disconnected : {}".format(sid))

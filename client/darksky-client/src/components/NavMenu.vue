@@ -15,7 +15,7 @@
         <b-nav-item href="#">Align To Target</b-nav-item>
       </b-navbar-nav>
 
-      <b-dropdown dropup text="Comm Port" class="darksky-menu">
+      <b-dropdown dropup :text="this.comportName()" class="darksky-menu">
         <b-dropdown-item
           v-for="comport in this.state.comports"
           v-bind:key="comport.device"
@@ -23,7 +23,7 @@
         >{{ comport.device }}</b-dropdown-item>
       </b-dropdown>
 
-      <b-button variant="outline-danger" class="darksky-menu" v-if="connected==false">
+      <b-button variant="outline-danger" class="darksky-menu" v-if="this.state.comportState==false">
         <font-awesome-icon
           :icon="['fas', 'plug']"
           size="lg"
@@ -31,7 +31,7 @@
           @click="serialConnect()"
         />
       </b-button>
-      <b-button variant="outline-success" class="darksky-menu" v-if="connected==true">
+      <b-button variant="outline-success" class="darksky-menu" v-if="this.state.comportState==true">
         <font-awesome-icon
           :icon="['fas', 'link']"
           size="lg"
@@ -61,6 +61,7 @@
         </b-nav-form>
       </b-navbar-nav>
     </b-navbar>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -87,16 +88,21 @@ library.add(faLink);
 export default {
   name: "NavMenu",
   data() {
-    return {
-      currentComport: undefined,
-      connected: false
-    };
+    return {};
   },
   components: { FontAwesomeIcon },
   computed: mapState({
     state: state => state
   }),
   methods: {
+    comportName() {
+      if (this.state.currentComport === undefined) {
+        return "Com Port";
+      }
+      let comNameArray = this.state.currentComport.device.split("/");
+      let comName = comNameArray[comNameArray.length - 1];
+      return comName.substr(0, 15);
+    },
     selectComport(comport) {
       this.$store.commit("selectComport", comport);
       this.currentComport = comport;

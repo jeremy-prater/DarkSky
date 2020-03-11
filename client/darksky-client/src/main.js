@@ -34,7 +34,8 @@ const defaultState = function() {
     return {
         endpoint: 'http://127.0.0.1:8100',
         comports: [],
-        currentComport: {}
+        currentComport: undefined,
+        comportState: false
     };
 };
 
@@ -48,6 +49,10 @@ const store = new Vuex.Store({
         selectComport(state, comport) {
             console.log(`selectComport(${JSON.stringify(comport)})`);
             state.currentComport = comport;
+        },
+        comportStatus(state, comportStatus) {
+            console.log(`comportStatus(${JSON.stringify(comportStatus)})`);
+            state.comportState = comportStatus;
         }
     }
 });

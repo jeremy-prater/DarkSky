@@ -33,7 +33,7 @@ export default {
     });
 
     this.socket.on("comport.status", comstatus => {
-      console.log(`comport.status(${JSON.stringify(comstatus)})`);
+      this.$store.commit("comportStatus", comstatus);
     });
 
     EventBus.$on("comport.connect", comport => {
