@@ -18,6 +18,11 @@ class SocketIOBackend:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info("Creating DarkSky Socket.IO server")
+
+        # for super debug socket io logging... comment these lines out...
+        logging.getLogger('socketio').setLevel(logging.WARNING)
+        logging.getLogger('engineio').setLevel(logging.WARNING)
+
         self.mcp = MotorPowerController.getInstance()
         self.sio = socketio.Server(cors_allowed_origins='*')
         self.app = socketio.WSGIApp(self.sio)
