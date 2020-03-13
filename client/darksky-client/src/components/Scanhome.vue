@@ -1,13 +1,15 @@
 <template>
-  <canvas
-    ref="scanhome3d"
-    class="home"
-    v-observe-visibility="visibilityChanged"
-    @mousedown="mousedown"
-    @mouseup="mouseup"
-    @mousemove="mousemove"
-    @mousewheel="mousewheel"
-  />
+  <div class="home" ref="scanhome3dparent" @resize="resize">
+    <canvas
+      ref="scanhome3d"
+      class="home"
+      v-observe-visibility="visibilityChanged"
+      @mousedown="mousedown"
+      @mouseup="mouseup"
+      @mousemove="mousemove"
+      @mousewheel="mousewheel"
+    />
+  </div>
 </template>
 
 <script>
@@ -37,6 +39,10 @@ export default {
   name: "Scanhome",
   data() {
     return {
+      size: {
+        width: 0,
+        height: 0
+      },
       loaded: false,
       render: {},
       assetFile: "./src/assets/darksky-sphere.gltf",
@@ -57,6 +63,15 @@ export default {
   computed: mapState({
     state: state => state
   }),
+  mounted() {
+    console.log("Created Scanhome...");
+    window.addEventListener(
+      "resize",
+      function(event) {
+        this.resize(event);
+      }.bind(this)
+    );
+  },
   methods: {
     mousedown(event) {
       if (event.buttons == 1) {
@@ -87,13 +102,11 @@ export default {
       let scale = 0.001;
       this.viewVector.zoom += scale * event.deltaY;
 
-      if (this.viewVector.zoom > 0.99)
-      {
+      if (this.viewVector.zoom > 0.99) {
         this.viewVector.zoom = 0.99;
       }
 
-      if (this.viewVector.zoom < -0.99)
-      {
+      if (this.viewVector.zoom < -0.99) {
         this.viewVector.zoom = -0.99;
       }
     },
@@ -103,6 +116,10 @@ export default {
       } else {
         this.unload();
       }
+    },
+    resize() {
+      this.visibilityChanged(false);
+      this.visibilityChanged(true);
     },
     doRender() {
       if (this.loaded == false || this.render == undefined) {
@@ -139,7 +156,7 @@ export default {
         return;
       }
 
-      let domObject = this.$refs["scanhome3d"];
+      let domObject = this.$refs["scanhome3dparent"];
       this.render.width = domObject.clientWidth;
       this.render.height = domObject.clientHeight;
 
@@ -193,8 +210,8 @@ export default {
 
 <style scoped>
 .home {
-  height: 100vh;
   width: 100vw;
+  height: 99vh;
   background-color: #303050;
 }
 </style>
