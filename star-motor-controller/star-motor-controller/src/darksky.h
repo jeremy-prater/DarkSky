@@ -6,16 +6,16 @@
 #include <queue.h>
 #include <semphr.h>
 
-#include "darksky_tasks.h"
 #include "comm.h"
+#include "darksky_tasks.h"
 #include "motor.h"
 
 //#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 typedef struct {
-	Motor motor1;
-	Motor motor2;
-	Comm comm;
+  Motor motor1;
+  Motor motor2;
+  Comm comm;
 } Context;
 
 void DarkSkyMain(void *data);

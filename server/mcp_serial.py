@@ -43,9 +43,15 @@ class MotorPowerController:
         self.serial.port = self.port["device"]
         self.serial.open()
         self.SendStatus()
-        self.readerThread = MotorPowerControllerReader(self.serial);
+        if self.serial.is_open:
+            self.readerThread = MotorPowerControllerReader(self.serial);
+
 
     def SendStatus(self):
         backend_socketio.SocketIOBackend.getInstance().SendPacket('comport.status', self.serial.is_open)
 
-    # def SendPacket(packet: Packet):
+    def SendPacket(self, packet: Packet):
+        if self.serial.is_open:
+            outData = packet.GetRawBuffer()
+            self.logger("Sending to MCP : {}".format(outData))
+            self.serial.write(outData)

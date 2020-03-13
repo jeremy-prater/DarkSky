@@ -7,21 +7,21 @@
 Context darkSkyContext;
 
 int main(void) {
-	sysclk_init();
-	board_init();
+  sysclk_init();
+  board_init();
 
-	MotorInit();
-	LedInit();
-	CommInit();
+  MotorInit();
+  LedInit();
+  CommInit();
 
-	for (uint32_t taskNum = 0; taskNum < (uint32_t)TASK_NUM_TASKS; taskNum++) {
-		DarkSkyTask *task = &darkSkyTasks[taskNum];
-		xTaskCreate(task->entryPoint, task->name, task->stackSize, task->context,
-		task->priority, &task->taskHandle);
-	}
+  for (uint32_t taskNum = 0; taskNum < (uint32_t)TASK_NUM_TASKS; taskNum++) {
+    DarkSkyTask *task = &darkSkyTasks[taskNum];
+    xTaskCreate(task->entryPoint, task->name, task->stackSize, task->context,
+                task->priority, &task->taskHandle);
+  }
 
-	vTaskStartScheduler();
+  vTaskStartScheduler();
 
-	while (1) {
-	}
+  while (1) {
+  }
 }
