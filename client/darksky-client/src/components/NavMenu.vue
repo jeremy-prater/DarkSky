@@ -8,19 +8,32 @@
         class="darksky-navbar-logoicon"
       />
       <b-navbar-brand href="#">
-        <span class="darksky-navbar-logotext">DarkSky</span>
+        <b-dropdown dropup text="DarkSky" variant="outline-primary" class="darksky-menu">
+          <b-dropdown-item href="#">Manual Tracking</b-dropdown-item>
+          <b-dropdown-item href="#">Align To Target</b-dropdown-item>
+        </b-dropdown>
       </b-navbar-brand>
-      <b-navbar-nav>
-        <b-nav-item href="#">Manual Tracking</b-nav-item>
-        <b-nav-item href="#">Align To Target</b-nav-item>
-      </b-navbar-nav>
+      <b-navbar-nav></b-navbar-nav>
 
-      <b-dropdown dropup :text="this.comportName()" class="darksky-menu">
+      <b-dropdown dropup text="Comport" variant="outline-secondary" class="darksky-menu">
         <b-dropdown-item
           v-for="comport in this.state.comports"
           v-bind:key="comport.device"
           @click="selectComport(comport)"
         >{{ comport.device }}</b-dropdown-item>
+
+        <span class="menuStatusLeft">{{ this.comportName() }}</span>
+      </b-dropdown>
+
+      <b-dropdown dropup text="LNB Power" variant="outline-secondary" class="darksky-menu">
+        <b-dropdown-item href="#">Off</b-dropdown-item>
+        <b-dropdown-item href="#">Auto</b-dropdown-item>
+        <b-dropdown-divider />
+        <b-dropdown-item href="#">Mode 0 : +13 vdc @ 0 Hz</b-dropdown-item>
+        <b-dropdown-item href="#">Mode 1 : +13 vdc @ 22 KHz</b-dropdown-item>
+        <b-dropdown-item href="#">Mode 2 : +18 vdc @ 22 KHz</b-dropdown-item>
+        <b-dropdown-item href="#">Mode 3 : +18 vdc @ 0 KHz</b-dropdown-item>
+        <b-dropdown-divider />
       </b-dropdown>
 
       <b-button variant="outline-danger" class="darksky-menu" v-if="this.state.comportState==false">
@@ -40,18 +53,29 @@
         />
       </b-button>
 
-      <b-dropdown dropup text="LNB Power" class="darksky-menu">
-        <b-dropdown-item href="#">Off</b-dropdown-item>
-        <b-dropdown-item href="#">Auto</b-dropdown-item>
-        <b-dropdown-divider />
-        <b-dropdown-item href="#">Mode 0 : +13 vdc @ 0 Hz</b-dropdown-item>
-        <b-dropdown-item href="#">Mode 1 : +13 vdc @ 22 KHz</b-dropdown-item>
-        <b-dropdown-item href="#">Mode 2 : +18 vdc @ 22 KHz</b-dropdown-item>
-        <b-dropdown-item href="#">Mode 3 : +18 vdc @ 0 KHz</b-dropdown-item>
-      </b-dropdown>
       <b-button variant="outline-danger" class="darksky-menu">
         <font-awesome-icon :icon="['fas', 'power-off']" size="lg" color="gray" />
       </b-button>
+
+      <b-button variant="outline-danger" class="darksky-menu">
+        <font-awesome-icon :icon="['fas', 'stop-circle']" size="lg" color="gray" />
+      </b-button>
+
+      <b-button variant="outline-primary" class="darksky-menu">
+        <font-awesome-icon :icon="['fas', 'chevron-circle-up']" size="lg" color="gray" />
+      </b-button>
+      <b-button variant="outline-primary" class="darksky-menu">
+        <font-awesome-icon :icon="['fas', 'chevron-circle-down']" size="lg" color="gray" />
+      </b-button>
+
+      <b-button variant="outline-primary" class="darksky-menu">
+        <font-awesome-icon :icon="['fas', 'chevron-circle-left']" size="lg" color="gray" />
+      </b-button>
+      <b-button variant="outline-primary" class="darksky-menu">
+        <font-awesome-icon :icon="['fas', 'chevron-circle-right']" size="lg" color="gray" />
+      </b-button>
+
+
 
       <!-- Right aligned nav items -->
       <b-navbar-nav class="ml-auto">
@@ -75,7 +99,12 @@ import {
   faSatelliteDish,
   faPowerOff,
   faPlug,
-  faLink
+  faLink,
+  faStopCircle,
+  faChevronCircleUp,
+  faChevronCircleDown,
+  faChevronCircleLeft,
+  faChevronCircleRight
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { EventBus } from "../eventbus.js";
@@ -84,6 +113,13 @@ library.add(faSatelliteDish);
 library.add(faPowerOff);
 library.add(faPlug);
 library.add(faLink);
+library.add(faStopCircle);
+library.add(faLink);
+library.add(faStopCircle);
+library.add(faChevronCircleUp);
+library.add(faChevronCircleDown);
+library.add(faChevronCircleLeft);
+library.add(faChevronCircleRight);
 
 export default {
   name: "NavMenu",
