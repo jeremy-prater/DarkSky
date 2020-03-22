@@ -50,7 +50,7 @@ class SocketIOBackend:
         self.logger.info("Client disconnected : {}".format(sid))
 
     def SendPacket(self, event, payload):
-        self.logger.info("Sending Socket IO {} => {}".format(event, payload))
+        # self.logger.info("Sending Socket IO {} => {}".format(event, payload))
         self.sioLock.acquire()
         self.sio.emit(event, payload)
         self.sioLock.release()
@@ -64,7 +64,6 @@ class SocketIOBackend:
             arg = 1
         elif state == "reverse":
             arg = 2
-        self.logger.info("Setting {} motor to {}".format(motor, state))
         MotorPowerController.getInstance().SendPacket(Packet(motor, arg, 0, 0))
 
     def decState(self, sid, state):

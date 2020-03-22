@@ -55,7 +55,6 @@ class MotorPowerControllerReader:
         mcpSocketIO = backend_socketio.SocketIOBackend.getInstance()            
 
         context.incomingData = []
-        print(context.__dict__)
 
         while (context.reading):
             data = context.serial.read()
