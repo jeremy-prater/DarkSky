@@ -53,5 +53,5 @@ class MotorPowerController:
     def SendPacket(self, packet: Packet):
         if self.serial.is_open:
             outData = packet.GetRawBuffer()
-            self.logger("Sending to MCP : {}".format(outData))
+            self.logger.info("Sending to MCP : {}".format(outData))
             self.serial.write(outData)

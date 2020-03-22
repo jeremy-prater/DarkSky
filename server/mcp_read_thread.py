@@ -18,7 +18,6 @@ class MotorPowerControllerReader:
         self.readerThread = threading.Thread(
             target=self.ReaderThread, args=(self,), daemon=True)
         self.readerThread.start()
-        self.incomingData = []
 
     @staticmethod
     def binaryToMotorState(value):
@@ -26,9 +25,9 @@ class MotorPowerControllerReader:
             return "stop"
         elif value == 1:
             return "forward"
-        elif value == 1:
+        elif value == 2:
             return "reverse"
-        elif value == 1:
+        elif value == 3:
             return "stall"
         else:
             return "unknown"
@@ -46,13 +45,18 @@ class MotorPowerControllerReader:
         elif value == 4:
             return ("18vdc", "off")
         else:
-            return ("unknown", "unknown")    
+            return ("unknown", "unknown")
 
     @staticmethod
     def ReaderThread(context):
         context.logger.info(
             "MPC-Reader : Starting read loop on {}".format(context.serial.port))
         context.reading = True
+        mcpSocketIO = backend_socketio.SocketIOBackend.getInstance()            
+
+        context.incomingData = []
+        print(context.__dict__)
+
         while (context.reading):
             data = context.serial.read()
             context.incomingData.append(data)
@@ -66,23 +70,23 @@ class MotorPowerControllerReader:
                             context.incomingData[:16])
                         if packet != None:
                             del context.incomingData[:16]
-                            socketIO = backend_socketio.SocketIOBackend.getInstance()
+
                             if packet.command == PacketCommand.SIGNAL_BOOT:
-                                socketIO.SendPacket('signal.boot', True)
+                                mcpSocketIO.SendPacket('signal.boot', True)
                             elif packet.command == PacketCommand.SIGNAL_MOTOR_DEC_POSITION:
-                                socketIO.SendPacket(
+                                mcpSocketIO.SendPacket(
                                     'signal.motor.dec.position', packet.arg1)
                             elif packet.command == PacketCommand.SIGNAL_MOTOR_DEC_STATE:
-                                socketIO.SendPacket(
+                                mcpSocketIO.SendPacket(
                                     'signal.motor.dec.state', MotorPowerControllerReader.binaryToMotorState(packet.arg1))
                             elif packet.command == PacketCommand.SIGNAL_MOTOR_RA_POSITION:
-                                socketIO.SendPacket(
+                                mcpSocketIO.SendPacket(
                                     'signal.motor.ra.position', packet.arg1)
                             elif packet.command == PacketCommand.SIGNAL_MOTOR_RA_STATE:
-                                socketIO.SendPacket(
+                                mcpSocketIO.SendPacket(
                                     'signal.motor.ra.state', MotorPowerControllerReader.binaryToMotorState(packet.arg1))
                             elif packet.command == PacketCommand.SIGNAL_LNB_POWER_STATE:
-                                socketIO.SendPacket(
+                                mcpSocketIO.SendPacket(
                                     'signal.lnb.power', MotorPowerControllerReader.binaryToLNBState(packet.arg1))
                         else:
                             context.incomingData.pop(0)

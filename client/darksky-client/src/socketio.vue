@@ -44,9 +44,19 @@ export default {
       this.socket.emit("comport.connect", comport);
     });
 
+    // Commands to MCP
+    EventBus.$on("motor.ra.state", motorState => {
+      console.log(`Setting RA Motor to : ${motorState}`);
+      this.socket.emit("request.ra.state", motorState);
+    });
+    EventBus.$on("motor.dec.state", motorState => {
+      console.log(`Setting DEC Motor to : ${motorState}`);
+      this.socket.emit("request.dec.state", motorState);
+    });
+
     // Events from MCP
     this.socket.on("signal.boot", value => {
-      this.$store.commit("signalBoot", value);
+      this.$store.commit("signal.boot", value);
     });
     this.socket.on("signal.motor.dec.position", value => {
       this.$store.commit("signalMotorDecPosition", value);

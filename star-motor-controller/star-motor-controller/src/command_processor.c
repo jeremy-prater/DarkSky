@@ -34,9 +34,9 @@ void CommandProcessorTask(void *data) {
             // ... unless were already at 0
             if (bufferIndex != 0) {
               memmove(ApplicationBuffer, &ApplicationBuffer[bufferIndex],
-                      ApplicationBufferLevel - bufferIndex);
-              ApplicationBufferLevel -= bufferIndex;
+                      sizeof(CommPacket));
             }
+            ApplicationBufferLevel -= sizeof(CommPacket);
             break;
           }
         }

@@ -4,7 +4,7 @@ import socketio
 import eventlet
 from packet import Packet, PacketCommand
 from mcp_serial import MotorPowerController
-
+import threading
 
 class SocketIOBackend:
     instance = None
@@ -23,8 +23,11 @@ class SocketIOBackend:
         logging.getLogger('socketio').setLevel(logging.WARNING)
         logging.getLogger('engineio').setLevel(logging.WARNING)
 
+        self.sioLock = threading.Lock()
+
         self.mcp = MotorPowerController.getInstance()
-        self.sio = socketio.Server(cors_allowed_origins='*')
+        self.sio = socketio.Server(
+            cors_allowed_origins='*', engineio_logger=True)
         self.app = socketio.WSGIApp(self.sio)
         self.sio.on('connect', self.connect)
         self.sio.on('disconnect', self.disconnect)
@@ -47,7 +50,10 @@ class SocketIOBackend:
         self.logger.info("Client disconnected : {}".format(sid))
 
     def SendPacket(self, event, payload):
+        self.logger.info("Sending Socket IO {} => {}".format(event, payload))
+        self.sioLock.acquire()
         self.sio.emit(event, payload)
+        self.sioLock.release()
 
     def comportConnect(self,  sid, comport):
         MotorPowerController.getInstance().Connect(comport)
@@ -58,6 +64,7 @@ class SocketIOBackend:
             arg = 1
         elif state == "reverse":
             arg = 2
+        self.logger.info("Setting {} motor to {}".format(motor, state))
         MotorPowerController.getInstance().SendPacket(Packet(motor, arg, 0, 0))
 
     def decState(self, sid, state):

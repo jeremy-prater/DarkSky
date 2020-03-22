@@ -57,25 +57,23 @@
         <font-awesome-icon :icon="['fas', 'power-off']" size="lg" color="gray" />
       </b-button>
 
-      <b-button variant="outline-danger" class="darksky-menu">
+      <b-button variant="outline-danger" class="darksky-menu" @click="allMotorsOff()">
         <font-awesome-icon :icon="['fas', 'stop-circle']" size="lg" color="gray" />
       </b-button>
 
-      <b-button variant="outline-primary" class="darksky-menu">
+      <b-button variant="outline-primary" class="darksky-menu" @click="decMotorUp()">
         <font-awesome-icon :icon="['fas', 'chevron-circle-up']" size="lg" color="gray" />
       </b-button>
-      <b-button variant="outline-primary" class="darksky-menu">
+      <b-button variant="outline-primary" class="darksky-menu" @click="decMotorDown()">
         <font-awesome-icon :icon="['fas', 'chevron-circle-down']" size="lg" color="gray" />
       </b-button>
 
-      <b-button variant="outline-primary" class="darksky-menu">
+      <b-button variant="outline-primary" class="darksky-menu" @click="raMotorLeft()">
         <font-awesome-icon :icon="['fas', 'chevron-circle-left']" size="lg" color="gray" />
       </b-button>
-      <b-button variant="outline-primary" class="darksky-menu">
+      <b-button variant="outline-primary" class="darksky-menu" @click="raMotorRight()">
         <font-awesome-icon :icon="['fas', 'chevron-circle-right']" size="lg" color="gray" />
       </b-button>
-
-
 
       <!-- Right aligned nav items -->
       <b-navbar-nav class="ml-auto">
@@ -153,6 +151,38 @@ export default {
     serialDisconnect() {
       if (this.currentComport != undefined) {
         console.log(`Disconnecting from comport ${this.currentComport.device}`);
+      }
+    },
+    allMotorsOff() {
+      EventBus.$emit("motor.dec.state", "stop");
+      EventBus.$emit("motor.ra.state", "stop");
+    },
+    decMotorUp() {
+      if (this.state.mcpState.dec.state == "foward") {
+        EventBus.$emit("motor.dec.state", "stop");
+      } else {
+        EventBus.$emit("motor.dec.state", "forward");
+      }
+    },
+    decMotorDown() {
+      if (this.state.mcpState.dec.state == "reverse") {
+        EventBus.$emit("motor.dec.state", "stop");
+      } else {
+        EventBus.$emit("motor.dec.state", "reverse");
+      }
+    },
+    raMotorLeft() {
+      if (this.state.mcpState.ra.state == "forward") {
+        EventBus.$emit("motor.ra.state", "stop");
+      } else {
+        EventBus.$emit("motor.ra.state", "forward");
+      }
+    },
+    raMotorRight() {
+      if (this.state.mcpState.ra.state == "reverse") {
+        EventBus.$emit("motor.ra.state", "stop");
+      } else {
+        EventBus.$emit("motor.ra.state", "reverse");
       }
     }
   }
