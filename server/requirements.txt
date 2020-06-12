@@ -1,0 +1,10 @@
+coloredlogs==14.0
+dnspython==1.16.0
+eventlet==0.25.2
+greenlet==0.4.16
+humanfriendly==8.2
+monotonic==1.5
+pyserial==3.4
+python-engineio==3.13.0
+python-socketio==4.6.0
+six==1.15.0
