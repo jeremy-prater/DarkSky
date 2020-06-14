@@ -15,9 +15,6 @@
 <script>
 import * as THREE from "three";
 import { mapState } from "vuex";
-import Vue from "vue";
-import VueObserveVisibility from "vue-observe-visibility";
-Vue.use(VueObserveVisibility);
 
 // import { library } from "@fortawesome/fontawesome-svg-core";
 // import {

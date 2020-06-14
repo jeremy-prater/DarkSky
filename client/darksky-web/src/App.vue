@@ -1,16 +1,19 @@
 <template>
   <div id="app">
-    <ScanHome />
+    <Scanhome />
+    <Navhome />
   </div>
 </template>
 
 <script>
-import ScanHome from "./components/Scanhome.vue";
+import Scanhome from "./components/Scanhome.vue";
+import Navhome from "./components/Navhome.vue";
 
 export default {
   name: "App",
   components: {
-    ScanHome
+    Scanhome,
+    Navhome
   }
 };
 </script>
@@ -20,7 +23,7 @@ body {
   padding: 0px;
   margin: 0px;
   border: 0px;
-  height: 100%;
+  height: 100vh;
   overflow: hidden;
 }
 </style>

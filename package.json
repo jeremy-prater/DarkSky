@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "struct": "^0.0.12"
+    "bootstrap": "^4.5.0",
+    "bootstrap-vue": "^2.15.0",
+    "struct": "^0.0.12",
+    "vue": "^2.6.11"
   }
 }
