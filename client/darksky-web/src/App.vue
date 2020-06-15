@@ -38,4 +38,20 @@ body {
   height: 100vh;
   overflow: hidden;
 }
+
+.overlaypanel-title {
+  color: cornflowerblue;
+  text-align: center;
+  font-family: "Fira Code";
+  font-size: 1.5em;
+  padding: 5%;
+  width: 100%;
+}
+
+.overlaypanel {
+  background-color: rgba(30, 30, 50, 0.75);
+  border-radius: 5%;
+  position: fixed;
+}
+
 </style>

@@ -11,8 +11,8 @@
         @mousewheel="mousewheel"
       />
     </div>
-    <div class="overlaypanel">
-      <div class="overlaypanel-text">Map overlay</div>
+    <div class="overlaypanel mappanel">
+      <div class="overlaypanel-title">Map overlay</div>
     </div>
   </div>
 </template>
@@ -313,22 +313,10 @@ export default {
   background-color: #303050;
 }
 
-.overlaypanel-text {
-  color: cornflowerblue;
-  text-align: center;
-  font-family: "Fira Code";
-  font-size: 1.5em;
-  padding: 5%;
-  width: 100%;
-}
-
-.overlaypanel {
-  background-color: rgba(20, 20, 20, 0.8);
+.mappanel {
   bottom: 79vh;
   left: 79vw;
-  position: fixed;
   height: 20vh;
   width: 20vw;
-  border-radius: 5%;
 }
 </style>
