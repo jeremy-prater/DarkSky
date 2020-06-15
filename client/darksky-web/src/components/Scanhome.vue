@@ -1,14 +1,19 @@
 <template>
-  <div class="home" ref="scanhome3dparent" @resize="resize">
-    <canvas
-      ref="scanhome3d"
-      class="home"
-      v-observe-visibility="visibilityChanged"
-      @mousedown="mousedown"
-      @mouseup="mouseup"
-      @mousemove="mousemove"
-      @mousewheel="mousewheel"
-    />
+  <div>
+    <div class="home" ref="scanhome3dparent" @resize="resize">
+      <canvas
+        ref="scanhome3d"
+        class="home"
+        v-observe-visibility="visibilityChanged"
+        @mousedown="mousedown"
+        @mouseup="mouseup"
+        @mousemove="mousemove"
+        @mousewheel="mousewheel"
+      />
+    </div>
+    <div class="overlaypanel">
+      <div class="overlaypanel-text">Map overlay</div>
+    </div>
   </div>
 </template>
 
@@ -30,6 +35,30 @@ import { mapState } from "vuex";
 // library.add(faPlug);
 // library.add(faLink);
 
+function cartesian2polar(position) {
+  var r = Math.sqrt(
+    position.x * position.x + position.z * position.z + position.y * position.y
+  );
+
+  return {
+    r: r,
+    phi: Math.acos(position.y / r),
+    theta: Math.atan2(position.z, -position.x)
+  };
+}
+// function polar2cartesian(polar) {
+//   return {
+//     x: polar.distance * Math.cos(polar.radians),
+//     z: polar.distance * Math.sin(polar.radians)
+//   };
+// }
+function polar2canvas(polarPoint) {
+  return {
+    y: polarPoint.phi / Math.PI,
+    x: (polarPoint.theta + Math.PI) / (2 * Math.PI)
+  };
+}
+
 export default {
   name: "Scanhome",
   data() {
@@ -41,7 +70,6 @@ export default {
       loaded: false,
       sphereQuality: 256,
       render: {},
-      assetFile: "/darksky-sphere.gltf",
       viewVector: {
         zoom: 0,
         dragging: false,
@@ -145,6 +173,82 @@ export default {
         this.remapMaterials(child);
       });
     },
+    assignUVs(geometry) {
+      // This function is based on the code found at (the original source doesn't work well)
+      // http://stackoverflow.com/questions/20774648/three-js-generate-uv-coordinate
+      //
+      // She following page explains how UV map should be calculated
+      // https://solutiondesign.com/blog/-/blogs/webgl-and-three-js-texture-mappi-1/
+      //
+      // The following documentation shows what a apherical UV map should look like
+      // https://threejs.org/examples/#misc_uv_tests
+
+      // converting all vertices into polar coordinates
+      var polarVertices = geometry.vertices.map(cartesian2polar);
+
+      geometry.faceVertexUvs[0] = []; // This clears out any UV mapping that may have already existed on the object
+
+      // walking through all the faces defined by the object
+      // ... we need to define a UV map for each of them
+      geometry.faces.forEach(function(face) {
+        var uvs = [];
+
+        // Each face is a triangle defined by three points or vertices (point a, b and c).
+        // Instead of storing the three points (vertices) by itself,
+        // a face uses points from the [vertices] array.
+        // The 'a', 'b' and 'c' properties of the [face] object in fact represent
+        // index at which each of the three points is stored in the [vertices] array
+        var ids = ["a", "b", "c"];
+
+        for (var i = 0; i < ids.length; i++) {
+          // using the point to access the vertice
+          var vertexIndex = face[ids[i]];
+          var vertex = polarVertices[vertexIndex];
+
+          // If the vertice is located at the top or the bottom
+          // of the sphere, the x coordinates will always be 0
+          // This isn't good, since it will make all the faces
+          // which meet at this point use the same starting point
+          // for their texture ...
+          // this is a bit difficult to explainm, so try to comment out
+          // the following block and take look at the top of the
+          // spehere to see how it is mapped. Also have a look
+          // at the following image: https://dev.ngit.hr/vr/textures/sphere-uv.png
+          if (
+            vertex.theta === 0 &&
+            (vertex.phi === 0 || vertex.phi === Math.PI)
+          ) {
+            // at the sphere bottom and at the top different
+            // points are alligned differently - have a look at the
+            // following image https://dev.ngit.hr/vr/textures/sphere-uv.png
+            var alignedVertice = vertex.phi === 0 ? face.b : face.a;
+
+            vertex = {
+              phi: vertex.phi,
+              theta: polarVertices[alignedVertice].theta
+            };
+          }
+
+          // Fixing vertices, which close the gap in the circle
+          // These are the last vertices in a row, and are at identical position as
+          // vertices which are at the first position in the row.
+          // This causes the [theta] angle to be miscalculated
+          if (
+            vertex.theta === Math.PI &&
+            cartesian2polar(face.normal).theta < Math.PI / 2
+          ) {
+            vertex.theta = -Math.PI;
+          }
+
+          var canvasPoint = polar2canvas(vertex);
+
+          uvs.push(new THREE.Vector2(1 - canvasPoint.x, 1 - canvasPoint.y));
+        }
+
+        geometry.faceVertexUvs[0].push(uvs);
+      });
+      geometry.uvsNeedUpdate = true;
+    },
     load() {
       if (this.loaded === false) {
         this.loaded = true;
@@ -156,7 +260,7 @@ export default {
       this.render.width = domObject.clientWidth;
       this.render.height = domObject.clientHeight;
 
-      console.info(`Loading darksky-sphere.gltf`);
+      console.info(`Creating darksky-sphere`);
 
       this.render.scene = new THREE.Scene();
       this.render.camera = new THREE.PerspectiveCamera(
@@ -171,16 +275,25 @@ export default {
       });
       this.render.renderer.setSize(this.render.width, this.render.height);
 
-      var geometry = new THREE.SphereGeometry(
+      let geometry = new THREE.SphereGeometry(
         1,
         this.sphereQuality,
         this.sphereQuality
       );
-      var material = new THREE.MeshNormalMaterial({
-        wireframe: true
-      });
-      material.side = THREE.BackSide;
-      var sphere = new THREE.Mesh(geometry, material);
+      this.assignUVs(geometry);
+
+      // let texture_grid = new THREE.TextureLoader().load("/celestial_grid.png");
+      // let texture_figures = new THREE.TextureLoader().load("/constellation_figures.png");
+      // let texture_boundaries = new THREE.TextureLoader().load("/constellation_boundaries.png");
+      let texture_starmap = new THREE.TextureLoader().load("/starmap_8k.jpg");
+
+      // immediately use the texture for material creation
+      let material = new THREE.MeshBasicMaterial({ map: texture_starmap });
+      // let material = new THREE.MeshNormalMaterial({
+      //   wireframe: true
+      // });
+      material.side = THREE.DoubleSide;
+      let sphere = new THREE.Mesh(geometry, material);
       this.render.scene.add(sphere);
       requestAnimationFrame(this.doRender);
     },
@@ -198,5 +311,24 @@ export default {
   width: 100vw;
   height: 100vh;
   background-color: #303050;
+}
+
+.overlaypanel-text {
+  color: cornflowerblue;
+  text-align: center;
+  font-family: "Fira Code";
+  font-size: 1.5em;
+  padding: 5%;
+  width: 100%;
+}
+
+.overlaypanel {
+  background-color: rgba(20, 20, 20, 0.8);
+  bottom: 79vh;
+  left: 79vw;
+  position: fixed;
+  height: 20vh;
+  width: 20vw;
+  border-radius: 5%;
 }
 </style>
