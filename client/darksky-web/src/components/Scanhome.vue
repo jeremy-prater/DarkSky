@@ -321,11 +321,28 @@ export default {
       });
       this.render.renderer.setSize(this.render.width, this.render.height);
 
-      // immediately use the texture for material creation
-      let material = new THREE.MeshBasicMaterial({ map: this.texture_starmap });
+      // Version : 1 - built in wireframe shader
       // let material = new THREE.MeshNormalMaterial({
       //   wireframe: true
       // });
+
+      // Version : 2 - built in texture mapper
+      // immediately use the texture for material creation
+      // let material = new THREE.MeshBasicMaterial({ map: this.texture_starmap });
+
+      // Verion : 3 - Custom texture layers
+      let material = new THREE.ShaderMaterial({
+        uniforms: {
+          grid: { type: "t", value: this.texture_grid },
+          boundaries: { type: "t", value: this.texture_boundaries },
+          figures: { type: "t", value: this.texture_figures },
+          starmap: { type: "t", value: this.texture_starmap }
+        },
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader
+      });
+
+      // Generate scene
       material.side = THREE.DoubleSide;
       let sphere = new THREE.Mesh(this.geometry, material);
       this.render.scene.add(sphere);
