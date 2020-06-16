@@ -20,6 +20,7 @@
 <script>
 import * as THREE from "three";
 import { mapState } from "vuex";
+import { Vector3 } from "three";
 
 // import { library } from "@fortawesome/fontawesome-svg-core";
 // import {
@@ -63,16 +64,22 @@ const vertexShader = `
   varying vec2 vUV;
 
   void main() {
-    vUv = uv;
+    vUV = uv;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
   }
 `;
 
 const fragmentShader = `
+  uniform vec3 gridColor;
+  uniform vec3 figuresColor;
+  uniform vec3 boundariesColor;
+  uniform vec3 starmapColor;
+  uniform vec3 lnbColor;
+ 
   uniform sampler2D grid;
   uniform sampler2D figures;
-  uniform sampler2D boundries;
+  uniform sampler2D boundaries;
   uniform sampler2D starmap;
   uniform sampler2D lnb;
 
@@ -80,7 +87,12 @@ const fragmentShader = `
 
   void main()
   {
-      gl_FragColor = vec3(1,1,1);
+    gl_FragColor =
+      (vec4(gridColor,1) * texture2D(grid, vUV)) +
+      (vec4(figuresColor,1) * texture2D(figures, vUV)) +
+      (vec4(boundariesColor,1) * texture2D(boundaries, vUV)) +
+      (vec4(starmapColor,1) * texture2D(starmap, vUV)) +
+      (vec4(lnbColor,1) *  texture2D(lnb, vUV));
   }
 `;
 
@@ -333,10 +345,16 @@ export default {
       // Verion : 3 - Custom texture layers
       let material = new THREE.ShaderMaterial({
         uniforms: {
-          grid: { type: "t", value: this.texture_grid },
-          boundaries: { type: "t", value: this.texture_boundaries },
-          figures: { type: "t", value: this.texture_figures },
-          starmap: { type: "t", value: this.texture_starmap }
+          gridColor: { value: new Vector3(1, 0, 0) },
+          boundariesColor: { value: new Vector3(0, 0.5, 0) },
+          figuresColor: { value: new Vector3(0, 0, 1) },
+          starmapColor: { value: new Vector3(1, 1, 1) },
+          lnbColor: { value: new Vector3(0, 0, 0) },
+          grid: { value: this.texture_grid },
+          boundaries: { value: this.texture_boundaries },
+          figures: { value: this.texture_figures },
+          starmap: { value: this.texture_starmap },
+          lnb: { value: this.texture_starmap }
         },
         vertexShader: vertexShader,
         fragmentShader: fragmentShader
@@ -347,6 +365,7 @@ export default {
       let sphere = new THREE.Mesh(this.geometry, material);
       this.render.scene.add(sphere);
       requestAnimationFrame(this.doRender);
+      console.log("Renderer started!");
     },
     unload() {
       this.loaded = false;
