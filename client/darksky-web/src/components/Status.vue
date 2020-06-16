@@ -4,8 +4,12 @@
       <b-nav-item>Fixed bottom</b-nav-item>
     </b-nav>-->
     <div class="overlaypanel-title">
-      <font-awesome-icon :icon="['fas', 'satellite-dish']" size="lg" color="orange" />
-      System Status
+      <font-awesome-icon
+        :icon="['fas', 'satellite-dish']"
+        size="lg"
+        color="orange"
+        class="statusicon"
+      />System Status
     </div>
   </div>
 </template>

@@ -42,16 +42,21 @@ body {
 .overlaypanel-title {
   color: cornflowerblue;
   text-align: center;
+  justify-content: center;
   font-family: "Fira Code";
   font-size: 1.5em;
   padding: 5%;
-  width: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .overlaypanel {
-  background-color: rgba(30, 30, 50, 0.75);
+  background-color: rgba(50, 50, 80, 0.75);
   border-radius: 5%;
   position: fixed;
 }
 
+.statusicon {
+  margin: 10px;
+}
 </style>

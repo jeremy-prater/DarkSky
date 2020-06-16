@@ -59,6 +59,31 @@ function polar2canvas(polarPoint) {
   };
 }
 
+const vertexShader = `
+  varying vec2 vUV;
+
+  void main() {
+    vUv = uv;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+  }
+`;
+
+const fragmentShader = `
+  uniform sampler2D grid;
+  uniform sampler2D figures;
+  uniform sampler2D boundries;
+  uniform sampler2D starmap;
+  uniform sampler2D lnb;
+
+  varying vec2 vUV;
+
+  void main()
+  {
+      gl_FragColor = vec3(1,1,1);
+  }
+`;
+
 export default {
   name: "Scanhome",
   data() {
@@ -67,6 +92,11 @@ export default {
         width: 0,
         height: 0
       },
+      geometry: null,
+      texture_grid: null,
+      texture_figures: null,
+      texture_boundaries: null,
+      texture_starmap: null,
       loaded: false,
       sphereQuality: 256,
       render: {},
@@ -95,6 +125,22 @@ export default {
         this.resize(event);
       }.bind(this)
     );
+
+    this.geometry = new THREE.SphereGeometry(
+      1,
+      this.sphereQuality,
+      this.sphereQuality
+    );
+    this.assignUVs(this.geometry);
+
+    this.texture_grid = new THREE.TextureLoader().load("/celestial_grid.png");
+    this.texture_figures = new THREE.TextureLoader().load(
+      "/constellation_figures.png"
+    );
+    this.texture_boundaries = new THREE.TextureLoader().load(
+      "/constellation_boundaries.png"
+    );
+    this.texture_starmap = new THREE.TextureLoader().load("/starmap_8k.jpg");
   },
   methods: {
     mousedown(event) {
@@ -260,7 +306,7 @@ export default {
       this.render.width = domObject.clientWidth;
       this.render.height = domObject.clientHeight;
 
-      console.info(`Creating darksky-sphere`);
+      console.info(`Creating darksky scene`);
 
       this.render.scene = new THREE.Scene();
       this.render.camera = new THREE.PerspectiveCamera(
@@ -275,32 +321,20 @@ export default {
       });
       this.render.renderer.setSize(this.render.width, this.render.height);
 
-      let geometry = new THREE.SphereGeometry(
-        1,
-        this.sphereQuality,
-        this.sphereQuality
-      );
-      this.assignUVs(geometry);
-
-      // let texture_grid = new THREE.TextureLoader().load("/celestial_grid.png");
-      // let texture_figures = new THREE.TextureLoader().load("/constellation_figures.png");
-      // let texture_boundaries = new THREE.TextureLoader().load("/constellation_boundaries.png");
-      let texture_starmap = new THREE.TextureLoader().load("/starmap_8k.jpg");
-
       // immediately use the texture for material creation
-      let material = new THREE.MeshBasicMaterial({ map: texture_starmap });
+      let material = new THREE.MeshBasicMaterial({ map: this.texture_starmap });
       // let material = new THREE.MeshNormalMaterial({
       //   wireframe: true
       // });
       material.side = THREE.DoubleSide;
-      let sphere = new THREE.Mesh(geometry, material);
+      let sphere = new THREE.Mesh(this.geometry, material);
       this.render.scene.add(sphere);
       requestAnimationFrame(this.doRender);
     },
     unload() {
       this.loaded = false;
       this.render = {};
-      console.info(`Unloaded ScanHome 3D`);
+      console.info(`Destroying darksky scene`);
     }
   }
 };
