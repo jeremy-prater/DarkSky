@@ -174,10 +174,10 @@ export default {
         this.viewVector.dx = event.clientX;
         this.viewVector.dy = event.clientY;
 
-        let scale = (this.viewVector.zoom + 1) * 0.01;
+        let scale = (this.viewVector.zoom + 1) * 0.001;
 
-        this.viewVector.y += dx * scale;
-        this.viewVector.x += dy * scale;
+        this.viewVector.y += -dx * scale;
+        this.viewVector.x += -dy * scale;
       }
     },
     mousewheel(event) {
