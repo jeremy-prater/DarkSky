@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "jspack": "0.0.4",
     "serialport": "^9.0.0"
   }
 }
