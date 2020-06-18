@@ -33,6 +33,7 @@ typedef enum {
 typedef struct {
   xSemaphoreHandle positionMutex;
   int16_t position; // Range [0, 11000) pulses per revolution
+  int16_t stopPosition;
   QUADRATURE_STATE quadratureState;
 
   xSemaphoreHandle stateMutex;
@@ -50,6 +51,7 @@ void StopAllMotors(void);
 void MotorStop(Motor *motor);
 void MotorForward(Motor *motor);
 void MotorReverse(Motor *motor);
+void MotorSetStop(Motor *motor, int16_t stopPos);
 
 // Interrupt declarations
 void encoder_handler_dec(const uint32_t id, const uint32_t index);

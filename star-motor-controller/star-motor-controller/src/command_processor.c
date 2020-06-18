@@ -44,19 +44,9 @@ void CommandProcessorTask(void *data) {
         if (foundHeader) {
           ioport_toggle_pin_level(IOPORT_LED_ST);
           switch (packet->command) {
-          // case SIGNAL_BOOT:
+          // case BOOT:
           // break;
-          // case SIGNAL_MOTOR_DEC_STATE:
-          // break;
-          // case SIGNAL_MOTOR_DEC_POSITION:
-          // break;
-          // case SIGNAL_MOTOR_RA_STATE:
-          // break;
-          // case SIGNAL_MOTOR_RA_POSITION:
-          // break;
-          // case SIGNAL_LNB_POWER_STATE:
-          // break;
-          case COMMAND_MOTOR_DEC_SET_STATE:
+          case MOTOR_DEC_STATE:
             switch (packet->arg1) {
             case MOTOR_FORWARD:
               MotorForward(&darkSkyContext.motor1);
@@ -70,13 +60,17 @@ void CommandProcessorTask(void *data) {
             }
             break;
 
-          case COMMAND_MOTOR_DEC_SET_POSITION:
+          case MOTOR_DEC_POSITION:
             if (packet->arg1 < MOTOR_POSITION_MAX) {
               darkSkyContext.motor1.position = packet->arg1;
             }
             break;
 
-          case COMMAND_MOTOR_RA_SET_STATE:
+          case MOTOR_DEC_STOP_POS:
+            MotorSetStop(&darkSkyContext.motor1, packet->arg1);
+            break;
+
+          case MOTOR_RA_STATE:
             switch (packet->arg1) {
             case MOTOR_FORWARD:
               MotorForward(&darkSkyContext.motor2);
@@ -90,18 +84,22 @@ void CommandProcessorTask(void *data) {
             }
             break;
 
-          case COMMAND_MOTOR_RA_SET_POSITION:
+          case MOTOR_RA_POSITION:
             if (packet->arg1 < MOTOR_POSITION_MAX) {
               darkSkyContext.motor2.position = packet->arg1;
             }
             break;
 
-          case COMMAND_STOP_ALL_MOTORS:
+          case MOTOR_RA_STOP_POS:
+            MotorSetStop(&darkSkyContext.motor2, packet->arg1);
+            break;
+
+          case STOP_ALL_MOTORS:
             MotorStop(&darkSkyContext.motor1);
             MotorStop(&darkSkyContext.motor2);
             break;
 
-          case COMMAND_LNB_SET_POWER_STATE:
+          case LNB_POWER_STATE:
             break;
 
           case ERROR:

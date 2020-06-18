@@ -13,11 +13,16 @@
 #define MOTOR_RA_ENC_1 IOPORT_CREATE_PIN(PIOC, 16) // Pin 47
 #define MOTOR_RA_ENC_2 IOPORT_CREATE_PIN(PIOC, 18) // Pin 45
 
-static inline void CheckMotorPositionBounds(int16_t *position) {
-  if (*position < 0) {
-    *position += MOTOR_POSITION_MAX;
-  } else if (*position >= MOTOR_POSITION_MAX) {
-    *position -= MOTOR_POSITION_MAX;
+static inline void CheckMotorPositionBounds(Motor *motor) {
+  if (motor->position < 0) {
+    motor->position += MOTOR_POSITION_MAX;
+  } else if (motor->position >= MOTOR_POSITION_MAX) {
+    motor->position -= MOTOR_POSITION_MAX;
+  }
+
+  if (motor->position == motor->stopPosition)
+  {
+    MotorStop(motor);
   }
 }
 
@@ -179,6 +184,11 @@ void MotorReverse(Motor *motor) {
   motor->state = MOTOR_REVERSE;
 }
 
+void MotorSetStop(Motor *motor, int16_t stopPos)
+{
+  motor->stopPosition = stopPos;
+}
+
 void encoder_handler_dec(const uint32_t id, const uint32_t index) {
   Assert(id == ID_PIOC);
   Assert((index == PIO_PC17) || (index == PIO_PC19));
@@ -189,7 +199,7 @@ void encoder_handler_dec(const uint32_t id, const uint32_t index) {
 
   darkSkyContext.motor1.position +=
       GeneratePositionChange(darkSkyContext.motor1.quadratureState, newState);
-  CheckMotorPositionBounds(&darkSkyContext.motor1.position);
+  CheckMotorPositionBounds(&darkSkyContext.motor1);
   darkSkyContext.motor1.quadratureState = newState;
 }
 
@@ -203,6 +213,6 @@ void encoder_handler_ra(const uint32_t id, const uint32_t index) {
 
   darkSkyContext.motor2.position +=
       GeneratePositionChange(darkSkyContext.motor1.quadratureState, newState);
-  CheckMotorPositionBounds(&darkSkyContext.motor2.position);
+  CheckMotorPositionBounds(&darkSkyContext.motor2);
   darkSkyContext.motor2.quadratureState = newState;
 }

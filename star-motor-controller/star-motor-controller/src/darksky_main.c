@@ -54,25 +54,33 @@ void DarkSkyMain(void *data) {
 
   for (;;) {
     // Show some sign of life!
-    vTaskDelay(250 / portTICK_RATE_MS);
+    vTaskDelay(500 / portTICK_RATE_MS);
 
-    packet.command = SIGNAL_MOTOR_DEC_POSITION;
-    packet.arg1 = darkSkyContext.motor1.position;
-    SendCommPacket(&packet);
-
-    packet.command = SIGNAL_MOTOR_DEC_STATE;
+    packet.command = MOTOR_DEC_STATE;
     packet.arg1 = darkSkyContext.motor1.state;
     SendCommPacket(&packet);
 
-    packet.command = SIGNAL_MOTOR_RA_POSITION;
-    packet.arg1 = darkSkyContext.motor2.position;
+    packet.command = MOTOR_DEC_POSITION;
+    packet.arg1 = darkSkyContext.motor1.position;
     SendCommPacket(&packet);
 
-    packet.command = SIGNAL_MOTOR_RA_STATE;
+    packet.command = MOTOR_DEC_STOP_POS;
+    packet.arg1 = darkSkyContext.motor1.stopPosition;
+    SendCommPacket(&packet);
+
+    packet.command = MOTOR_RA_STATE;
     packet.arg1 = darkSkyContext.motor2.state;
     SendCommPacket(&packet);
 
-    packet.command = SIGNAL_LNB_POWER_STATE;
+    packet.command = MOTOR_RA_POSITION;
+    packet.arg1 = darkSkyContext.motor2.position;
+    SendCommPacket(&packet);
+
+    packet.command = MOTOR_RA_STOP_POS;
+    packet.arg1 = darkSkyContext.motor2.stopPosition;
+    SendCommPacket(&packet);
+
+    packet.command = LNB_POWER_STATE;
     packet.arg1 = 0;
     SendCommPacket(&packet);
   }

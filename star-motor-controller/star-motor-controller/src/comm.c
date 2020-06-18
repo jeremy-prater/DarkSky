@@ -113,7 +113,7 @@ status_code_t SendCommString(const char *message) {
 
 void CommTask(void *data) {
   CommPacket tempPacket = {.header = COMM_PACKET_HEADER,
-                           .command = SIGNAL_BOOT};
+                           .command = BOOT};
 
   SendCommPacket(&tempPacket);
 
