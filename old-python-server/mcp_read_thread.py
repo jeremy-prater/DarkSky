@@ -84,7 +84,7 @@ class MotorPowerControllerReader:
                             elif packet.command == PacketCommand.SIGNAL_MOTOR_RA_STATE:
                                 mcpSocketIO.SendPacket(
                                     'signal.motor.ra.state', MotorPowerControllerReader.binaryToMotorState(packet.arg1))
-                            elif packet.command == PacketCommand.SIGNAL_LNB_POWER_STATE:
+                            elif packet.command == PacketCommand.SIGNAL_LNB_STATE:
                                 mcpSocketIO.SendPacket(
                                     'signal.lnb.power', MotorPowerControllerReader.binaryToLNBState(packet.arg1))
                         else:

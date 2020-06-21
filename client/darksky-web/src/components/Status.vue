@@ -81,7 +81,7 @@ export default {
           // MOTOR_RA_STATE = 0x0201,
           // MOTOR_RA_POSITION = 0x0202,
           // MOTOR_RA_STOP_POS = 0x0203,
-          // LNB_POWER_STATE = 0x0301,
+          // LNB_STATE = 0x0301,
           // STOP_ALL_MOTORS = 0x1001,
           // ERROR = 0x2000,
           // REBOOT = 0xFFFF
@@ -117,7 +117,7 @@ export default {
             }
             break;
 
-          case 0x0301: // LNB_POWER_STATE
+          case 0x0301: // LNB_STATE
             if (this.state.lnbState.voltage != data.arg1) {
               this.$store.commit("updateLNBVoltage", data.arg1);
             }

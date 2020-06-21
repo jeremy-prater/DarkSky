@@ -99,7 +99,9 @@ void CommandProcessorTask(void *data) {
             MotorStop(&darkSkyContext.motor2);
             break;
 
-          case LNB_POWER_STATE:
+          case LNB_STATE:
+            LNBPower((LNB_POWER_STATE)packet->arg1);
+            LNBCarrier((LNB_CARRIER_STATE)packet->arg2);
             break;
 
           case ERROR:

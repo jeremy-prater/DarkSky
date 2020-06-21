@@ -80,8 +80,9 @@ void DarkSkyMain(void *data) {
     packet.arg1 = darkSkyContext.motor2.stopPosition;
     SendCommPacket(&packet);
 
-    packet.command = LNB_POWER_STATE;
-    packet.arg1 = 0;
+    packet.command = LNB_STATE;
+    packet.arg1 = darkSkyContext.lnb.power;
+    packet.arg2 = darkSkyContext.lnb.carrier;
     SendCommPacket(&packet);
   }
   vTaskDelete(NULL);

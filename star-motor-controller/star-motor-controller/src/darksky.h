@@ -9,6 +9,7 @@
 #include "comm.h"
 #include "darksky_tasks.h"
 #include "motor.h"
+#include "lnb.h"
 
 //#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
@@ -16,6 +17,8 @@ typedef struct {
   Motor motor1;
   Motor motor2;
   Comm comm;
+  LNB lnb;
+  bool allMotorStop;
 } Context;
 
 void DarkSkyMain(void *data);
