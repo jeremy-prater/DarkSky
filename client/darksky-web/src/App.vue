@@ -1,8 +1,10 @@
 <template>
-  <div id="app">
-    <Scanhome />
-    <Status />
-  </div>
+  <v-main>
+    <v-app>
+      <Scanhome />
+      <Status />
+    </v-app>
+  </v-main>
 </template>
 
 <script>

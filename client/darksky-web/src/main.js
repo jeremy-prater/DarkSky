@@ -4,6 +4,7 @@ import store from './store';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
 import VueObserveVisibility from 'vue-observe-visibility';
 import VueSocketIO from 'vue-socket.io';
+import vuetify from './plugins/vuetify';
 
 // Install BootstrapVue
 Vue.use(BootstrapVue);
@@ -26,5 +27,6 @@ Vue.config.productionTip = false;
 
 new Vue({
     store,
+    vuetify,
     render: (h) => h(App),
 }).$mount('#app');

@@ -12,7 +12,14 @@
       />
     </div>
     <div class="overlaypanel mappanel">
-      <div class="overlaypanel-title">Map overlay</div>
+      <div class="overlaypanel-title">
+        <font-awesome-icon
+          :icon="['fa', 'map-marked-alt']"
+          size="lg"
+          class="statusicon"
+        />Map overlay
+      </div>
+      <v-color-picker v-model="color"></v-color-picker>
     </div>
   </div>
 </template>
@@ -21,20 +28,11 @@
 import * as THREE from "three";
 import { mapState } from "vuex";
 import { Vector3 } from "three";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
-// import { library } from "@fortawesome/fontawesome-svg-core";
-// import {
-//   faSatelliteDish,
-//   faPowerOff,
-//   faPlug,
-//   faLink
-// } from "@fortawesome/free-solid-svg-icons";
-// import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-
-// library.add(faSatelliteDish);
-// library.add(faPowerOff);
-// library.add(faPlug);
-// library.add(faLink);
+library.add(faMapMarkedAlt);
 
 function cartesian2polar(position) {
   var r = Math.sqrt(
@@ -104,6 +102,17 @@ export default {
         width: 0,
         height: 0
       },
+      mapColors: {
+        grid: {
+          types: ["hex", "hexa", "rgba", "hsla", "hsva"],
+          type: "hex",
+          hex: "#FF00FF",
+          hexa: "#FF00FFFF",
+          rgba: { r: 255, g: 0, b: 255, a: 1 },
+          hsla: { h: 300, s: 1, l: 0.5, a: 1 },
+          hsva: { h: 300, s: 1, v: 1, a: 1 }
+        }
+      },
       geometry: null,
       texture_grid: null,
       texture_figures: null,
@@ -124,11 +133,21 @@ export default {
     };
   },
   components: {
-    //FontAwesomeIcon
+    FontAwesomeIcon
   },
-  computed: mapState({
-    state: state => state
-  }),
+  computed: {
+    ...mapState({
+      state: state => state
+    }),
+    color: {
+      get() {
+        return this[this.mapColors.grid];
+      },
+      set(v) {
+        this[this.mapColors.grid] = v;
+      }
+    }
+  },
   mounted() {
     console.log("Created Scanhome...");
     window.addEventListener(

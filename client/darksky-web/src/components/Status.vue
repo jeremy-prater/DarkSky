@@ -50,9 +50,11 @@ export default {
   components: {
     FontAwesomeIcon
   },
-  computed: mapState({
-    state: state => state
-  }),
+  computed: {
+    ...mapState({
+      state: state => state
+    })
+  },
   mounted() {
     console.log("Created Status panel...");
 
