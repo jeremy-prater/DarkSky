@@ -14,6 +14,7 @@ void LNBInit(void)
 {
     // Enable lnb carrier ioport pin
     ioport_enable_pin(LNB_CARRIER);
+    ioport_enable_pin(LNB_POWER);
 
     LNBPower(LNB_POWER_OFF);
 	LNBCarrier(LNB_CARRIER_OFF);
@@ -26,11 +27,10 @@ void LNBPower(LNB_POWER_STATE powerState)
     darkSkyContext.lnb.power = powerState;
     if (powerState == LNB_POWER_OFF)
     {
-        ioport_disable_pin(LNB_POWER);
+        ioport_set_pin_dir(LNB_POWER, IOPORT_DIR_INPUT);
     }
     else
     {
-        ioport_enable_pin(LNB_POWER);
         ioport_set_pin_dir(LNB_POWER, IOPORT_DIR_OUTPUT);
         if (powerState == LNB_POWER_13V)
         {
