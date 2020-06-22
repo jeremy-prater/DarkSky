@@ -19,6 +19,7 @@
           class="statusicon"
         />Map overlay
       </div>
+      <b-button>Button</b-button>
       <v-color-picker v-model="color"></v-color-picker>
     </div>
   </div>
