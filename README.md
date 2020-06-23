@@ -9,6 +9,14 @@ By re-using a Ku band LNB and a parabolic satellite dish along with some basic m
 
 The LNB is powered by a LNBP9-LIT voltage regulator which outputs 13VDC or 18VDC with an optional 22KHz carrier signal
 
+#### 3D Printed parts
+
+Basically the only parts you can't buy at a hardware store or amazon...
+
+https://www.tinkercad.com/things/gs3KI5FEyEn-darksky-bearing-hub-and-motor-mounts
+https://www.tinkercad.com/things/a3AqQsurTH3-dark-sky-upper-assembly
+https://www.tinkercad.com/things/6xYix4EpEH2-darksky-dish-hub
+
 #### Drive Motors
 
 The drive motors are +/- 12 VDC 9 RPM worm gear drivers with 3.3VDC quadrature encoders with 11000 pulses per revolution. These were chosen because of the high torque rating and stepper motors can slip and require constant power to hold the rotor stationary.
