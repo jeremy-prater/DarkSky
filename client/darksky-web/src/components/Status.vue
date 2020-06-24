@@ -153,9 +153,8 @@ export default {
 
 <style scoped>
 .status-panel {
-  bottom: 79vh;
   left: 0.5vw;
-  height: 20vh;
+  top: 0.5vh;
   width: 20vw;
 }
 </style>

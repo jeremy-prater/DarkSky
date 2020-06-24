@@ -13,14 +13,18 @@
     </div>
     <div class="overlaypanel mappanel">
       <div class="overlaypanel-title">
-        <font-awesome-icon
-          :icon="['fa', 'map-marked-alt']"
-          size="lg"
-          class="statusicon"
-        />Map overlay
+        <font-awesome-icon :icon="['fa', 'map-marked-alt']" size="lg" class="statusicon" />Map overlay
       </div>
+      <div class="overlaypanel-item maplist">
+        <ul>
+          <li>Lat : {{ state.location.lat }}</li>
+          <li>Lng : {{ state.location.lng }}</li>
+          <li>Time : {{ state.location.time }}</li>
+        </ul>
+      </div>
+
       <b-button>Button</b-button>
-      <v-color-picker v-model="color"></v-color-picker>
+
     </div>
   </div>
 </template>
@@ -173,8 +177,13 @@ export default {
       "/constellation_boundaries.png"
     );
     this.texture_starmap = new THREE.TextureLoader().load("/starmap_8k.jpg");
+
+    setInterval(this.tick, 1000);
   },
   methods: {
+    tick() {
+      this.$store.commit("updateTime", new Date(Date.now()).toISOString());
+    },
     mousedown(event) {
       if (event.buttons == 1) {
         this.viewVector.dragging = true;
@@ -404,9 +413,12 @@ export default {
 }
 
 .mappanel {
-  bottom: 79vh;
-  left: 79vw;
-  height: 20vh;
-  width: 20vw;
+  top: 0.5vh;
+  right: 0.5vw;
+  padding: 0.5vw;
+}
+
+.maplist {
+  padding: 0px;
 }
 </style>

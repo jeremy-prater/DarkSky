@@ -21,8 +21,17 @@ export default new Vuex.Store({
             voltage: 0,
             carrier: false,
         },
+        location: {
+            lat: 45.663177,
+            lng: -122.710401,
+            time: "no-lock"
+        },
     },
     mutations: {
+        updateTime(state, time) {
+            // console.log(`updateTime ${time}`);
+            state.location.time = time;
+        },
         setMotorConnection(state, connected) {
             if (connected) {
                 console.log('Motor server connected');
