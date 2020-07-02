@@ -70,21 +70,21 @@ class MotorPowerControllerReader:
                         if packet != None:
                             del context.incomingData[:16]
 
-                            if packet.command == PacketCommand.SIGNAL_BOOT:
+                            if packet.command == PacketCommand.BOOT:
                                 mcpSocketIO.SendPacket('signal.boot', True)
-                            elif packet.command == PacketCommand.SIGNAL_MOTOR_DEC_POSITION:
+                            elif packet.command == PacketCommand.MOTOR_DEC_POSITION:
                                 mcpSocketIO.SendPacket(
                                     'signal.motor.dec.position', packet.arg1)
-                            elif packet.command == PacketCommand.SIGNAL_MOTOR_DEC_STATE:
+                            elif packet.command == PacketCommand.MOTOR_DEC_STATE:
                                 mcpSocketIO.SendPacket(
                                     'signal.motor.dec.state', MotorPowerControllerReader.binaryToMotorState(packet.arg1))
-                            elif packet.command == PacketCommand.SIGNAL_MOTOR_RA_POSITION:
+                            elif packet.command == PacketCommand.MOTOR_RA_POSITION:
                                 mcpSocketIO.SendPacket(
                                     'signal.motor.ra.position', packet.arg1)
-                            elif packet.command == PacketCommand.SIGNAL_MOTOR_RA_STATE:
+                            elif packet.command == PacketCommand.MOTOR_RA_STATE:
                                 mcpSocketIO.SendPacket(
                                     'signal.motor.ra.state', MotorPowerControllerReader.binaryToMotorState(packet.arg1))
-                            elif packet.command == PacketCommand.SIGNAL_LNB_STATE:
+                            elif packet.command == PacketCommand.LNB_STATE:
                                 mcpSocketIO.SendPacket(
                                     'signal.lnb.power', MotorPowerControllerReader.binaryToLNBState(packet.arg1))
                         else:
