@@ -14,5 +14,5 @@ class State:
         self.logger.info('Init')
 
     def updateGPS(self, gpsFix):
-        self.logger.info(gpsFix)
-        # self.logger.info('GPS Update {}.{} @ {}'.format(gpsFix.lat, gpsFix.lon, gpsFix.time))
+        # self.logger.info(gpsFix)
+        self.logger.info('GPS Update {}.{} @ {}'.format(gpsFix['lat'], gpsFix['lon'], gpsFix['time']))

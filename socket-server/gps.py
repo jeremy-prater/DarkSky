@@ -44,7 +44,7 @@ class GPS:
                 'sats': 11,
                 'lat': 45.963637,
                 'lon': -122.416802,
-                'time': datetime.datetime.utcnow().isoformat(),
+                'time': datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 'error': "",
                 'alt': 0,
                 'climb': 0
