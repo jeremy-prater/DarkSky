@@ -7,13 +7,15 @@ from gps import GPS
 from state import State
 
 import eventlet
-eventlet.monkey_patch()
 
-coloredlogs.install(level='DEBUG', milliseconds=True)
+if __name__ == "__main__":
+    eventlet.monkey_patch()
 
-mpc = MotorPowerController.getInstance()
-server = SocketIOBackend.getInstance()
-gps = GPS.getInstance()
-state = State.getInstance()
+    coloredlogs.install(level='DEBUG', milliseconds=True)
 
-server.Listen()
+    mpc = MotorPowerController.getInstance()
+    server = SocketIOBackend.getInstance()
+    state = State.getInstance()
+    gps = GPS.getInstance()
+
+    server.Listen()
