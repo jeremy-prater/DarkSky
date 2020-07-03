@@ -70,6 +70,7 @@ class MotorPowerControllerReader:
                         if packet != None:
                             del context.incomingData[:16]
 
+                            # We have a packet!
                             if packet.command == PacketCommand.BOOT:
                                 mcpSocketIO.SendPacket('signal.boot', True)
                             elif packet.command == PacketCommand.MOTOR_DEC_POSITION:
