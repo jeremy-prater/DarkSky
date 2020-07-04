@@ -131,32 +131,73 @@ class State:
 
     # State update methods
 
+    # Dec motor updates
     def updateDecState(self, packet: Packet):
         self.updateMotorState('dec', packet)
 
+    def updateDecPosition(self, packet: Packet):
+        self.updateMotorPosition('dec', packet)
+
+    def updateDecStopAt(self, packet: Packet):
+        self.updateMotorStopAt('dec', packet)
+
+    # RA motor updates
     def updateRaState(self, packet: Packet):
         self.updateMotorState('ra', packet)
 
+    def updateRaPosition(self, packet: Packet):
+        self.updateMotorPosition('ra', packet)
+
+    def updateRaStopAt(self, packet: Packet):
+        self.updateMotorStopAt('ra', packet)
+
+    # Motor request methods
+
+    # Dec motor requests
     def requestDecState(self, packet: Packet):
         self.requestMotorState('dec', packet)
 
+    def requestDecPosition(self, packet: Packet):
+        self.requestMotorPosition('dec', packet)
+
+    def requestDecStopAt(self, packet: Packet):
+        self.requestMotorStopAt('dec', packet)
+
+    # RA motor requests
     def requestRaState(self, packet: Packet):
         self.requestMotorState('ra', packet)
 
-    def updateMotorState(self, motor: str, packet: Packet)
-    {
-        payload = packet.GetPayload()
-        newState = payload['arg1']
+    def requestRaPosition(self, packet: Packet):
+        self.requestMotorPosition('ra', packet)
 
-        self.state.state['motors'][motor]['state'] = State.MOTOR_STATES[newState]
-    }
+    def requestRaStopAt(self, packet: Packet):
+        self.requestMotorStopAt('ra', packet)
 
-    def requestMotorState(self, motor: str, state: str)
-    {
-        self.state.requestedState['motors'][motor]['state'] = state
+    # Generic motor update functions
+    def updateMotorState(self, motor: str, packet: Packet):
+        self.state['motors'][motor]['state'] = State.MOTOR_STATES[packet.GetPayload()[
+            'arg1']]
+
+    def updateMotorPosition(self, motor: str, packet: Packet):
+        self.state['motors'][motor]['position'] = packet.GetPayload()['arg1']
+
+    def updateMotorStopAt(self, motor: str, packet: Packet):
+        self.state['motors'][motor]['stoAt'] = packet.GetPayload()['arg1']
+
+    # Generic motor request functions
+    def requestMotorState(self, motor: str, state: str):
+        self.requestedState['motors'][motor]['state'] = state
         self.processStateUpdate()
-    }
 
+    def requestMotorPosition(self, motor: str, state: int):
+        self.requestedState['motors'][motor]['position'] = state
+        self.processStateUpdate()
+
+    def requestMotorStopAt(self, motor: str, state: int):
+        self.requestedState['motors'][motor]['stopAt'] = state
+        self.processStateUpdate()
+
+    # Compare requested state to actual state and issue commands
     def processStateUpdate(self):
         # LNB State
         if self.requestedState['lnb']['voltage'] != self.state['lnb']['voltage']:
@@ -173,7 +214,7 @@ class State:
             pass
         if self.requestedState['motor']['ra']['position'] != self.state['motor']['ra']['position']:
             pass
-        if self.requestedState['motor']['ra']['state'] != self.state['motor']['ra']['state']:
+        if self.requestedState['motor']['ra']['stopAt'] != self.state['motor']['ra']['stopAt']:
             pass
 
         # Dec motor state
@@ -181,5 +222,5 @@ class State:
             pass
         if self.requestedState['motor']['dec']['position'] != self.state['motor']['dec']['position']:
             pass
-        if self.requestedState['motor']['dec']['state'] != self.state['motor']['dec']['state']:
+        if self.requestedState['motor']['dec']['stopAt'] != self.state['motor']['dec']['stopAt']:
             pass

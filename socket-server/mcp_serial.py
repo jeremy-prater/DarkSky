@@ -31,6 +31,9 @@ class MotorPowerController:
             self.ports.append(port.__dict__)
         return self.ports
 
+    def ConnectSimulator(self):
+        self.port = "simulator"
+
     def Connect(self, comport):
         if self.serial.is_open:
             if self.readerThread != None:
