@@ -5,17 +5,11 @@ import eventlet
 from packet import Packet, PacketCommand
 from mcp_serial import MotorPowerController
 import threading
+from singleton import Singleton
 
-class SocketIOBackend:
-    instance = None
 
-    @staticmethod
-    def getInstance():
-        if SocketIOBackend.instance == None:
-            SocketIOBackend.instance = SocketIOBackend()
-        return SocketIOBackend.instance
-
-    def __init__(self):
+class SocketIOBackend(Singleton):
+    def init(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info("Creating DarkSky Socket.IO server")
 
@@ -25,7 +19,7 @@ class SocketIOBackend:
 
         self.sioLock = threading.Lock()
 
-        self.mcp = MotorPowerController.getInstance()
+        self.mcp = MotorPowerController()
         self.sio = socketio.Server(
             cors_allowed_origins='*', engineio_logger=True)
         self.app = socketio.WSGIApp(self.sio)
@@ -44,7 +38,7 @@ class SocketIOBackend:
     def connect(self, sid, environ):
         self.logger.info("Client connected : {}".format(sid))
         self.SendPacket('comport.update', self.mcp.GetPorts())
-        MotorPowerController.getInstance().SendStatus()
+        MotorPowerController().SendStatus()
 
     def disconnect(self, sid):
         self.logger.info("Client disconnected : {}".format(sid))
@@ -56,7 +50,7 @@ class SocketIOBackend:
         self.sioLock.release()
 
     def comportConnect(self,  sid, comport):
-        MotorPowerController.getInstance().Connect(comport)
+        MotorPowerController().Connect(comport)
 
     def setMotorState(self, sid, state, motor):
         arg = 0
@@ -64,7 +58,7 @@ class SocketIOBackend:
             arg = 1
         elif state == "reverse":
             arg = 2
-        MotorPowerController.getInstance().SendPacket(Packet(motor, arg, 0, 0))
+        MotorPowerController().SendPacket(Packet(motor, arg, 0, 0))
 
     def decState(self, sid, state):
         self.setMotorState(

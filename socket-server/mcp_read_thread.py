@@ -52,7 +52,7 @@ class MotorPowerControllerReader:
         context.logger.info(
             "MPC-Reader : Starting read loop on {}".format(context.serial.port))
         context.reading = True
-        mcpSocketIO = backend_socketio.SocketIOBackend.getInstance()            
+        mcpSocketIO = backend_socketio.SocketIOBackend()
 
         context.incomingData = []
 

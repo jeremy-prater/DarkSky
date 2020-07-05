@@ -4,18 +4,11 @@ import threading
 import time
 from state import State
 import datetime
+from singleton import Singleton
 
 
-class GPS:
-    instance = None
-
-    @staticmethod
-    def getInstance():
-        if GPS.instance == None:
-            GPS.instance = GPS()
-        return GPS.instance
-
-    def __init__(self):
+class GPS(Singleton):
+    def init(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info('Init')
 
@@ -34,7 +27,7 @@ class GPS:
 
     @staticmethod
     def GPSSimulatorThread(context):
-        state = State.getInstance()
+        state = State()
         context.logger.info(
             'Starting GPS Simulator loop')
         context.reading = True
@@ -53,7 +46,7 @@ class GPS:
 
     @staticmethod
     def GPSThread(context):
-        state = State.getInstance()
+        state = State()
         context.logger.info(
             'Starting GPS Simulator loop')
         context.reading = True

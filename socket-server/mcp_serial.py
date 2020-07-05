@@ -5,18 +5,11 @@ from mcp_read_thread import MotorPowerControllerReader
 import logging
 import json
 import backend_socketio
+from singleton import Singleton
 
 
-class MotorPowerController:
-    instance = None
-
-    @staticmethod
-    def getInstance():
-        if MotorPowerController.instance == None:
-            MotorPowerController.instance = MotorPowerController()
-        return MotorPowerController.instance
-
-    def __init__(self):
+class MotorPowerController(Singleton):
+    def init(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info("Creating DarkSky Motor Power Controller backend")
         self.serial = serial.Serial()
@@ -37,7 +30,7 @@ class MotorPowerController:
     def Connect(self, comport):
         if self.serial.is_open:
             if self.readerThread != None:
-                self.logger.warn("Destroy Existing Thread reader...");
+                self.logger.warn("Destroy Existing Thread reader...")
                 # self.readerThread.shutdown()
             self.serial.close()
 
@@ -47,11 +40,11 @@ class MotorPowerController:
         self.serial.open()
         self.SendStatus()
         if self.serial.is_open:
-            self.readerThread = MotorPowerControllerReader(self.serial);
-
+            self.readerThread = MotorPowerControllerReader(self.serial)
 
     def SendStatus(self):
-        backend_socketio.SocketIOBackend.getInstance().SendPacket('comport.status', self.serial.is_open)
+        backend_socketio.SocketIOBackend().SendPacket(
+            'comport.status', self.serial.is_open)
 
     def SendPacket(self, packet: Packet):
         if self.serial.is_open:

@@ -3,11 +3,10 @@ from backend_socketio import SocketIOBackend
 import time
 import threading
 from packet import Packet, PacketCommand
+from singleton import Singleton
 
 
-class State:
-    instance = None
-
+class State(Singleton):
     MOTOR_STATES = [
         'stopped',
         'forward',
@@ -15,13 +14,7 @@ class State:
         'stall'
     ]
 
-    @staticmethod
-    def getInstance():
-        if State.instance == None:
-            State.instance = State()
-        return State.instance
-
-    def __init__(self):
+    def init(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info('Init')
         self.state = {
@@ -79,7 +72,7 @@ class State:
 
     @staticmethod
     def StateUpdate(context):
-        socket = SocketIOBackend.getInstance()
+        socket = SocketIOBackend()
         context.logger.info(
             'Starting State Update Thread')
         context.sending = True

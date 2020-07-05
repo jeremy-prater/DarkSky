@@ -13,10 +13,10 @@ if __name__ == "__main__":
 
     coloredlogs.install(level='DEBUG', milliseconds=True)
 
-    mpc = MotorPowerController.getInstance()
-    server = SocketIOBackend.getInstance()
-    state = State.getInstance()
-    gps = GPS.getInstance()
+    mpc = MotorPowerController()
+    server = SocketIOBackend()
+    gps = GPS()
+    state = State()
 
     server.Listen()
 
