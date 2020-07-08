@@ -17,9 +17,9 @@
       </div>
       <div class="overlaypanel-item maplist">
         <ul>
-          <li>Lat : {{ state.location.lat }}</li>
-          <li>Lng : {{ state.location.lng }}</li>
-          <li>Time : {{ state.location.time }}</li>
+          <li>Lat : {{ state.gps.lat }}</li>
+          <li>Lng : {{ state.gps.lon }}</li>
+          <li>Time : {{ state.gps.time }}</li>
         </ul>
       </div>
 
@@ -183,7 +183,7 @@ export default {
   },
   methods: {
     tick() {
-      this.$store.commit("updateTime", new Date(Date.now()).toISOString());
+      // this.$store.commit("updateTime", new Date(Date.now()).toISOString());
     },
     mousedown(event) {
       if (event.buttons == 1) {

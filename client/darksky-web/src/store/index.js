@@ -1,37 +1,48 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+const lodash = require('lodash');
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
         motorServerConnected: false,
-        decMotor: {
-            state: null,
-            position: 0,
-            stopPos: 0,
+        gps: {
+            mode: 0,
+            sats: 0,
+            lat: 0,
+            lon: 0,
+            time: new Date(
+                Date.parse('2000-01-01T11:58:55.816Z')
+            ).toISOString(),
+            error: '',
+            alt: 0,
+            climb: 0,
         },
-        raMotor: {
-            state: null,
-            position: 0,
-            stopPos: 0,
-        },
-        allMotorStop: false,
-        lnbState: {
+        lnb: {
             voltage: 0,
             carrier: false,
         },
-        location: {
-            lat: 45.663177,
-            lng: -122.710401,
-            time: "no-lock"
+        motors: {
+            stopAll: false,
+            ra: {
+                state: 'unknown',
+                position: 0,
+                stopAt: 0,
+            },
+            dec: {
+                state: 'unknown',
+                position: 0,
+                stopAt: 0,
+            },
         },
+        serial: {
+            port: '',
+            connected: false,
+        },
+        sdr: {},
     },
     mutations: {
-        updateTime(state, time) {
-            // console.log(`updateTime ${time}`);
-            state.location.time = time;
-        },
         setMotorConnection(state, connected) {
             if (connected) {
                 console.log('Motor server connected');
@@ -39,6 +50,12 @@ export default new Vuex.Store({
                 console.log('Motor server disconnected');
             }
             state.motorServerConnected = connected;
+        },
+        updateState(state, newState) {
+            state = lodash.merge(state, newState);
+        },
+        updateTime(state, time) {
+            state.location.time = time;
         },
         updateDecMotorState(state, payload) {
             state.decMotor.state = payload;

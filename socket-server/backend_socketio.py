@@ -6,7 +6,8 @@ from packet import Packet, PacketCommand
 from mcp_serial import MotorPowerController
 import threading
 from singleton import Singleton
-
+from state import State
+import time
 
 class SocketIOBackend(Singleton):
     def init(self):
@@ -32,18 +33,37 @@ class SocketIOBackend(Singleton):
         self.sio.on('request.ra.state', self.raState)
         self.sio.on('request.lnb.state', self.lnbState)
 
+        self.state = State()
+
+        self.stateThread = threading.Thread(
+            target=self.StateUpdate, args=(self,), daemon=True)
+
+        self.stateThread.start()
+
+    @staticmethod
+    def StateUpdate(context):
+        context.logger.info(
+            'Starting State Update Thread')
+        context.sending = True
+        while (context.sending):
+            # context.logger.info('Emitting state over socket')
+            context.updateState()
+            time.sleep(1)
+
     def Listen(self):
-        eventlet.wsgi.server(eventlet.listen(('', 8100)), self.app)
+        eventlet.wsgi.server(eventlet.listen(('', 22502)), self.app)
 
     def connect(self, sid, environ):
         self.logger.info("Client connected : {}".format(sid))
-        self.SendPacket('comport.update', self.mcp.GetPorts())
-        MotorPowerController().SendStatus()
+        self.updateState()
+    
+    def updateState(self):
+        self.SendMessage('updateState', self.state.state)
 
     def disconnect(self, sid):
         self.logger.info("Client disconnected : {}".format(sid))
 
-    def SendPacket(self, event, payload):
+    def SendMessage(self, event, payload):
         # self.logger.info("Sending Socket IO {} => {}".format(event, payload))
         self.sioLock.acquire()
         self.sio.emit(event, payload)

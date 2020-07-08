@@ -1,5 +1,4 @@
 import logging
-from backend_socketio import SocketIOBackend
 import time
 import threading
 from packet import Packet, PacketCommand
@@ -42,6 +41,9 @@ class State(Singleton):
                 'port': '',
                 'connected': False
             },
+            'astro': {
+                
+            },
             'sdr': {}
         }
 
@@ -64,23 +66,6 @@ class State(Singleton):
                 }
             }
         }
-
-        self.stateThread = threading.Thread(
-            target=self.StateUpdate, args=(self,), daemon=True)
-
-        self.stateThread.start()
-
-    @staticmethod
-    def StateUpdate(context):
-        socket = SocketIOBackend()
-        context.logger.info(
-            'Starting State Update Thread')
-        context.sending = True
-        while (context.sending):
-            context.logger.info('Emitting state over socket')
-            context.logger.info(context.state)
-
-            time.sleep(1)
 
     def updateGPS(self, gpsFix):
         # self.logger.info(gpsFix)

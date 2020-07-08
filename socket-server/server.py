@@ -16,7 +16,6 @@ if __name__ == "__main__":
     mpc = MotorPowerController()
     server = SocketIOBackend()
     gps = GPS()
-    state = State()
 
     server.Listen()
 
