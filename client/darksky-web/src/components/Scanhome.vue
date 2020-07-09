@@ -30,41 +30,6 @@ import { faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 library.add(faMapMarkedAlt);
-// const vertexShader = `
-//   varying vec2 vUV;
-
-//   void main() {
-//     vUV = uv;
-
-//     gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-//   }
-// `;
-
-// const fragmentShader = `
-//   uniform vec3 gridColor;
-//   uniform vec3 figuresColor;
-//   uniform vec3 boundariesColor;
-//   uniform vec3 starmapColor;
-//   uniform vec3 lnbColor;
-
-//   uniform sampler2D grid;
-//   uniform sampler2D figures;
-//   uniform sampler2D boundaries;
-//   uniform sampler2D starmap;
-//   uniform sampler2D lnb;
-
-//   varying vec2 vUV;
-
-//   void main()
-//   {
-//     gl_FragColor =
-//       (vec4(gridColor,1) * texture2D(grid, vUV)) +
-//       (vec4(figuresColor,1) * texture2D(figures, vUV)) +
-//       (vec4(boundariesColor,1) * texture2D(boundaries, vUV)) +
-//       (vec4(starmapColor,1) * texture2D(starmap, vUV)) +
-//       (vec4(lnbColor,1) *  texture2D(lnb, vUV));
-//   }
-// `;
 
 export default {
   name: "Scanhome",
@@ -130,65 +95,12 @@ export default {
       }.bind(this)
     );
 
-    // this.geometry = new THREE.SphereGeometry(
-    //   1,
-    //   this.sphereQuality,
-    //   this.sphereQuality
-    // );
-    // this.assignUVs(this.geometry);
-
-    // this.texture_grid = new THREE.TextureLoader().load("/celestial_grid.png");
-    // this.texture_figures = new THREE.TextureLoader().load(
-    //   "/constellation_figures.png"
-    // );
-    // this.texture_boundaries = new THREE.TextureLoader().load(
-    //   "/constellation_boundaries.png"
-    // );
-    // this.texture_starmap = new THREE.TextureLoader().load("/starmap_8k.jpg");
-
     setInterval(this.tick, 1000);
   },
   methods: {
     tick() {
       // this.$store.commit("updateTime", new Date(Date.now()).toISOString());
     },
-    // mousedown(event) {
-    //   if (event.buttons == 1) {
-    //     this.viewVector.dragging = true;
-    //     this.viewVector.dx = event.clientX;
-    //     this.viewVector.dy = event.clientY;
-    //   }
-    // },
-    // mouseup(event) {
-    //   if (event.buttons == 0) {
-    //     this.viewVector.dragging = false;
-    //   }
-    // },
-    // mousemove(event) {
-    //   if (this.viewVector.dragging) {
-    //     let dx = event.clientX - this.viewVector.dx;
-    //     let dy = event.clientY - this.viewVector.dy;
-    //     this.viewVector.dx = event.clientX;
-    //     this.viewVector.dy = event.clientY;
-
-    //     let scale = (this.viewVector.zoom + 1) * 0.001;
-
-    //     this.viewVector.y += -dx * scale;
-    //     this.viewVector.x += -dy * scale;
-    //   }
-    // },
-    // mousewheel(event) {
-    //   let scale = 0.001;
-    //   this.viewVector.zoom += scale * event.deltaY;
-
-    //   if (this.viewVector.zoom > 0.99) {
-    //     this.viewVector.zoom = 0.99;
-    //   }
-
-    //   if (this.viewVector.zoom < -0.99) {
-    //     this.viewVector.zoom = -0.99;
-    //   }
-    // },
     visibilityChanged(isVisible) {
       if (isVisible === true) {
         this.load();
@@ -208,25 +120,7 @@ export default {
       this.render.trackball.update();
       this.render.renderer.render(this.render.scene, this.render.camera);
 
-      // this.render.camera.lookAt(
-      //   this.viewVector.x,
-      //   this.viewVector.y,
-      //   this.viewVector.z
-      // );
-      // this.render.camera.position.z = this.viewVector.zoom;
-
       requestAnimationFrame(this.doRender);
-    },
-    remapMaterials(parent) {
-      if (Object.prototype.hasOwnProperty.call(parent, "material")) {
-        parent.material = new THREE.MeshNormalMaterial({
-          wireframe: false
-        });
-      }
-      // Process all children
-      parent.children.forEach(child => {
-        this.remapMaterials(child);
-      });
     },
     load() {
       if (this.loaded === false) {
@@ -248,7 +142,8 @@ export default {
         0.0001,
         10
       );
-      this.render.camera.position.z = 1;
+
+      this.render.camera.position.x = 1;
 
       this.render.trackball = new TrackballControls(
         this.render.camera,
@@ -256,49 +151,20 @@ export default {
       );
 
       this.render.trackball.rotateSpeed = 5;
+      this.render.trackball.minDistance = 0.1;
+      this.render.trackball.maxDistance = 2;
 
       this.render.renderer = new THREE.WebGLRenderer({
         canvas: this.$refs["scanhome3d"]
       });
+
       this.render.renderer.setSize(this.render.width, this.render.height);
-
-      // Version : 1 - built in wireframe shader
-      // let material = new THREE.MeshNormalMaterial({
-      //   wireframe: true
-      // });
-
-      // Version : 2 - built in texture mapper
-      // immediately use the texture for material creation
-      // let material = new THREE.MeshBasicMaterial({ map: this.texture_starmap });
-
-      // Verion : 3 - Custom texture layers
-      // let material = new THREE.ShaderMaterial({
-      //   uniforms: {
-      //     gridColor: { value: new Vector3(1, 0, 0) },
-      //     boundariesColor: { value: new Vector3(0, 0.5, 0) },
-      //     figuresColor: { value: new Vector3(0, 0, 1) },
-      //     starmapColor: { value: new Vector3(1, 1, 1) },
-      //     lnbColor: { value: new Vector3(0, 0, 0) },
-      //     grid: { value: this.texture_grid },
-      //     boundaries: { value: this.texture_boundaries },
-      //     figures: { value: this.texture_figures },
-      //     starmap: { value: this.texture_starmap },
-      //     lnb: { value: this.texture_starmap }
-      //   },
-      //   vertexShader: vertexShader,
-      //   fragmentShader: fragmentShader
-      // });
-      // material.side = THREE.DoubleSide;
-      // let sphere = new THREE.Mesh(this.geometry, material);
-      // this.render.scene.add(sphere);
-
-      // Version : 4 - All custom
 
       let sliceSize = 0.015;
       let numSlices = 128;
       for (let dec = 0.0; dec < 90; dec += 15) {
         let position = dec / 90;
-        let radius = Math.sqrt(1 - (position*position));
+        let radius = Math.sqrt(1 - position * position);
         let geometry = new THREE.CylinderGeometry(
           radius,
           radius,
@@ -331,33 +197,11 @@ export default {
           side: THREE.BackSide
         });
         let meshn = new THREE.Mesh(geometryn, materialn);
-        // mesh2.position.z = -2;
+
         meshn.rotation.x = Math.PI / 2;
         meshn.rotation.z = Math.PI * (lon / 180);
         this.render.scene.add(meshn);
       }
-
-      // let segments = 32;
-      // for (let segment = 0; segment <= segments; segment++) {
-      //   let x = segment / segments;
-      //   console.log(x);
-      //   let phi = Math.sin(Math.PI * x);
-      //   console.log(phi);
-      //   if (phi > 0) {
-      //     let geometry = new THREE.CylinderGeometry(
-      //       phi,
-      //       phi,
-      //       0.01,
-      //       64,
-      //       1,
-      //       true
-      //     );
-      //     let mesh = new THREE.Mesh(geometry, material);
-      //     mesh.position.y = x - 0.5;
-      //     mesh.position.z = -2;
-      //     this.render.scene.add(mesh);
-      //   }
-      // }
 
       // Generate scene
       requestAnimationFrame(this.doRender);
