@@ -126,6 +126,7 @@ export default {
       "resize",
       function(event) {
         this.resize(event);
+        this.render.trackball.handleResize();
       }.bind(this)
     );
 
@@ -205,8 +206,6 @@ export default {
       }
 
       this.render.trackball.update();
-      this.render.trackball.rotateCamera();
-      this.render.trackball.zoomCamera();
       this.render.renderer.render(this.render.scene, this.render.camera);
 
       // this.render.camera.lookAt(
@@ -249,11 +248,14 @@ export default {
         0.0001,
         10
       );
+      this.render.camera.position.z = 1;
 
       this.render.trackball = new TrackballControls(
         this.render.camera,
         domObject
       );
+
+      this.render.trackball.rotateSpeed = 5;
 
       this.render.renderer = new THREE.WebGLRenderer({
         canvas: this.$refs["scanhome3d"]
@@ -292,24 +294,48 @@ export default {
 
       // Version : 4 - All custom
 
-      let geometry = new THREE.CylinderGeometry(1, 1, 0.01, 64, 1, true);
-      let material = new THREE.MeshBasicMaterial({
-        color: 0xff0000,
-        side: THREE.DoubleSide
-      });
-      let mesh = new THREE.Mesh(geometry, material);
-      // mesh.position.z = -2;
-      this.render.scene.add(mesh);
+      let sliceSize = 0.015;
+      let numSlices = 128;
+      for (let dec = 0.0; dec < 90; dec += 15) {
+        let position = dec / 90;
+        let radius = Math.sqrt(1 - (position*position));
+        let geometry = new THREE.CylinderGeometry(
+          radius,
+          radius,
+          sliceSize,
+          numSlices,
+          1,
+          true
+        );
+        let material = new THREE.MeshBasicMaterial({
+          color: 0x3030ff,
+          side: THREE.BackSide
+        });
+        let mesh = new THREE.Mesh(geometry, material);
+        mesh.position.y = position;
+        this.render.scene.add(mesh);
+      }
 
-      let geometry2 = new THREE.CylinderGeometry(1, 1, 0.01, 64, 1, true);
-      let material2 = new THREE.MeshBasicMaterial({
-        color: 0xffff00,
-        side: THREE.DoubleSide
-      });
-      let mesh2 = new THREE.Mesh(geometry2, material2);
-      // mesh2.position.z = -2;
-      mesh2.rotation.z = Math.PI / 2;
-      this.render.scene.add(mesh2);
+      for (let lon = 0.0; lon < 180; lon += 15) {
+        let radius = 1;
+        let geometryn = new THREE.CylinderGeometry(
+          radius,
+          radius,
+          sliceSize,
+          numSlices,
+          1,
+          true
+        );
+        let materialn = new THREE.MeshBasicMaterial({
+          color: 0xffff00,
+          side: THREE.BackSide
+        });
+        let meshn = new THREE.Mesh(geometryn, materialn);
+        // mesh2.position.z = -2;
+        meshn.rotation.x = Math.PI / 2;
+        meshn.rotation.z = Math.PI * (lon / 180);
+        this.render.scene.add(meshn);
+      }
 
       // let segments = 32;
       // for (let segment = 0; segment <= segments; segment++) {
