@@ -56,8 +56,8 @@ export default {
       // texture_boundaries: null,
       // texture_starmap: null,
       loaded: false,
-      sphereQuality: 256,
       render: {},
+      objects: {},
       viewVector: {
         zoom: 0,
         dragging: false,
@@ -99,7 +99,10 @@ export default {
   },
   methods: {
     tick() {
-      // this.$store.commit("updateTime", new Date(Date.now()).toISOString());
+      // Roll
+      this.objects['horizonMesh'].rotation.x += Math.PI * 0.03;
+      // Pitch
+      this.objects['horizonMesh'].rotation.z += Math.PI * -0.02;
     },
     visibilityChanged(isVisible) {
       if (isVisible === true) {
@@ -162,9 +165,12 @@ export default {
 
       let sliceSize = 0.015;
       let numSlices = 128;
-      for (let dec = 0.0; dec < 90; dec += 15) {
+      for (let dec = -90; dec < 90; dec += 15) {
         let position = dec / 90;
         let radius = Math.sqrt(1 - position * position);
+
+        if (radius === 0) continue;
+
         let geometry = new THREE.CylinderGeometry(
           radius,
           radius,
@@ -202,6 +208,34 @@ export default {
         meshn.rotation.z = Math.PI * (lon / 180);
         this.render.scene.add(meshn);
       }
+
+      // Generate horizon
+      let horizonRadius = 1.01;
+      // let horizonGeometry = new THREE.CylinderGeometry(
+      //   horizonRadius,
+      //   horizonRadius,
+      //   sliceSize,
+      //   numSlices,
+      //   1,
+      //   true
+      // );
+      let horizonGeometry = new THREE.SphereGeometry(
+        horizonRadius,
+        numSlices,
+        numSlices,
+        0,
+        Math.PI * 2,
+        0,
+        Math.PI / 2
+      );
+
+      let horizonMaterial = new THREE.MeshBasicMaterial({
+        color: 0x803080,
+        side: THREE.BackSide
+      });
+      this.objects['horizonMesh'] = new THREE.Mesh(horizonGeometry, horizonMaterial);
+      this.objects['horizonMesh'].rotation.x = Math.PI;
+      this.render.scene.add(this.objects['horizonMesh']);
 
       // Generate scene
       requestAnimationFrame(this.doRender);
