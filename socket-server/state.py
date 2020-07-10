@@ -7,7 +7,7 @@ from singleton import Singleton
 from astropy.coordinates import EarthLocation, SkyCoord, AltAz, Angle
 from astropy import units as u
 import astropy.coordinates as coord
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 
 
 class State(Singleton):
@@ -21,6 +21,7 @@ class State(Singleton):
     def init(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info('Init')
+        self.testTime = Time.now()
         self.state = {
             'gps': {
                 'mode': 0
@@ -51,8 +52,15 @@ class State(Singleton):
             },
             'sdr': {},
             'sky': {
-                'ra': 0,
-                'dec': 0
+                'localHorizon': {
+                    'ra': 0,
+                    'dec': 0
+                },
+                'sun': {
+                    'ra': 0,
+                    'dec': 0,
+                    'distance': 0,
+                }
             }
         }
 
@@ -92,15 +100,20 @@ class State(Singleton):
             location = EarthLocation.from_geodetic(
                 lon=self.state['gps']['lon'], lat=self.state['gps']['lat'], height=self.state['gps']['alt'])
 
-            sun = coord.get_sun(
-                Time(self.state['gps']['time'], format='fits', scale='utc')
-            )
+            # timestamp = self.testTime
+            # self.testTime += TimeDelta(24*60*60, format='sec')
+            timestamp =  Time(self.state['gps']['time'], format='fits', scale='utc')
 
-            sun_angle = sun.transform_to(
-                AltAz(obstime=self.state['gps']['time'], location=location))
+            earthAngle = coord.get_body('earth',
+                                        timestamp, location)
 
-            self.state['sky']['ra'] = math.radians(sun_angle.az.value)
-            self.state['sky']['dec'] = math.radians(sun_angle.alt.value)
+            self.state['sky']['localHorizon']['ra'] = earthAngle.ra.value
+            self.state['sky']['localHorizon']['dec'] = earthAngle.dec.value
+
+            sun = coord.get_sun(timestamp)
+            self.state['sky']['sun']['ra'] = sun.ra.value
+            self.state['sky']['sun']['dec'] = sun.dec.value
+            self.state['sky']['sun']['distance'] = sun.distance.value
 
     # Control board state updates
 

@@ -23,7 +23,7 @@
 
 <script>
 import * as THREE from "three";
-import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { mapState } from "vuex";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
@@ -91,7 +91,7 @@ export default {
       "resize",
       function(event) {
         this.resize(event);
-        this.render.trackball.handleResize();
+        this.render.orbitControl.handleResize();
       }.bind(this)
     );
 
@@ -101,9 +101,24 @@ export default {
     tick() {
       if (this.state.gps.mode >= 2) {
         // Roll
-        this.objects["horizonMesh"].rotation.x = this.state.sky.ra;
-        // Pitch
-        this.objects["horizonMesh"].rotation.z = this.state.sky.dec;
+        this.objects["horizonMesh"].rotation.set(
+          THREE.Math.degToRad(this.state.sky.localHorizon.ra),
+          Math.PI / 2,
+          THREE.Math.degToRad(this.state.sky.localHorizon.dec)
+        );
+
+        let tempMatrix = new THREE.Matrix4();
+
+        this.objects["sun"].matrix.identity();
+        this.objects["sun"].matrix.multiply(
+          tempMatrix.makeRotationZ(THREE.Math.degToRad(this.state.sky.sun.ra))
+        );
+        this.objects["sun"].matrix.multiply(
+          tempMatrix.makeRotationX(THREE.Math.degToRad(this.state.sky.sun.dec))
+        );
+        this.objects["sun"].matrix.multiply(
+          tempMatrix.makeTranslation(0, 0, 1)
+        );
       }
     },
     visibilityChanged(isVisible) {
@@ -122,7 +137,15 @@ export default {
         return;
       }
 
-      this.render.trackball.update();
+      // this.render.camera.up = new THREE.Vector3(
+      //   THREE.Math.degToRad(this.state.sky.localHorizon.ra),
+      //   THREE.Math.degToRad(this.state.sky.localHorizon.dec),
+      //   0
+      // );
+
+      console.log(this.render.camera.rotation);
+
+      this.render.orbitControl.update();
       this.render.renderer.render(this.render.scene, this.render.camera);
 
       requestAnimationFrame(this.doRender);
@@ -150,22 +173,20 @@ export default {
 
       this.render.camera.position.x = 1;
 
-      this.render.trackball = new TrackballControls(
+      this.render.orbitControl = new OrbitControls(
         this.render.camera,
         domObject
       );
-
-      this.render.trackball.rotateSpeed = 5;
-      this.render.trackball.minDistance = 0.1;
-      this.render.trackball.maxDistance = 2;
 
       this.render.renderer = new THREE.WebGLRenderer({
         canvas: this.$refs["scanhome3d"]
       });
 
+      this.render.orbitControl.maxDistance = 2;
+
       this.render.renderer.setSize(this.render.width, this.render.height);
 
-      let sliceSize = 0.015;
+      let sliceSize = 0.005;
       let numSlices = 128;
       for (let dec = -90; dec < 90; dec += 15) {
         let position = dec / 90;
@@ -213,22 +234,14 @@ export default {
 
       // Generate horizon
       let horizonRadius = 1.01;
-      // let horizonGeometry = new THREE.CylinderGeometry(
-      //   horizonRadius,
-      //   horizonRadius,
-      //   sliceSize,
-      //   numSlices,
-      //   1,
-      //   true
-      // );
       let horizonGeometry = new THREE.SphereGeometry(
         horizonRadius,
         numSlices,
         numSlices,
         0,
         Math.PI * 2,
-        Math.PI / 2,
-        Math.PI
+        0,
+        Math.PI / 2
       );
 
       let horizonMaterial = new THREE.MeshBasicMaterial({
@@ -239,8 +252,19 @@ export default {
         horizonGeometry,
         horizonMaterial
       );
-      this.objects["horizonMesh"].rotation.x = Math.PI;
       this.render.scene.add(this.objects["horizonMesh"]);
+
+      // Generate sun
+      let sunRadius = 0.05;
+      let sunGeometry = new THREE.SphereGeometry(sunRadius, 32, 32);
+
+      let sunMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        side: THREE.FrontSide
+      });
+      this.objects["sun"] = new THREE.Mesh(sunGeometry, sunMaterial);
+      this.objects["sun"].matrixAutoUpdate = false;
+      this.render.scene.add(this.objects["sun"]);
 
       // Generate scene
       requestAnimationFrame(this.doRender);
