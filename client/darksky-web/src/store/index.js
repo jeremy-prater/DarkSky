@@ -41,6 +41,10 @@ export default new Vuex.Store({
             connected: false,
         },
         sdr: {},
+        sky: {
+            ra: 0,
+            dec: 0,
+        },
     },
     mutations: {
         setMotorConnection(state, connected) {

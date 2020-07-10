@@ -1,8 +1,13 @@
 import logging
 import time
 import threading
+import math
 from packet import Packet, PacketCommand
 from singleton import Singleton
+from astropy.coordinates import EarthLocation, SkyCoord, AltAz, Angle
+from astropy import units as u
+import astropy.coordinates as coord
+from astropy.time import Time
 
 
 class State(Singleton):
@@ -18,7 +23,7 @@ class State(Singleton):
         self.logger.info('Init')
         self.state = {
             'gps': {
-                'fix': 0
+                'mode': 0
             },
             'lnb': {
                 'voltage': 0,
@@ -42,9 +47,13 @@ class State(Singleton):
                 'connected': False
             },
             'astro': {
-                
+
             },
-            'sdr': {}
+            'sdr': {},
+            'sky': {
+                'ra': 0,
+                'dec': 0
+            }
         }
 
         self.requestedState = {
@@ -79,6 +88,19 @@ class State(Singleton):
         # 4. precession
         #
         # ... do math
+        if self.state['gps']['mode'] >= 2:
+            location = EarthLocation.from_geodetic(
+                lon=self.state['gps']['lon'], lat=self.state['gps']['lat'], height=self.state['gps']['alt'])
+
+            sun = coord.get_sun(
+                Time(self.state['gps']['time'], format='fits', scale='utc')
+            )
+
+            sun_angle = sun.transform_to(
+                AltAz(obstime=self.state['gps']['time'], location=location))
+
+            self.state['sky']['ra'] = math.radians(sun_angle.az.value)
+            self.state['sky']['dec'] = math.radians(sun_angle.alt.value)
 
     # Control board state updates
 
@@ -160,7 +182,7 @@ class State(Singleton):
         self.state['motors'][motor]['position'] = packet.GetPayload()['arg1']
 
     def updateMotorStopAt(self, motor: str, packet: Packet):
-        self.state['motors'][motor]['stoAt'] = packet.GetPayload()['arg1']
+        self.state['motors'][motor]['stopAt'] = packet.GetPayload()['arg1']
 
     # Generic motor request functions
     def requestMotorState(self, motor: str, state: str):

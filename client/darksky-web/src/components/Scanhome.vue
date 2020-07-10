@@ -99,10 +99,12 @@ export default {
   },
   methods: {
     tick() {
-      // Roll
-      this.objects['horizonMesh'].rotation.x += Math.PI * 0.03;
-      // Pitch
-      this.objects['horizonMesh'].rotation.z += Math.PI * -0.02;
+      if (this.state.gps.mode >= 2) {
+        // Roll
+        this.objects["horizonMesh"].rotation.x = this.state.sky.ra;
+        // Pitch
+        this.objects["horizonMesh"].rotation.z = this.state.sky.dec;
+      }
     },
     visibilityChanged(isVisible) {
       if (isVisible === true) {
@@ -225,17 +227,20 @@ export default {
         numSlices,
         0,
         Math.PI * 2,
-        0,
-        Math.PI / 2
+        Math.PI / 2,
+        Math.PI
       );
 
       let horizonMaterial = new THREE.MeshBasicMaterial({
         color: 0x803080,
         side: THREE.BackSide
       });
-      this.objects['horizonMesh'] = new THREE.Mesh(horizonGeometry, horizonMaterial);
-      this.objects['horizonMesh'].rotation.x = Math.PI;
-      this.render.scene.add(this.objects['horizonMesh']);
+      this.objects["horizonMesh"] = new THREE.Mesh(
+        horizonGeometry,
+        horizonMaterial
+      );
+      this.objects["horizonMesh"].rotation.x = Math.PI;
+      this.render.scene.add(this.objects["horizonMesh"]);
 
       // Generate scene
       requestAnimationFrame(this.doRender);
