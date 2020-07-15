@@ -7,4 +7,5 @@ star-motor-controller/star-motor-controller/Release
 **/node_modules
 **/__pycache__
 socket-server/server_runtime
+client/darksky-desktop/desktop_runtime
 **/*.pyc

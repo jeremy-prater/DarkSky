@@ -1,0 +1,17 @@
+astropy==4.0.1.post1
+autopep8==1.5.3
+coloredlogs==14.0
+dnspython==1.16.0
+eventlet==0.25.2
+greenlet==0.4.16
+humanfriendly==8.2
+monotonic==1.5
+numpy==1.19.0
+pycodestyle==2.6.0
+PyQt5==5.15.0
+PyQt5-sip==12.8.0
+pyrtlsdr==0.2.92
+python-engineio==3.13.1
+python-socketio==4.6.0
+six==1.15.0
+toml==0.10.1
