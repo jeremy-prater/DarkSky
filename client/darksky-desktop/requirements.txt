@@ -8,10 +8,10 @@ humanfriendly==8.2
 monotonic==1.5
 numpy==1.19.0
 pycodestyle==2.6.0
-PyQt5==5.15.0
-PyQt5-sip==12.8.0
 pyrtlsdr==0.2.92
+PySide2==5.15.0
 python-engineio==3.13.1
 python-socketio==4.6.0
+shiboken2==5.15.0
 six==1.15.0
 toml==0.10.1
