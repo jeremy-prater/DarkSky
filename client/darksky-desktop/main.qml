@@ -1,12 +1,30 @@
-import QtQuick 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Controls.Material 2.12
 
-Rectangle {
-    width: 200
-    height: 200
-    color: "dark grey"
+ApplicationWindow {
+    id: darksky
+    width: 1280
+    height: 720
+    // minimumWidth: 1180
+    // minimumHeight: 663
+    visible: true
+    title: "DarkSky Desktop"
 
-    Text {
-        text: "Hello World"
+    Material.theme: Material.Dark
+    Material.accent: Material.BlueGrey
+
+
+    Rectangle {
+        anchors.fill: parent
+        color: "#C04040"
+    }
+
+    Column {
         anchors.centerIn: parent
+
+        RadioButton { text: qsTr("Small") }
+        RadioButton { text: qsTr("Medium");  checked: true }
+        RadioButton { text: qsTr("Large") }
     }
 }

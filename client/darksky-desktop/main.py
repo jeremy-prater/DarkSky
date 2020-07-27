@@ -1,16 +1,47 @@
 import sys
-import random
-import time
-from PySide2.QtQuick import QQuickView
-from PySide2.QtCore import QUrl
-from PySide2.QtWidgets import QApplication, QLabel
-                                                     
-if __name__ == "__main__":
-    app = QApplication([])
-    view = QQuickView()
-    url = QUrl("main.qml")
+from PySide2.QtWidgets import QApplication
+from PySide2.QtWidgets import QApplication
+from PySide2.QtCore import Qt, QCoreApplication
+from PySide2.QtQml import QQmlApplicationEngine
 
-    view.setSource(url)
-    view.setResizeMode(QQuickView.SizeRootObjectToView)
-    view.show()
+import sys
+from os.path import abspath, dirname, join
+
+from PySide2.QtCore import QObject, Slot
+from PySide2.QtGui import QGuiApplication
+from PySide2.QtQml import QQmlApplicationEngine
+from PySide2.QtQuickControls2 import QQuickStyle
+
+# if __name__ == '__main__':
+#     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+
+#     QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+
+#     sys.argv += ['--style', 'Material']
+#     app = QApplication(sys.argv)
+
+#     engine = QQmlApplicationEngine('main.qml')
+
+#     sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    app = QGuiApplication(sys.argv)
+    QQuickStyle.setStyle("Material")
+    engine = QQmlApplicationEngine()
+
+    # # Instance of the Python object
+    # bridge = Bridge()
+
+    # # Expose the Python object to QML
+    context = engine.rootContext()
+    # context.setContextProperty("con", bridge)
+
+    # Get the path of the current directory, and then add the name
+    # of the QML file, to load it.
+    qmlFile = join(dirname(__file__), 'main.qml')
+    engine.load(abspath(qmlFile))
+
+    if not engine.rootObjects():
+        sys.exit(-1)
+
     sys.exit(app.exec_())
