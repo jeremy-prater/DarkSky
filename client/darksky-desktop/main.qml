@@ -14,17 +14,31 @@ ApplicationWindow {
     Material.theme: Material.Dark
     Material.accent: Material.BlueGrey
 
-
     Rectangle {
         anchors.fill: parent
-        color: "#C04040"
+        color: "#404040"
     }
 
     Column {
         anchors.centerIn: parent
 
-        RadioButton { text: qsTr("Small") }
-        RadioButton { text: qsTr("Medium");  checked: true }
-        RadioButton { text: qsTr("Large") }
+        RadioButton {
+            text: qsTr("Small")
+        }
+        RadioButton {
+            text: qsTr("Medium")
+            checked: true
+        }
+        RadioButton {
+            text: qsTr("Large")
+        }
+    }
+
+    jbox {
+        x: 500
+        y: 100
+        width: 200
+        height: 100
+        visible: true
     }
 }

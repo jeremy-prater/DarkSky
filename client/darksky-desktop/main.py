@@ -9,7 +9,7 @@ from os.path import abspath, dirname, join
 
 from PySide2.QtCore import QObject, Slot
 from PySide2.QtGui import QGuiApplication
-from PySide2.QtQml import QQmlApplicationEngine
+from PySide2.QtQml import QQmlApplicationEngine, QQmlComponent
 from PySide2.QtQuickControls2 import QQuickStyle
 
 # if __name__ == '__main__':
@@ -29,10 +29,7 @@ if __name__ == '__main__':
     QQuickStyle.setStyle("Material")
     engine = QQmlApplicationEngine()
 
-    # # Instance of the Python object
-    # bridge = Bridge()
-
-    # # Expose the Python object to QML
+    # Expose the Python object to QML
     context = engine.rootContext()
     # context.setContextProperty("con", bridge)
 
