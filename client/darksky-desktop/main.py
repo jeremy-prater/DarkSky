@@ -2,7 +2,7 @@ import sys
 from PySide2.QtWidgets import QApplication
 from PySide2.QtWidgets import QApplication
 from PySide2.QtCore import Qt, QCoreApplication
-from PySide2.QtQml import QQmlApplicationEngine
+from PySide2.QtQml import QQmlApplicationEngine, QQmlDebuggingEnabler
 
 import sys
 from os.path import abspath, dirname, join
@@ -25,6 +25,7 @@ from PySide2.QtQuickControls2 import QQuickStyle
 #     sys.exit(app.exec_())
 
 if __name__ == '__main__':
+    QQmlDebuggingEnabler()
     app = QGuiApplication(sys.argv)
     QQuickStyle.setStyle("Material")
     engine = QQmlApplicationEngine()

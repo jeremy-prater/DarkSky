@@ -12,33 +12,36 @@ ApplicationWindow {
     title: "DarkSky Desktop"
 
     Material.theme: Material.Dark
-    Material.accent: Material.BlueGrey
+    Material.accent: Material.Purple
 
     Rectangle {
         anchors.fill: parent
         color: "#404040"
     }
 
-    Column {
-        anchors.centerIn: parent
-
-        RadioButton {
-            text: qsTr("Small")
-        }
-        RadioButton {
-            text: qsTr("Medium")
-            checked: true
-        }
-        RadioButton {
-            text: qsTr("Large")
-        }
-    }
-
-    jbox {
-        x: 500
-        y: 100
+    UIBox {
+        title: "Status"
         width: 200
-        height: 100
+        height: 300
         visible: true
+        anchors.margins : 10
+        x: parent.width - 220
+        y: parent.height - 320
+        
+        uibody : 
+            Column {
+                anchors.centerIn: parent
+
+                RadioButton {
+                    text: qsTr("Small")
+                }
+                RadioButton {
+                    text: qsTr("Medium")
+                    checked: true
+                }
+                RadioButton {
+                    text: qsTr("Large")
+                }
+            }
     }
 }
