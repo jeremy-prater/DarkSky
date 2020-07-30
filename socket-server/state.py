@@ -4,10 +4,6 @@ import threading
 import math
 from packet import Packet, PacketCommand
 from singleton import Singleton
-from astropy.coordinates import EarthLocation, SkyCoord, AltAz, Angle
-from astropy import units as u
-import astropy.coordinates as coord
-from astropy.time import Time, TimeDelta
 
 
 class State(Singleton):
@@ -46,21 +42,6 @@ class State(Singleton):
             'serial': {
                 'port': '',
                 'connected': False
-            },
-            'astro': {
-
-            },
-            'sdr': {},
-            'sky': {
-                'localHorizon': {
-                    'ra': 0,
-                    'dec': 0
-                },
-                'sun': {
-                    'ra': 0,
-                    'dec': 0,
-                    'distance': 0,
-                }
             }
         }
 
@@ -88,32 +69,6 @@ class State(Singleton):
         # self.logger.info(gpsFix)
         # self.logger.info('GPS Update {}.{} @ {}'.format(gpsFix['lat'], gpsFix['lon'], gpsFix['time']))
         self.state['gps'] = gpsFix
-
-        # Here we need to signal the astronomical coordinates to update
-        # 1. time changed
-        # 2. coordinates may have changed
-        # 3. altiude correction
-        # 4. precession
-        #
-        # ... do math
-        if self.state['gps']['mode'] >= 2:
-            location = EarthLocation.from_geodetic(
-                lon=self.state['gps']['lon'], lat=self.state['gps']['lat'], height=self.state['gps']['alt'])
-
-            # timestamp = self.testTime
-            # self.testTime += TimeDelta(24*60*60, format='sec')
-            timestamp =  Time(self.state['gps']['time'], format='fits', scale='utc')
-
-            earthAngle = coord.get_body('earth',
-                                        timestamp, location)
-
-            self.state['sky']['localHorizon']['ra'] = earthAngle.ra.value
-            self.state['sky']['localHorizon']['dec'] = earthAngle.dec.value
-
-            sun = coord.get_sun(timestamp)
-            self.state['sky']['sun']['ra'] = sun.ra.value
-            self.state['sky']['sun']['dec'] = sun.dec.value
-            self.state['sky']['sun']['distance'] = sun.distance.value
 
     # Control board state updates
 

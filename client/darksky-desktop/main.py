@@ -12,6 +12,8 @@ from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine, QQmlComponent
 from PySide2.QtQuickControls2 import QQuickStyle
 
+from state import State
+
 # if __name__ == '__main__':
 #     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 
@@ -31,8 +33,10 @@ if __name__ == '__main__':
     engine = QQmlApplicationEngine()
 
     # Expose the Python object to QML
+    state = State()
+    print(state)
     context = engine.rootContext()
-    # context.setContextProperty("con", bridge)
+    context.setContextProperty("state", state)
 
     # Get the path of the current directory, and then add the name
     # of the QML file, to load it.

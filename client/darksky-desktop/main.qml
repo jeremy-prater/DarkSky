@@ -17,6 +17,16 @@ ApplicationWindow {
     Rectangle {
         anchors.fill: parent
         color: "#404040"
+
+        MouseArea {
+            anchors.fill: parent
+        
+            onPressed: {
+                console.log("imtest");
+                console.log(darksky);
+                console.log(darksky.state);
+            }
+        }
     }
 
     UIBox {
@@ -30,17 +40,18 @@ ApplicationWindow {
         
         uibody : 
             Column {
+
                 anchors.centerIn: parent
 
                 RadioButton {
-                    text: qsTr("Small")
+                    text: "Small"
                 }
                 RadioButton {
-                    text: qsTr("Medium")
+                    text: "Medium"
                     checked: true
                 }
                 RadioButton {
-                    text: qsTr("Large")
+                    text: "Large"
                 }
             }
     }
