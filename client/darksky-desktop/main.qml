@@ -23,8 +23,9 @@ ApplicationWindow {
         
             onPressed: {
                 console.log("imtest");
-                console.log(darksky);
-                console.log(darksky.state);
+                console.log(darksky.title);
+                console.log(version);
+                console.log(state.text);
             }
         }
     }
@@ -45,6 +46,10 @@ ApplicationWindow {
 
                 RadioButton {
                     text: "Small"
+                    onPressed : {
+                        console.log("You clicked it")
+                        
+                    }
                 }
                 RadioButton {
                     text: "Medium"

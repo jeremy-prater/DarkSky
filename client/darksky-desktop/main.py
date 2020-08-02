@@ -34,8 +34,9 @@ if __name__ == '__main__':
 
     # Expose the Python object to QML
     state = State()
-    print(state)
+
     context = engine.rootContext()
+    context.setContextProperty('version', "1.0")
     context.setContextProperty("state", state)
 
     # Get the path of the current directory, and then add the name

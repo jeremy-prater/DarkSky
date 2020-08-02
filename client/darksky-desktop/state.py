@@ -1,7 +1,13 @@
-from PySide2.QtCore import QObject, Slot
+from PySide2.QtCore import QObject, Slot, Signal, Property
 
 
-class State(QObject):    
-    @Slot(result=str)
-    def test1(self):
-        return "data"
+class State(QObject):
+    textChanged = Signal(str)
+
+    def __init__(self, parent=None):
+        QObject.__init__(self, parent)
+        self.m_text = "I'm a test"
+
+    @Property(str, notify=textChanged)
+    def text(self):
+        return self.m_text
