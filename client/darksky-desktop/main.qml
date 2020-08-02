@@ -20,12 +20,10 @@ ApplicationWindow {
 
         MouseArea {
             anchors.fill: parent
-        
+
             onPressed: {
-                console.log("imtest");
-                console.log(darksky.title);
-                console.log(version);
-                console.log(state.text);
+                console.log("yoyo-ing duke...");
+                DarkSkyState.updateText("yoyo duke");
             }
         }
     }
@@ -45,10 +43,10 @@ ApplicationWindow {
                 anchors.centerIn: parent
 
                 RadioButton {
-                    text: "Small"
+                    text: DarkSkyState.text
                     onPressed : {
                         console.log("You clicked it")
-                        
+                        console.log(DarkSkyState.text)   
                     }
                 }
                 RadioButton {

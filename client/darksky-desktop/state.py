@@ -2,12 +2,15 @@ from PySide2.QtCore import QObject, Slot, Signal, Property
 
 
 class State(QObject):
+    intext="mcguffin"
     textChanged = Signal(str)
-
-    def __init__(self, parent=None):
-        QObject.__init__(self, parent)
-        self.m_text = "I'm a test"
 
     @Property(str, notify=textChanged)
     def text(self):
-        return self.m_text
+        return self.intext
+
+    @Slot(str)
+    def updateText(self, newText):
+        print("yoyo engaging...")
+        self.intext = newText
+        self.textChanged.emit(self.intext)

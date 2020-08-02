@@ -36,8 +36,7 @@ if __name__ == '__main__':
     state = State()
 
     context = engine.rootContext()
-    context.setContextProperty('version', "1.0")
-    context.setContextProperty("state", state)
+    context.setContextProperty("DarkSkyState", state)
 
     # Get the path of the current directory, and then add the name
     # of the QML file, to load it.
