@@ -1,9 +1,10 @@
 from PySide2.QtCore import QObject, Slot, Signal, Property
-
+from singleton import Singleton
+import logging
 
 class State(QObject):
-    intext="mcguffin"
     textChanged = Signal(str)
+    intext="mcguffin"
 
     @Property(str, notify=textChanged)
     def text(self):

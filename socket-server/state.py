@@ -1,5 +1,5 @@
 import logging
-import time
+import datetime
 import threading
 import math
 from packet import Packet, PacketCommand
@@ -17,7 +17,6 @@ class State(Singleton):
     def init(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info('Init')
-        self.testTime = Time.now()
         self.state = {
             'gps': {
                 'mode': 0

@@ -13,6 +13,7 @@ from PySide2.QtQml import QQmlApplicationEngine, QQmlComponent
 from PySide2.QtQuickControls2 import QQuickStyle
 
 from state import State
+from darksky_socket import SocketClient
 
 # if __name__ == '__main__':
 #     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
@@ -34,9 +35,11 @@ if __name__ == '__main__':
 
     # Expose the Python object to QML
     state = State()
+    socketClient = SocketClient()
 
     context = engine.rootContext()
     context.setContextProperty("DarkSkyState", state)
+    context.setContextProperty("SocketClient", socketClient)
 
     # Get the path of the current directory, and then add the name
     # of the QML file, to load it.

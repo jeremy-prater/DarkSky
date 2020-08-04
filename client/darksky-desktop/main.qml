@@ -14,6 +14,17 @@ ApplicationWindow {
     Material.theme: Material.Dark
     Material.accent: Material.Purple
 
+    Component.onCompleted: {
+        console.log("Init...");
+        SocketClient.doConnect();
+    }
+
+    
+    onClosing: {
+        console.log("Shutdown starting ...");
+        SocketClient.doDisconnect();
+    }
+
     Rectangle {
         anchors.fill: parent
         color: "#404040"
