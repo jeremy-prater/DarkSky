@@ -1,45 +1,43 @@
-from PySide2.QtCore import QObject, Slot, Signal, Property
 import socketio
+import logging, coloredlogs
 
-class SocketClient(QObject):
-    sio = socketio.Client()
+class SocketClient():
+    def __init__(self, **kwargs):
+        super(SocketClient, self).__init__(**kwargs)
 
-    connected = False
-    connectedChanged = Signal(bool)
+        self.logger = logging.getLogger(__name__)
+        coloredlogs.install(level='DEBUG', logger=self.logger)
+        self.logger.info("Init")
 
-    @Property(bool, notify=connectedChanged)
+        self.sio = socketio.Client()
+        self.connected = False
+
+        self.sio.on('connect', self.connect)
+        self.sio.on('disconnect', self.disconnect)
+        self.sio.on('updateState', self.updateState)
+
+
     def isConnected(self):
         return self.connected
 
-    @sio.event
     def connect(self):
-        print('SocketIO => connection established')
+        self.logger.info('connection established')
         self.connected = True
-        self.connectedChanged.emit(SocketClient.connected)
 
-    @sio.event
     def disconnect(self):
-        print('SocketIO => Connection closed')
+        self.logger.info('Connection closed')
         self.connected = False
-        self.connectedChanged.emit(SocketClient.connected)
 
-    @sio.event
-    def my_message(self, data):
-        print('message received with ', data)
-        sio.emit('my response', {'response': 'my response'})
+    def updateState(self, data):
+        self.logger.info('message received with {}'.format(data))
+        # sio.emit('my response', {'response': 'my response'})
 
 
-    @Slot()
-    def doConnect(self):
-        print("Connecting to DarkSky")
-        self.sio.on('connect', self.connect)
-        self.sio.on('disconnect', self.disconnect)
-        
-        print("SocketIO => Connecting...")
+    def doConnect(self):     
+        self.logger.info("Connecting")
         self.sio.connect("http://localhost:22502")
 
 
-    @Slot()
     def doDisconnect(self):
-        print("SocketIO => Disconnecting")
+        self.logger.info("Disconnecting")
         self.sio.disconnect()

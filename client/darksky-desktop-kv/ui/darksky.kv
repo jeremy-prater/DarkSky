@@ -1,7 +1,15 @@
 #:kivy 1.0.9
 
-<DarkSky>:    
+<DarkSky>:
+    canvas.before:
+        Color:
+            rgba: .2, .2, .4, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
     canvas:
+        Color:
+            rgba: 1, 1, 1, 1
         Rectangle:
             pos: self.center_x - 5, 0
             size: 10, self.height
@@ -12,13 +20,13 @@
 
 
     Label:
-        font_size: 10  
+        font_size: 10
         center_x: root.width / 4
         top: root.top - 50
         text: "0"
-        
+
     Label:
-        font_size: 10  
+        font_size: 10
         center_x: root.width * 3 / 4
         top: root.top - 50
         text: "0"
