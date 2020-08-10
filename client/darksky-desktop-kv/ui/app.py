@@ -19,6 +19,7 @@ class DarkSkyApp(App):
 
     def on_stop(self):
         self.logger.info("on_stop")
+        self.context.backend.doDisconnect()
 
     def on_pause(self):
         self.logger.info("on_pause")
