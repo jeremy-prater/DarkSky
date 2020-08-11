@@ -4,6 +4,8 @@ from ui.darksky import DarkSky
 from kivy.app import App
 from darksky_socket import SocketClient
 
+from ui.skyview import SkyView
+
 class DarkSkyApp(App):
     def build(self):
         self.logger = logging.getLogger(__name__)

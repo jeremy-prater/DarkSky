@@ -1,32 +1,17 @@
-#:kivy 1.0.9
+#:kivy 2.0.0
+#:include ui/skyview.kv
 
 <DarkSky>:
-    canvas.before:
-        Color:
-            rgba: .2, .2, .4, 1
-        Rectangle:
-            pos: self.pos
-            size: self.size
     canvas:
         Color:
-            rgba: 1, 1, 1, 1
+            rgba: .2, .2, .2, 1
         Rectangle:
-            pos: self.center_x - 5, 0
-            size: 10, self.height
+            pos: (0, 0)
+            size: self.size
 
-        Rectangle:
-            pos: 0, self.center_y - 5
-            size: self.width, 10
+    FloatLayout:
+        size: root.size
 
-
-    Label:
-        font_size: 10
-        center_x: root.width / 4
-        top: root.top - 50
-        text: "0"
-
-    Label:
-        font_size: 10
-        center_x: root.width * 3 / 4
-        top: root.top - 50
-        text: "0"
+        SkyView:
+            pos_hint: {'center_x:': 0.5, 'center_y': 0.8}
+            size_hint: (0.1, 0.1)

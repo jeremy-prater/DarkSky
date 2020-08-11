@@ -1,0 +1,22 @@
+#:kivy 2.0.0
+
+<SkyView>:
+    canvas.before:
+        Color:
+            rgba: .2, .2, .4, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    canvas:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+            # pos: self.center_x - 5, 0
+            # size: 10, self.height
+
+        # Rectangle:
+        #     pos: 0, self.center_y - 5
+        #     size: self.width, 10
