@@ -5,7 +5,7 @@
       <div class="overlaypanel-title">
         <font-awesome-icon :icon="['fa', 'map-marked-alt']" size="lg" class="statusicon" />Map overlay
       </div>
-      <div class="overlaypanel-item maplist">
+      <div class="overlaypanel-text overlaypanel-item maplist">
         <ul>
           <li>Lat : {{ state.gps.lat }}</li>
           <li>Lng : {{ state.gps.lon }}</li>
@@ -13,8 +13,36 @@
         </ul>
       </div>
 
-      <b-button>Button</b-button>
-      <v-color-picker v-model="color"></v-color-picker>
+      <b-form-checkbox
+        class="overlaypanel-text"
+        v-model="celestialConfig.stars.show"
+        @input="mapConfigChanged"
+      >Stars</b-form-checkbox>
+      <b-form-checkbox
+        class="overlaypanel-text"
+        v-model="celestialConfig.dsos.show"
+        @input="mapConfigChanged"
+      >Deep space objects</b-form-checkbox>
+      <b-form-checkbox
+        class="overlaypanel-text"
+        v-model="celestialConfig.planets.show"
+        @input="mapConfigChanged"
+      >Planets</b-form-checkbox>
+      <b-form-checkbox
+        class="overlaypanel-text"
+        v-model="celestialConfig.mw.show"
+        @input="mapConfigChanged"
+      >Milkyway</b-form-checkbox>
+      <b-form-checkbox
+        class="overlaypanel-text"
+        v-model="celestialConfig.daylight.show"
+        @input="mapConfigChanged"
+      >Daylight</b-form-checkbox>
+
+      <b-button
+      @click="resetView"
+      >Reset View</b-button>
+      <!-- v-color-picker v-model="color"></v-color-picker -->
     </div>
   </div>
 </template>
@@ -25,7 +53,7 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { Celestial } from "d3-celestial";
-import moment from 'moment';
+import moment from "moment";
 
 library.add(faMapMarkedAlt);
 
@@ -33,10 +61,11 @@ export default {
   name: "Scanhome",
   data() {
     return {
+      posSet: false,
       celestialConfig: {
         width: 0, // Default width, 0 = full parent element width;
         // height is determined by projection
-        projection: "aitoff", // Map projection used: see below
+        projection: "bromley", // Map projection used: see below
         transform: "equatorial", // Coordinate transformation: equatorial (default),
         // ecliptic, galactic, supergalactic
         center: null, // Initial center coordinates in set transform
@@ -47,13 +76,13 @@ export default {
         // overrides center
         follow: "zenith", // on which coordinates to center the map, default: zenith, if location enabled,
         // otherwise center
-        zoomlevel: null, // initial zoom level 0...zoomextend; 0|null = default, 1 = 100%, 0 < x <= zoomextend
+        zoomlevel: 1.25, // initial zoom level 0...zoomextend; 0|null = default, 1 = 100%, 0 < x <= zoomextend
         zoomextend: 10, // maximum zoom level
         adaptable: true, // Sizes are increased with higher zoom-levels
         interactive: true, // Enable zooming and rotation with mousewheel and dragging
         form: false, // Display form for interactive settings. Needs a div with
         // id="celestial-form", created automatically if not present
-        location: true, // Display location settings. Deprecated, use formFields below
+        location: false, // Display location settings. Deprecated, use formFields below
         formFields: {
           location: true, // Set visiblity for each group of fields with the respective id
           general: true,
@@ -64,7 +93,7 @@ export default {
           other: true,
           download: false
         },
-        advanced: true, // Display fewer form fields if false
+        advanced: false, // Display fewer form fields if false
         daterange: [], // Calender date range; null: displaydate-+10; [n<100]: displaydate-+n; [yr]: yr-+10;
         // [yr, n<100]: [yr-n, yr+n]; [yr0, yr1]
         controls: true, // Display zoom controls
@@ -74,7 +103,7 @@ export default {
         container: "celestial-map", // ID of parent element, e.g. div, null = html-body
         datapath: "data/", // Path/URL to data files, empty = subfolder 'data'
         stars: {
-          show: true, // Show stars
+          show: false, // Show stars
           limit: 6, // Show only stars brighter than limit magnitude
           colors: true, // Show stars in spectral colors, if not use default color
           style: { fill: "#ffffff", opacity: 1 }, // Default style for stars
@@ -106,7 +135,7 @@ export default {
           // number indicates limit magnitude
         },
         dsos: {
-          show: true, // Show Deep Space Objects
+          show: false, // Show Deep Space Objects
           limit: 6, // Show only DSOs brighter than limit magnitude
           colors: true, // // Show DSOs in symbol colors if true, use style setting below if false
           style: { fill: "#cccccc", stroke: "#cccccc", width: 2, opacity: 1 }, // Default style for dsos
@@ -237,7 +266,7 @@ export default {
           }, // ranked constellations
           lines: true, // Show constellation lines, style below
           lineStyle: { stroke: "#cccccc", width: 1, opacity: 0.6 },
-          bounds: false, // Show constellation boundaries, style below
+          bounds: true, // Show constellation boundaries, style below
           boundStyle: {
             stroke: "#cccc00",
             width: 0.5,
@@ -246,7 +275,7 @@ export default {
           }
         },
         mw: {
-          show: true, // Show Milky Way as filled multi-polygon outlines
+          show: false, // Show Milky Way as filled multi-polygon outlines
           style: { fill: "#ffffff", opacity: 0.15 } // Style for MW layers
         },
         lines: {
@@ -337,20 +366,33 @@ export default {
       }.bind(this)
     );
 
-    this.celestial = Celestial()
+    this.celestial = Celestial();
     this.celestial.display(this.celestialConfig);
     this.timestamp = moment();
 
     setInterval(this.tick, 1000);
   },
   methods: {
+    mapConfigChanged() {
+      console.log("Map config changed!");
+      console.log(this.celestialConfig);
+      this.celestial.reload(this.celestialConfig);
+    },
+    resetView() {
+      console.log("Resetting View");
+      this.posSet = false;
+    },
     tick() {
       if (this.state.gps.mode >= 2) {
         // Update GPS pos
-        //console.log(this.state.gps);
-        this.celestial.location([this.state.gps.lat, this.state.gps.lon]);
-        this.celestial.date(this.timestamp.toDate());
-        this.timestamp.add(15, "m");
+        // console.log(this.state.gps);
+        if (!this.posSet) {
+          this.celestial.skyview({
+            date: this.state.gps.time,
+            location: [this.state.gps.lat, this.state.gps.lon]
+          });
+          this.posSet = true;
+        }
       }
     },
     visibilityChanged(isVisible) {

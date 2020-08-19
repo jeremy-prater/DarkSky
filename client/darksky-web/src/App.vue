@@ -52,11 +52,14 @@ body {
   align-items: center;
 }
 
-.overlaypanel-item {
+.overlaypanel-text {
   color: cornflowerblue;
   font-family: "Fira Code";
   font-size: 0.8em;
   text-align: left;
+}
+
+.overlaypanel-item {
   padding: 5%;
 }
 

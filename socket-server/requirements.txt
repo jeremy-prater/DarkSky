@@ -11,7 +11,7 @@ numpy==1.19.1
 pycodestyle==2.6.0
 pyrtlsdr==0.2.92
 pyserial==3.4
-python-engineio==3.13.1
+python-engineio==3.13.2
 python-socketio==4.6.0
 six==1.15.0
 toml==0.10.1
