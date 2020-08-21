@@ -8,6 +8,7 @@ import vuetify from './plugins/vuetify';
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'd3-celestial/celestial.css'
 
 // Install BootstrapVue
 Vue.use(BootstrapVue);

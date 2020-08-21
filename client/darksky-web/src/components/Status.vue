@@ -76,7 +76,7 @@ export default {
 
 <style scoped>
 .status-panel {
-  left: 0.5vw;
+  left: 3.5vw;
   top: 0.5vh;
   width: 20vw;
 }

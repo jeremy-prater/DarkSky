@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="celestial-map"></div>
+    <div id="celestial-map" class="celestialmap" @mousemove="updateCoords" @contextmenu="mapMenu"></div>
     <div class="overlaypanel mappanel">
       <div class="overlaypanel-title">
         <font-awesome-icon :icon="['fa', 'map-marked-alt']" size="lg" class="statusicon" />Map overlay
@@ -10,6 +10,10 @@
           <li>Lat : {{ state.gps.lat }}</li>
           <li>Lng : {{ state.gps.lon }}</li>
           <li>Time : {{ state.gps.time }}</li>
+          <li>RA : {{ this.deg2hms(this.mouseRADec[0]) }}</li>
+          <li>Dec : {{ this.deg2dms(this.mouseRADec[1]) }}</li>
+          <li>Alt : {{ this.mouseAltAz[0] }}</li>
+          <li>Az : {{ this.mouseAltAz[1] }}</li>
         </ul>
       </div>
 
@@ -39,9 +43,7 @@
         @input="mapConfigChanged"
       >Daylight</b-form-checkbox>
 
-      <b-button
-      @click="resetView"
-      >Reset View</b-button>
+      <b-button @click="resetView">Reset View</b-button>
       <!-- v-color-picker v-model="color"></v-color-picker -->
     </div>
   </div>
@@ -61,11 +63,13 @@ export default {
   name: "Scanhome",
   data() {
     return {
+      mouseRADec: [NaN, NaN],
+      mouseAltAz: [NaN, NaN],
       posSet: false,
       celestialConfig: {
         width: 0, // Default width, 0 = full parent element width;
         // height is determined by projection
-        projection: "bromley", // Map projection used: see below
+        projection: "armadillo", // Map projection used: see below
         transform: "equatorial", // Coordinate transformation: equatorial (default),
         // ecliptic, galactic, supergalactic
         center: null, // Initial center coordinates in set transform
@@ -164,7 +168,7 @@ export default {
             i: { shape: "ellipse", fill: "#ff0000" }, // Irregular galaxy
             oc: {
               shape: "circle",
-              fill: "#ffcc00",
+              fill: "#is:closed ffcc00",
               stroke: "#ffcc00",
               width: 1.5
             }, // Open cluster
@@ -369,14 +373,52 @@ export default {
     this.celestial = Celestial();
     this.celestial.display(this.celestialConfig);
     this.timestamp = moment();
+    console.log(this.celestial.container);
+    console.log(this.celestial.context);
 
     setInterval(this.tick, 1000);
   },
   methods: {
+    deg2hms(deg) {
+      if (deg === null || isNaN(parseFloat(deg))) return;
+      let ra = deg < 0 ? (deg + 360) / 15 : deg / 15,
+        h = Math.floor(ra),
+        rest1 = (ra - h) * 60,
+        m = Math.floor(rest1),
+        rest2 = (rest1 - m) * 60,
+        s = Math.round(rest2);
+      return "" + this.pad(h) + "ʰ " + this.pad(m) + "ᵐ " + this.pad(s) + "ˢ";
+    },
+    deg2dms(deg) {
+      if (deg === null || isNaN(parseFloat(deg))) return;
+      let d = Math.floor(deg),
+        rest1 = (deg - d) * 60,
+        m = Math.floor(rest1),
+        rest2 = (rest1 - m) * 60,
+        s = Math.round(rest2);
+      return "" + this.pad(d) + "° " + this.pad(m) + "′ " + this.pad(s) + "″";
+    },
+
+    pad(n) {
+      if (n < 0) return n > -10 ? "-0" + Math.abs(n) : n;
+      return n < 10 ? "0" + n : n;
+    },
+    mapMenu(event) {
+      console.log(event);
+    },
+    updateCoords(event) {
+      let radec = this.celestial.mapProjection.invert([
+        event.offsetX,
+        event.offsetY
+      ]);
+      if (radec != null) {
+        this.mouseRADec = radec;
+      }
+    },
     mapConfigChanged() {
       console.log("Map config changed!");
       console.log(this.celestialConfig);
-      this.celestial.reload(this.celestialConfig);
+      this.celestial.apply(this.celestialConfig);
     },
     resetView() {
       console.log("Resetting View");
@@ -432,4 +474,12 @@ export default {
 .maplist {
   padding: 0px;
 }
+
+.celestialmap {
+  padding: 0px;
+  margin: 0px;
+  width: 100vw;
+  background-color: #000000;
+}
+
 </style>
