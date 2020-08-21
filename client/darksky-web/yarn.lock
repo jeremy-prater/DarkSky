@@ -1604,6 +1604,11 @@ astral-regex@^1.0.0:
   resolved "https://registry.yarnpkg.com/astral-regex/-/astral-regex-1.0.0.tgz#6c8c3fb827dd43ee3918f27b82782ab7658a6fd9"
   integrity sha512-+Ryf6g3BKoRc7jfp7ad8tM4TtMiaWvbF/1/sQcZPkkS7ag3D5nMBCe2UfOTONtAkaG0tO0ij3C5Lwmf1EiyjHg==
 
+astronomia@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/astronomia/-/astronomia-2.1.3.tgz#1c8e69f44a1f4cb0435d1a692eeef5f62eab074d"
+  integrity sha512-slRv2h0HlowjWwMbojL4hKcXqiItfx/TNruYmiETw6ATfeSZxBSGv1bo16ruMVKzGGxucL1esh7MYjwXuToS6w==
+
 async-each@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/async-each/-/async-each-1.0.3.tgz#b727dbf87d7651602f06f4d4ac387f47d91b0cbf"

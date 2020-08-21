@@ -56,6 +56,7 @@ import { faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { Celestial } from "d3-celestial";
 import moment from "moment";
+import { coord, globe, base } from "astronomia";
 
 library.add(faMapMarkedAlt);
 
@@ -80,7 +81,7 @@ export default {
         // overrides center
         follow: "zenith", // on which coordinates to center the map, default: zenith, if location enabled,
         // otherwise center
-        zoomlevel: 1.25, // initial zoom level 0...zoomextend; 0|null = default, 1 = 100%, 0 < x <= zoomextend
+        zoomlevel: 1, // initial zoom level 0...zoomextend; 0|null = default, 1 = 100%, 0 < x <= zoomextend
         zoomextend: 10, // maximum zoom level
         adaptable: true, // Sizes are increased with higher zoom-levels
         interactive: true, // Enable zooming and rotation with mousewheel and dragging
@@ -413,6 +414,17 @@ export default {
       ]);
       if (radec != null) {
         this.mouseRADec = radec;
+        if (this.state.gps.mode >= 2) {
+          let eqCoord = new coord.Equatorial(
+            base.toRad(radec[0]),
+            base.toRad(radec[1])
+          );
+          let altaz = eqCoord.toHorizontal(
+            new globe.Coord(this.state.gps.lat, this.state.gps.lon),
+            0
+          );
+          this.mouseAltAz = [base.toDeg(altaz.alt), base.toDeg(altaz.az)];
+        }
       }
     },
     mapConfigChanged() {
@@ -481,5 +493,4 @@ export default {
   width: 100vw;
   background-color: #000000;
 }
-
 </style>
