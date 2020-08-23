@@ -10,6 +10,7 @@
           <li>Lat : {{ state.gps.lat }}</li>
           <li>Lng : {{ state.gps.lon }}</li>
           <li>Time : {{ state.gps.time }}</li>
+          <li>JDE : {{ this.jde }}</li>
           <li>RA : {{ this.deg2hms(this.mouseRADec[0]) }}</li>
           <li>Dec : {{ this.deg2dms(this.mouseRADec[1]) }}</li>
           <li>Alt : {{ this.mouseAltAz[0] }}</li>
@@ -56,7 +57,7 @@ import { faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { Celestial } from "d3-celestial";
 import moment from "moment";
-import { coord, globe, base } from "astronomia";
+import { coord, globe, base, sidereal, julian } from "astronomia";
 
 library.add(faMapMarkedAlt);
 
@@ -64,9 +65,10 @@ export default {
   name: "Scanhome",
   data() {
     return {
-      mouseRADec: [NaN, NaN],
-      mouseAltAz: [NaN, NaN],
+      mouseRADec: [0, 0],
+      mouseAltAz: [0, 0],
       posSet: false,
+      jde: 0,
       celestialConfig: {
         width: 0, // Default width, 0 = full parent element width;
         // height is determined by projection
@@ -414,17 +416,23 @@ export default {
       ]);
       if (radec != null) {
         this.mouseRADec = radec;
-        if (this.state.gps.mode >= 2) {
-          let eqCoord = new coord.Equatorial(
-            base.toRad(radec[0]),
-            base.toRad(radec[1])
-          );
-          let altaz = eqCoord.toHorizontal(
-            new globe.Coord(this.state.gps.lat, this.state.gps.lon),
-            0
-          );
-          this.mouseAltAz = [base.toDeg(altaz.alt), base.toDeg(altaz.az)];
-        }
+      }
+      this.updateAltAz();
+    },
+    updateAltAz() {
+      if (this.state.gps.mode >= 2) {
+        let eqCoord = new coord.Equatorial(
+          base.toRad(this.mouseRADec[0]),
+          base.toRad(this.mouseRADec[1])
+        );
+
+        this.jde = julian.DateToJDE(new Date(this.state.gps.time));        
+        let siderealTime = sidereal.apparent(this.jde);
+        let altaz = eqCoord.toHorizontal(
+          new globe.Coord(this.state.gps.lat, this.state.gps.lon),
+          siderealTime
+        );
+        this.mouseAltAz = [base.toDeg(altaz.alt), base.toDeg(altaz.az)];
       }
     },
     mapConfigChanged() {
@@ -437,6 +445,7 @@ export default {
       this.posSet = false;
     },
     tick() {
+      this.updateAltAz();
       if (this.state.gps.mode >= 2) {
         // Update GPS pos
         // console.log(this.state.gps);
