@@ -11,8 +11,8 @@
           <li>Lng : {{ state.gps.lon }}</li>
           <li>Time : {{ state.gps.time }}</li>
           <li>JDE : {{ this.jde }}</li>
-          <li>RA : {{ this.deg2hms(this.mouseRADec[0]) }}</li>
-          <li>Dec : {{ this.deg2dms(this.mouseRADec[1]) }}</li>
+          <li>RA : {{ this.deg2hms(this.mouseRADec[0]) }} ({{ this.deg2dms(this.mouseRADec[0]) }})</li>
+          <li>Dec : {{ this.deg2hms(this.mouseRADec[1]) }}</li>
           <li>Alt : {{ this.mouseAltAz[0] }}</li>
           <li>Az : {{ this.mouseAltAz[1] }}</li>
         </ul>
@@ -64,6 +64,29 @@ export default {
       mouseAltAz: [0, 0],
       posSet: false,
       jde: 0,
+      tailCounter: 0,
+      dishTrack: {
+        type: "FeatureCollection",
+        // this is an array, add as many objects as you want
+        features: [
+          {
+            type: "Feature",
+            id: "SummerTriangle",
+            properties: {
+              // Name
+              n: "Summer Triangle",
+              // Location of name text on the map
+              loc: [-67.5, 52]
+            },
+            geometry: {
+              // the line object as an array of point coordinates,
+              // always as [ra -180..180 degrees, dec -90..90 degrees]
+              type: "MultiLineString",
+              coordinates: [[[0, 0]]]
+            }
+          }
+        ]
+      },
       celestialConfig: {
         width: 0, // Default width, 0 = full parent element width;
         // height is determined by projection
@@ -105,7 +128,7 @@ export default {
         container: "celestial-map", // ID of parent element, e.g. div, null = html-body
         datapath: "data/", // Path/URL to data files, empty = subfolder 'data'
         stars: {
-          show: true, // Show stars
+          show: false, // Show stars
           limit: 5, // Show only stars brighter than limit magnitude
           colors: true, // Show stars in spectral colors, if not use default color
           style: { fill: "#ffffff", opacity: 1 }, // Default style for stars
@@ -137,7 +160,7 @@ export default {
           // number indicates limit magnitude
         },
         dsos: {
-          show: true, // Show Deep Space Objects
+          show: false, // Show Deep Space Objects
           limit: 10, // Show only DSOs brighter than limit magnitude
           colors: true, // // Show DSOs in symbol colors if true, use style setting below if false
           style: { fill: "#cccccc", stroke: "#cccccc", width: 2, opacity: 1 }, // Default style for dsos
@@ -203,7 +226,7 @@ export default {
         },
         planets: {
           //Show planet locations, if date-time is set
-          show: true,
+          show: false,
           // List of all objects to show
           which: [
             "sol",
@@ -369,13 +392,14 @@ export default {
     );
 
     this.celestial = Celestial();
-    this.celestial.display(this.celestialConfig);
+    this.timestamp = moment();
     this.celestial.add({
+      file: "",
       type: "json",
       callback: this.generateDishTrack,
       redraw: this.redrawDishTrack
     });
-    this.timestamp = moment();
+    this.celestial.display(this.celestialConfig);
     setInterval(this.tick, 1000);
   },
   methods: {
@@ -416,20 +440,30 @@ export default {
       }
       this.updateAltAz();
     },
+    convertRADec2AltAz(coords) {
+      let eqCoord = new coord.Equatorial(
+        base.toRad(coords.ra),
+        base.toRad(coords.dec)
+      );
+
+      this.jde = julian.DateToJDE(new Date(this.state.gps.time));
+      let siderealTime = sidereal.apparent(this.jde);
+      let altaz = eqCoord.toHorizontal(
+        new globe.Coord(this.state.gps.lat, this.state.gps.lon),
+        siderealTime
+      );
+      return {
+        alt: base.toDeg(altaz.alt),
+        az: base.toDeg(altaz.az)
+      };
+    },
     updateAltAz() {
       if (this.state.gps.mode >= 2) {
-        let eqCoord = new coord.Equatorial(
-          base.toRad(this.mouseRADec[0]),
-          base.toRad(this.mouseRADec[1])
-        );
-
-        this.jde = julian.DateToJDE(new Date(this.state.gps.time));
-        let siderealTime = sidereal.apparent(this.jde);
-        let altaz = eqCoord.toHorizontal(
-          new globe.Coord(this.state.gps.lat, this.state.gps.lon),
-          siderealTime
-        );
-        this.mouseAltAz = [base.toDeg(altaz.alt), base.toDeg(altaz.az)];
+        const altaz = this.convertRADec2AltAz({
+          ra: this.mouseRADec[0],
+          dec: this.mouseRADec[1]
+        });
+        this.mouseAltAz = [altaz.alt, altaz.az];
       }
     },
     mapConfigChanged() {
@@ -442,42 +476,13 @@ export default {
       this.posSet = false;
     },
     generateDishTrack(error, json) {
-      console.log("generate dish track");
-      console.log(json);
-      var jsonLine = {
-        type: "FeatureCollection",
-        // this is an array, add as many objects as you want
-        features: [
-          {
-            type: "Feature",
-            id: "SummerTriangle",
-            properties: {
-              // Name
-              n: "Summer Triangle",
-              // Location of name text on the map
-              loc: [-67.5, 52]
-            },
-            geometry: {
-              // the line object as an array of point coordinates,
-              // always as [ra -180..180 degrees, dec -90..90 degrees]
-              type: "MultiLineString",
-              coordinates: [
-                [
-                  [-80.7653, 38.7837],
-                  [-62.3042, 8.8683],
-                  [-49.642, 45.2803],
-                  [-80.7653, 38.7837]
-                ]
-              ]
-            }
-          }
-        ]
-      };
+      error;
+      json;
+      // console.log("generate dish track");
 
-      if (error) return console.warn(error);
       // Load the geoJSON file and transform to correct coordinate system, if necessary
-      var asterism = this.celestial.getData(
-        jsonLine,
+      const asterism = this.celestial.getData(
+        this.dishTrack,
         this.celestialConfig.transform
       );
 
@@ -488,44 +493,53 @@ export default {
         .enter()
         .append("path")
         .attr("class", "ast");
-      // Trigger redraw to display changes
-      this.celestial.redraw();
     },
     redrawDishTrack() {
-      console.log("redraw dish track");
-      var lineStyle = {
+      // console.log("redraw dish track");
+      const lineStyle = {
         stroke: "#f00",
         fill: "rgba(255, 204, 204, 0.4)",
         width: 3
       };
-      var textStyle = {
+      const textStyle = {
         fill: "#f00",
         font: "bold 15px Helvetica, Arial, sans-serif",
         align: "center",
         baseline: "bottom"
       };
-      // Select the added objects by class name as given previously
-      this.celestial.container.selectAll(".ast").each(function(d) {
-        // Set line styles
-        this.celestial.setStyle(lineStyle);
-        // Project objects on map
-        this.celestial.map(d);
-        // draw on canvas
-        this.celestial.context.fill();
-        this.celestial.context.stroke();
 
-        // If point is visible (this doesn't work automatically for points)
-        if (this.celestial.clip(d.properties.loc)) {
-          // get point coordinates
-          let pt = this.celestial.mapProjection(d.properties.loc);
-          // Set text styles
-          this.celestial.setTextStyle(textStyle);
-          // and draw text on canvas
-          this.celestial.context.fillText(d.properties.n, pt[0], pt[1]);
-        }
-      });
+      // Add more line segments!!
+      this.dishTrack.features[0].geometry.coordinates[0].push([
+        this.tailCounter++,
+        0
+      ]);
+      this.generateDishTrack(null, null);
+
+      // Select the added objects by class name as given previously
+      this.celestial.container.selectAll(".ast").each(
+        function(d) {
+          // Set line styles
+          this.celestial.setStyle(lineStyle);
+          // Project objects on map
+          this.celestial.map(d);
+          // draw on canvas
+          this.celestial.context.fill();
+          this.celestial.context.stroke();
+
+          // If point is visible (this doesn't work automatically for points)
+          if (this.celestial.clip(d.properties.loc)) {
+            // get point coordinates
+            let pt = this.celestial.mapProjection(d.properties.loc);
+            // Set text styles
+            this.celestial.setTextStyle(textStyle);
+            // and draw text on canvas
+            this.celestial.context.fillText(d.properties.n, pt[0], pt[1]);
+          }
+        }.bind(this)
+      );
     },
     tick() {
+      this.celestial.redraw();
       this.updateAltAz();
       if (this.state.gps.mode >= 2) {
         // Update GPS pos
