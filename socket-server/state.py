@@ -2,6 +2,7 @@ import logging
 import datetime
 import threading
 import math
+import time
 from packet import Packet, PacketCommand
 from singleton import Singleton
 
@@ -24,6 +25,11 @@ class State(Singleton):
             'lnb': {
                 'voltage': 0,
                 'carrier': False
+            },
+            'dish': {
+                'alt': 0,
+                'az': 0,
+                'lineString': []
             },
             'motors': {
                 'stopAll': False,
@@ -191,3 +197,51 @@ class State(Singleton):
             pass
         if self.requestedState['motor']['dec']['stopAt'] != self.state['motor']['dec']['stopAt']:
             pass
+
+    def UpdateDishPositionLineString(self):
+        if len(self.state["dish"]["lineString"]) == 0:
+            self.state["dish"]["lineString"].append(
+                [self.state["dish"]["az"], self.state["dish"]["alt"]])
+            return
+
+        daz = abs(self.state["dish"]["az"] -
+                  self.state["dish"]["lineString"][0][0])
+        dalt = abs(self.state["dish"]["alt"] -
+                   self.state["dish"]["lineString"][0][1])
+
+        if daz >= 1 or dalt >= 1:
+            self.state["dish"]["lineString"].insert(0,
+                                                    [self.state["dish"]["az"], self.state["dish"]["alt"]])
+
+        if len(self.state["dish"]["lineString"]) > 250:
+            self.state["dish"]["lineString"].pop()
+
+    def StartSimulation(self):
+        self.simulating = False
+        self.simulationThread = threading.Thread(
+            target=self.SimulationThread, args=(self,), daemon=True)
+        self.simulationThread.start()
+
+    @staticmethod
+    def SimulationThread(context):
+        context.logger.info("Starting Simulation Thread")
+        context.simulating = True
+
+        azStep = 5
+        altStep = 15
+
+        while (context.simulating):
+            context.state["dish"]["az"] += azStep
+            if context.state["dish"]["az"] == 360:
+                context.state["dish"]["az"] = 0
+                context.state["dish"]["alt"] += altStep
+
+                if context.state["dish"]["alt"] == 90 or context.state["dish"]["alt"] == 0:
+                    altStep = -altStep
+
+            context.logger.info("Simulation AZ : {}, ALT : {}, altStep : {}, lineString : {}".format(
+                context.state["dish"]["az"], context.state["dish"]["alt"], altStep, len(context.state["dish"]["lineString"])))
+
+            context.UpdateDishPositionLineString()
+
+            time.sleep(.1)

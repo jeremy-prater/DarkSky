@@ -93,7 +93,7 @@ export default {
       celestialConfig: {
         width: 0, // Default width, 0 = full parent element width;
         // height is determined by projection
-        projection: "airy", // Map projection used: see below
+        projection: "armadillo", // Map projection used: see below
         transform: "equatorial", // Coordinate transformation: equatorial (default),
         // ecliptic, galactic, supergalactic
         center: null, // Initial center coordinates in set transform
@@ -530,19 +530,18 @@ export default {
 
       // Add more line segments!!
       if (this.state.gps.mode >= 2) {
-        const radec = this.convertAltAz2RADec({
-          az: this.dishPos.az,
-          alt: this.dishPos.alt
+        // Convert incoming lineString from backend
+        this.dishTrack.features[0].geometry.coordinates[0] = [];
+        this.state.dish.lineString.forEach(coords => {
+          const radec = this.convertAltAz2RADec({
+            az: coords[0],
+            alt: coords[1]
+          });
+          this.dishTrack.features[0].geometry.coordinates[0].push([
+            radec.ra,
+            radec.dec
+          ]);
         });
-        this.dishPos.az += 15;
-        if (this.dishPos.az >= 360) {
-          this.dishPos.az = 0;
-          this.dishPos.alt += 15;
-        }
-        this.dishTrack.features[0].geometry.coordinates[0].push([
-          radec.ra,
-          radec.dec
-        ]);
         this.generateDishTrack(null, null);
       }
 
