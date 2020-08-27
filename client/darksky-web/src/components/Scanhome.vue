@@ -64,7 +64,10 @@ export default {
       mouseAltAz: [0, 0],
       posSet: false,
       jde: 0,
-      tailCounter: 0,
+      dishPos: {
+        alt: 0,
+        az: 0
+      },
       dishTrack: {
         type: "FeatureCollection",
         // this is an array, add as many objects as you want
@@ -82,7 +85,7 @@ export default {
               // the line object as an array of point coordinates,
               // always as [ra -180..180 degrees, dec -90..90 degrees]
               type: "MultiLineString",
-              coordinates: [[[0, 0]]]
+              coordinates: [[]]
             }
           }
         ]
@@ -90,7 +93,7 @@ export default {
       celestialConfig: {
         width: 0, // Default width, 0 = full parent element width;
         // height is determined by projection
-        projection: "armadillo", // Map projection used: see below
+        projection: "airy", // Map projection used: see below
         transform: "equatorial", // Coordinate transformation: equatorial (default),
         // ecliptic, galactic, supergalactic
         center: null, // Initial center coordinates in set transform
@@ -457,6 +460,23 @@ export default {
         az: base.toDeg(altaz.az)
       };
     },
+    convertAltAz2RADec(coords) {
+      let eqCoord = new coord.Horizontal(
+        base.toRad(coords.az),
+        base.toRad(coords.alt)
+      );
+
+      this.jde = julian.DateToJDE(new Date(this.state.gps.time));
+      let siderealTime = sidereal.apparent(this.jde);
+      let radec = eqCoord.toEquatorial(
+        new globe.Coord(this.state.gps.lat, this.state.gps.lon),
+        siderealTime
+      );
+      return {
+        ra: base.toDeg(radec.ra),
+        dec: base.toDeg(radec.dec)
+      };
+    },
     updateAltAz() {
       if (this.state.gps.mode >= 2) {
         const altaz = this.convertRADec2AltAz({
@@ -509,11 +529,22 @@ export default {
       };
 
       // Add more line segments!!
-      this.dishTrack.features[0].geometry.coordinates[0].push([
-        this.tailCounter++,
-        0
-      ]);
-      this.generateDishTrack(null, null);
+      if (this.state.gps.mode >= 2) {
+        const radec = this.convertAltAz2RADec({
+          az: this.dishPos.az,
+          alt: this.dishPos.alt
+        });
+        this.dishPos.az += 15;
+        if (this.dishPos.az >= 360) {
+          this.dishPos.az = 0;
+          this.dishPos.alt += 15;
+        }
+        this.dishTrack.features[0].geometry.coordinates[0].push([
+          radec.ra,
+          radec.dec
+        ]);
+        this.generateDishTrack(null, null);
+      }
 
       // Select the added objects by class name as given previously
       this.celestial.container.selectAll(".ast").each(
@@ -523,7 +554,7 @@ export default {
           // Project objects on map
           this.celestial.map(d);
           // draw on canvas
-          this.celestial.context.fill();
+          // this.celestial.context.fill();
           this.celestial.context.stroke();
 
           // If point is visible (this doesn't work automatically for points)
