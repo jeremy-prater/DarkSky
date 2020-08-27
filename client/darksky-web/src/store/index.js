@@ -22,11 +22,13 @@ export default new Vuex.Store({
         lnb: {
             voltage: 0,
             carrier: false,
+            strength: 0,
         },
         dish: {
             alt: 0,
             az: 0,
-            lineString: [],
+            historyPath: [],
+            historyStrength: []
         },
         motors: {
             stopAll: false,
@@ -62,7 +64,8 @@ export default new Vuex.Store({
         },
         updateState(state, newState) {
             state = lodash.merge(state, newState);
-            state.dish.lineString = newState.dish.lineString;
+            state.dish.historyPath = newState.dish.historyPath;
+            state.dish.historyStrength = newState.dish.historyStrength;
         },
         updateTime(state, time) {
             state.location.time = time;

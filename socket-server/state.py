@@ -3,6 +3,7 @@ import datetime
 import threading
 import math
 import time
+import random
 from packet import Packet, PacketCommand
 from singleton import Singleton
 
@@ -24,12 +25,14 @@ class State(Singleton):
             },
             'lnb': {
                 'voltage': 0,
-                'carrier': False
+                'carrier': False,
+                'strength': 0
             },
             'dish': {
                 'alt': 0,
                 'az': 0,
-                'lineString': []
+                'historyPath': [],
+                'historyStrength': []
             },
             'motors': {
                 'stopAll': False,
@@ -198,23 +201,26 @@ class State(Singleton):
         if self.requestedState['motor']['dec']['stopAt'] != self.state['motor']['dec']['stopAt']:
             pass
 
-    def UpdateDishPositionLineString(self):
-        if len(self.state["dish"]["lineString"]) == 0:
-            self.state["dish"]["lineString"].append(
+    def UpdateDishPositionHistory(self):
+        if len(self.state["dish"]["historyPath"]) == 0:
+            self.state["dish"]["historyPath"].append(
                 [self.state["dish"]["az"], self.state["dish"]["alt"]])
+            self.state["dish"]["historyStrength"].append(self.state["lnb"]["strength"])
             return
 
         daz = abs(self.state["dish"]["az"] -
-                  self.state["dish"]["lineString"][0][0])
+                  self.state["dish"]["historyPath"][0][0])
         dalt = abs(self.state["dish"]["alt"] -
-                   self.state["dish"]["lineString"][0][1])
+                   self.state["dish"]["historyPath"][0][1])
 
         if daz >= 1 or dalt >= 1:
-            self.state["dish"]["lineString"].insert(0,
+            self.state["dish"]["historyPath"].insert(0,
                                                     [self.state["dish"]["az"], self.state["dish"]["alt"]])
+            self.state["dish"]["historyStrength"].append(self.state["lnb"]["strength"])
 
-        if len(self.state["dish"]["lineString"]) > 250:
-            self.state["dish"]["lineString"].pop()
+        if len(self.state["dish"]["historyPath"]) > 250:
+            self.state["dish"]["historyPath"].pop()
+            self.state["dish"]["historyStrength"].pop()
 
     def StartSimulation(self):
         self.simulating = False
@@ -229,8 +235,19 @@ class State(Singleton):
 
         azStep = 5
         altStep = 15
+        lnbStep = 1
 
         while (context.simulating):
+            context.state["lnb"]["strength"] += lnbStep * random.random()
+
+            if context.state["lnb"]["strength"] <= 0:
+                lnbStep = -lnbStep
+                context.state["lnb"]["strength"] = 0
+
+            if context.state["lnb"]["strength"] >= 100:
+                lnbStep = -lnbStep
+                context.state["lnb"]["strength"] = 100
+
             context.state["dish"]["az"] += azStep
             if context.state["dish"]["az"] == 360:
                 context.state["dish"]["az"] = 0
@@ -239,9 +256,9 @@ class State(Singleton):
                 if context.state["dish"]["alt"] == 90 or context.state["dish"]["alt"] == 0:
                     altStep = -altStep
 
-            context.logger.info("Simulation AZ : {}, ALT : {}, altStep : {}, lineString : {}".format(
-                context.state["dish"]["az"], context.state["dish"]["alt"], altStep, len(context.state["dish"]["lineString"])))
+            context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(
+                context.state["dish"]["az"], context.state["dish"]["alt"], context.state["lnb"]["strength"]))
 
-            context.UpdateDishPositionLineString()
+            context.UpdateDishPositionHistory()
 
             time.sleep(.1)

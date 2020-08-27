@@ -17,6 +17,7 @@
     "d3-celestial": "^0.7.31",
     "lodash": "^4.17.15",
     "moment": "^2.27.0",
+    "rainbowvis.js": "^1.0.1",
     "three": "^0.117.1",
     "vue": "^2.6.11",
     "vue-observe-visibility": "^0.4.6",

@@ -53,6 +53,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { Celestial } from "d3-celestial";
 import moment from "moment";
 import { coord, globe, base, sidereal, julian } from "astronomia";
+import Rainbow from "rainbowvis.js";
 
 library.add(faMapMarkedAlt);
 
@@ -68,24 +69,42 @@ export default {
         alt: 0,
         az: 0
       },
+      dishGradient: new Rainbow(),
       dishTrack: {
         type: "FeatureCollection",
         // this is an array, add as many objects as you want
         features: [
           {
             type: "Feature",
-            id: "SummerTriangle",
-            properties: {
-              // Name
-              n: "Summer Triangle",
-              // Location of name text on the map
-              loc: [-67.5, 52]
-            },
+            id: "DishTrack",
+            // properties: {
+            //   // Name
+            //   n: "DishTrack",
+            //   // Location of name text on the map
+            //   loc: [0, 0]
+            // },
             geometry: {
               // the line object as an array of point coordinates,
               // always as [ra -180..180 degrees, dec -90..90 degrees]
               type: "MultiLineString",
-              coordinates: [[]]
+              coordinates: [[]],
+              strength: [[]]
+            }
+          },
+          {
+            type: "Feature",
+            id: "DishTarget",
+            properties: {
+              // Name
+              name: "Dish Target",
+              // magnitude, dimension in arcseconds or any other size criterion
+              mag: 1,
+              dim: 30
+            },
+            geometry: {
+              // the location of the object as a [ra, dec] array in degrees [-180..180, -90..90]
+              type: "Point",
+              coordinates: [0, 0]
             }
           }
         ]
@@ -501,28 +520,23 @@ export default {
       // console.log("generate dish track");
 
       // Load the geoJSON file and transform to correct coordinate system, if necessary
-      const asterism = this.celestial.getData(
+      const dishTrack = this.celestial.getData(
         this.dishTrack,
         this.celestialConfig.transform
       );
 
       // Add to celestial objects container in d3
       this.celestial.container
-        .selectAll(".asterisms")
-        .data(asterism.features)
+        .selectAll(".dishtrack")
+        .data(dishTrack.features)
         .enter()
         .append("path")
-        .attr("class", "ast");
+        .attr("class", "dishtrack");
     },
     redrawDishTrack() {
       // console.log("redraw dish track");
-      const lineStyle = {
-        stroke: "#f00",
-        fill: "rgba(255, 204, 204, 0.4)",
-        width: 3
-      };
       const textStyle = {
-        fill: "#f00",
+        stroke: "#4040ff",
         font: "bold 15px Helvetica, Arial, sans-serif",
         align: "center",
         baseline: "bottom"
@@ -532,7 +546,8 @@ export default {
       if (this.state.gps.mode >= 2) {
         // Convert incoming lineString from backend
         this.dishTrack.features[0].geometry.coordinates[0] = [];
-        this.state.dish.lineString.forEach(coords => {
+        this.dishTrack.features[0].geometry.strength[0] = this.state.dish.historyStrength;
+        this.state.dish.historyPath.forEach(coords => {
           const radec = this.convertAltAz2RADec({
             az: coords[0],
             alt: coords[1]
@@ -541,29 +556,63 @@ export default {
             radec.ra,
             radec.dec
           ]);
+          this.dishTrack.features[0].geometry.strength;
         });
+        this.dishTrack.features[1].geometry.coordinates = this.dishTrack.features[0].geometry.coordinates[0][0];
         this.generateDishTrack(null, null);
       }
 
       // Select the added objects by class name as given previously
-      this.celestial.container.selectAll(".ast").each(
+      this.celestial.container.selectAll(".dishtrack").each(
         function(d) {
-          // Set line styles
-          this.celestial.setStyle(lineStyle);
-          // Project objects on map
-          this.celestial.map(d);
-          // draw on canvas
-          // this.celestial.context.fill();
-          this.celestial.context.stroke();
+          const geometry = d.geometry.type;
+          // console.log(JSON.stringify(d));
+          switch (geometry) {
+            case "MultiLineString":
+              this.celestial.setStyle({
+                stroke: "#" + this.dishGradient.colorAt(1),
+                width: 3
+              });
+              // Project objects on map
+              this.celestial.map(d);
+              // draw on canvas
+              // this.celestial.context.fill();
+              this.celestial.context.stroke();
+              break;
 
-          // If point is visible (this doesn't work automatically for points)
-          if (this.celestial.clip(d.properties.loc)) {
-            // get point coordinates
-            let pt = this.celestial.mapProjection(d.properties.loc);
-            // Set text styles
-            this.celestial.setTextStyle(textStyle);
-            // and draw text on canvas
-            this.celestial.context.fillText(d.properties.n, pt[0], pt[1]);
+            case "Point":
+              if (this.celestial.clip(d.geometry.coordinates)) {
+                // get point coordinates
+                var pt = this.celestial.mapProjection(d.geometry.coordinates);
+                // object radius in pixel, could be varable depending on e.g. dimension or magnitude
+                var r = Math.pow(20 - d.properties.mag, 0.7); // replace 20 with dimmest magnitude in the data
+
+                // draw on canvas
+                //  Set object styles fill color, line color & width etc.
+                this.celestial.setStyle({
+                  stroke:
+                    "#" + this.dishGradient.colorAt(this.state.lnb.strength),
+                  width: 3
+                });
+                // Start the drawing path
+                this.celestial.context.beginPath();
+                // Thats a circle in html5 canvas
+                this.celestial.context.arc(pt[0], pt[1], r, 0, 2 * Math.PI);
+                // Finish the drawing path
+                this.celestial.context.closePath();
+                // Draw a line along the path with the prevoiusly set stroke color and line width
+                this.celestial.context.stroke();
+
+                // Set text styles
+                this.celestial.setTextStyle(textStyle);
+                // and draw text on canvas
+                this.celestial.context.fillText(
+                  d.properties.name,
+                  pt[0] + r - 1,
+                  pt[1] - r + 1
+                );
+              }
+              break;
           }
         }.bind(this)
       );
