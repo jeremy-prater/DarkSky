@@ -73,41 +73,7 @@ export default {
       dishTrack: {
         type: "FeatureCollection",
         // this is an array, add as many objects as you want
-        features: [
-          {
-            type: "Feature",
-            id: "DishTrack",
-            // properties: {
-            //   // Name
-            //   n: "DishTrack",
-            //   // Location of name text on the map
-            //   loc: [0, 0]
-            // },
-            geometry: {
-              // the line object as an array of point coordinates,
-              // always as [ra -180..180 degrees, dec -90..90 degrees]
-              type: "MultiLineString",
-              coordinates: [[]],
-              strength: [[]]
-            }
-          },
-          {
-            type: "Feature",
-            id: "DishTarget",
-            properties: {
-              // Name
-              name: "Dish Target",
-              // magnitude, dimension in arcseconds or any other size criterion
-              mag: 1,
-              dim: 30
-            },
-            geometry: {
-              // the location of the object as a [ra, dec] array in degrees [-180..180, -90..90]
-              type: "Point",
-              coordinates: [0, 0]
-            }
-          }
-        ]
+        features: []
       },
       celestialConfig: {
         width: 0, // Default width, 0 = full parent element width;
@@ -518,6 +484,76 @@ export default {
       error;
       json;
       // console.log("generate dish track");
+      this.dishTrack.features = [];
+      // Convert incoming lineString from backend
+      // this.dishTrack.features[0].geometry.coordinates[0] = [];
+      // this.dishTrack.features[0].geometry.strength[0] = this.state.dish.historyStrength;
+      let lastRADec = null;
+      let dcCounter = 0;
+      this.state.dish.historyPath.forEach(coords => {
+        if (lastRADec == null) {
+          lastRADec = this.convertAltAz2RADec({
+            az: coords[0],
+            alt: coords[1]
+          });
+          return;
+        }
+
+        let currentRADec = this.convertAltAz2RADec({
+          az: coords[0],
+          alt: coords[1]
+        });
+
+        this.dishTrack.features.push({
+          type: "Feature",
+          id: "DishTrack+" + dcCounter,
+          properties: {
+            strokeColor: "#" + this.dishGradient.colorAt(this.state.dish.historyStrength[dcCounter++]),
+          },
+          geometry: {
+            // the line object as an array of point coordinates,
+            // always as [ra -180..180 degrees, dec -90..90 degrees]
+            type: "LineString",
+            coordinates: [
+              [lastRADec.ra, lastRADec.dec],
+              [currentRADec.ra, currentRADec.dec]
+            ]
+          }
+        });
+        lastRADec = currentRADec;
+
+        // const radec = this.convertAltAz2RADec({
+        //   az: coords[0],
+        //   alt: coords[1]
+        // });
+        // this.dishTrack.features[0].geometry.coordinates[0].push([
+        //   radec.ra,
+        //   radec.dec
+        // ]);
+        // this.dishTrack.features[0].geometry.strength;
+      });
+      // this.dishTrack.features[1].geometry.coordinates = this.dishTrack.features[0].geometry.coordinates[0][0];
+      let dishTarget = this.convertAltAz2RADec({
+        az: this.state.dish.az,
+        alt: this.state.dish.alt
+      });
+
+      this.dishTrack.features.push({
+        type: "Feature",
+        id: "DishTarget",
+        properties: {
+          // Name
+          name: "Dish Target",
+          // magnitude, dimension in arcseconds or any other size criterion
+          mag: 1,
+          dim: 30
+        },
+        geometry: {
+          // the location of the object as a [ra, dec] array in degrees [-180..180, -90..90]
+          type: "Point",
+          coordinates: [dishTarget.ra, dishTarget.dec]
+        }
+      });
 
       // Load the geoJSON file and transform to correct coordinate system, if necessary
       const dishTrack = this.celestial.getData(
@@ -544,21 +580,6 @@ export default {
 
       // Add more line segments!!
       if (this.state.gps.mode >= 2) {
-        // Convert incoming lineString from backend
-        this.dishTrack.features[0].geometry.coordinates[0] = [];
-        this.dishTrack.features[0].geometry.strength[0] = this.state.dish.historyStrength;
-        this.state.dish.historyPath.forEach(coords => {
-          const radec = this.convertAltAz2RADec({
-            az: coords[0],
-            alt: coords[1]
-          });
-          this.dishTrack.features[0].geometry.coordinates[0].push([
-            radec.ra,
-            radec.dec
-          ]);
-          this.dishTrack.features[0].geometry.strength;
-        });
-        this.dishTrack.features[1].geometry.coordinates = this.dishTrack.features[0].geometry.coordinates[0][0];
         this.generateDishTrack(null, null);
       }
 
@@ -568,9 +589,9 @@ export default {
           const geometry = d.geometry.type;
           // console.log(JSON.stringify(d));
           switch (geometry) {
-            case "MultiLineString":
+            case "LineString":
               this.celestial.setStyle({
-                stroke: "#" + this.dishGradient.colorAt(1),
+                stroke: d.properties.strokeColor,
                 width: 3
               });
               // Project objects on map

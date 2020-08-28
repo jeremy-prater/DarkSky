@@ -205,7 +205,8 @@ class State(Singleton):
         if len(self.state["dish"]["historyPath"]) == 0:
             self.state["dish"]["historyPath"].append(
                 [self.state["dish"]["az"], self.state["dish"]["alt"]])
-            self.state["dish"]["historyStrength"].append(self.state["lnb"]["strength"])
+            self.state["dish"]["historyStrength"].append(
+                self.state["lnb"]["strength"])
             return
 
         daz = abs(self.state["dish"]["az"] -
@@ -215,10 +216,11 @@ class State(Singleton):
 
         if daz >= 1 or dalt >= 1:
             self.state["dish"]["historyPath"].insert(0,
-                                                    [self.state["dish"]["az"], self.state["dish"]["alt"]])
-            self.state["dish"]["historyStrength"].append(self.state["lnb"]["strength"])
+                                                     [self.state["dish"]["az"], self.state["dish"]["alt"]])
+            self.state["dish"]["historyStrength"].insert(0,
+                                                         self.state["lnb"]["strength"])
 
-        if len(self.state["dish"]["historyPath"]) > 250:
+        if len(self.state["dish"]["historyPath"]) > 2500:
             self.state["dish"]["historyPath"].pop()
             self.state["dish"]["historyStrength"].pop()
 
@@ -233,9 +235,9 @@ class State(Singleton):
         context.logger.info("Starting Simulation Thread")
         context.simulating = True
 
-        azStep = 5
-        altStep = 15
-        lnbStep = 1
+        azStep = 10
+        altStep = 5
+        lnbStep = 25
 
         while (context.simulating):
             context.state["lnb"]["strength"] += lnbStep * random.random()
@@ -248,17 +250,23 @@ class State(Singleton):
                 lnbStep = -lnbStep
                 context.state["lnb"]["strength"] = 100
 
+            bumpAlt = False
             context.state["dish"]["az"] += azStep
-            if context.state["dish"]["az"] == 360:
-                context.state["dish"]["az"] = 0
+            if context.state["dish"]["az"] >= 180:
+                context.state["dish"]["az"] -= 360
                 context.state["dish"]["alt"] += altStep
+                bumpAlt = True
+            elif context.state["dish"]["az"] <= -180:
+                context.state["dish"]["az"] += -360
+                context.state["dish"]["alt"] += altStep
+                bumpAlt = True
 
-                if context.state["dish"]["alt"] == 90 or context.state["dish"]["alt"] == 0:
-                    altStep = -altStep
+            if bumpAlt and (context.state["dish"]["alt"] == 90 or context.state["dish"]["alt"] == 0):
+                altStep = -altStep
 
             context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(
                 context.state["dish"]["az"], context.state["dish"]["alt"], context.state["lnb"]["strength"]))
 
             context.UpdateDishPositionHistory()
 
-            time.sleep(.1)
+            time.sleep(1)

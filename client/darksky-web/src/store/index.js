@@ -25,8 +25,8 @@ export default new Vuex.Store({
             strength: 0,
         },
         dish: {
-            alt: 0,
             az: 0,
+            alt: 0,
             historyPath: [],
             historyStrength: []
         },
