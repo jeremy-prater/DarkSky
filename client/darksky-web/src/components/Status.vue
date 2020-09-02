@@ -7,9 +7,42 @@
       <font-awesome-icon
         :icon="['fas', 'satellite-dish']"
         size="lg"
+        color="green"
+        class="statusicon"
+        v-if="state.motorServerConnected"
+      />
+      <font-awesome-icon
+        :icon="['fas', 'satellite-dish']"
+        size="lg"
         color="orange"
         class="statusicon"
-      />System Status
+        v-else
+      />
+      
+      <font-awesome-icon
+        :icon="['fas', 'compass']"
+        size="lg"
+        color="green"
+        class="statusicon"
+        v-if="state.motorServerConnected && (state.gps.mode >= 2)"
+      />
+      <font-awesome-icon
+        :icon="['fas', 'compass']"
+        size="lg"
+        color="orange"
+        class="statusicon"
+        v-else
+      />
+            System Status
+    </div>
+    <div class="overlaypanel-text overlaypanel-item maplist">
+      <ul>
+        <li>Az : {{ common.deg2dms(state.dish.az) }}</li>
+        <li>Alt : {{ common.deg2dms(state.dish.alt) }}</li>
+        <li>RA : {{ common.deg2hms(dish.ra) }}</li>
+        <li>Dec : {{ common.deg2dms(dish.dec) }}</li>
+        <li>Strength : {{ state.lnb.strength.toFixed(5) }}</li>
+      </ul>
     </div>
   </div>
 </template>
@@ -19,33 +52,24 @@ import { mapState } from "vuex";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faSatelliteDish,
-  faPowerOff,
-  faPlug,
-  faLink,
-  faStopCircle,
-  faChevronCircleUp,
-  faChevronCircleDown,
-  faChevronCircleLeft,
-  faChevronCircleRight
+  faCompass,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import common from "./common";
 
 library.add(faSatelliteDish);
-library.add(faPowerOff);
-library.add(faPlug);
-library.add(faLink);
-library.add(faStopCircle);
-library.add(faLink);
-library.add(faStopCircle);
-library.add(faChevronCircleUp);
-library.add(faChevronCircleDown);
-library.add(faChevronCircleLeft);
-library.add(faChevronCircleRight);
+library.add(faCompass);
 
 export default {
   name: "Status",
   data() {
-    return {};
+    return {
+      common: common,
+      dish: {
+        ra: 0,
+        dec: 0
+      }
+    };
   },
   components: {
     FontAwesomeIcon
@@ -69,8 +93,19 @@ export default {
     this.sockets.listener.subscribe("updateState", data => {
       this.$store.commit("updateState", data);
     });
+
+    setInterval(this.tick, 1000);
   },
-  methods: {}
+  methods: {
+    tick() {
+      const radec = common.convertAzAlt2RADec(this.state, {
+        az: this.state.dish.az,
+        alt: this.state.dish.alt
+      });
+      this.dish.ra = radec.ra;
+      this.dish.dec = radec.dec;
+    }
+  }
 };
 </script>
 

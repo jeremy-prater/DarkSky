@@ -37,7 +37,7 @@ class GPS(Singleton):
                 'sats': 11,
                 'lat': 45.963637,
                 'lon': -122.416802,
-                'time': datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0, tzinfo=None).isoformat(),
+                'time': datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0, tzinfo=None).isoformat() + "Z",
                 'error': "",
                 'alt': 360,
                 'climb': 0

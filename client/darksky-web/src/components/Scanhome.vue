@@ -10,11 +10,11 @@
           <li>Lat : {{ state.gps.lat }}</li>
           <li>Lng : {{ state.gps.lon }}</li>
           <li>Time : {{ state.gps.time }}</li>
-          <li>JDE : {{ this.jde }}</li>
-          <li>RA : {{ this.deg2hms(this.mouseRADec[0]) }} ({{ this.deg2dms(this.mouseRADec[0]) }})</li>
-          <li>Dec : {{ this.deg2hms(this.mouseRADec[1]) }}</li>
-          <li>Alt : {{ this.mouseAltAz[0] }}</li>
-          <li>Az : {{ this.mouseAltAz[1] }}</li>
+          <li>JDE : {{ state.jde }}</li>
+          <li>RA : {{ common.deg2hms(mouseRADec[0]) }} ({{ common.deg2dms(mouseRADec[0]) }})</li>
+          <li>Dec : {{ common.deg2dms(mouseRADec[1]) }}</li>
+          <li>Az : {{ common.deg2dms(mouseAzAlt[0]) }}</li>
+          <li>Alt : {{ common.deg2dms(mouseAzAlt[1]) }}</li>
         </ul>
       </div>
 
@@ -52,8 +52,9 @@ import { faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { Celestial } from "d3-celestial";
 import moment from "moment";
-import { coord, globe, base, sidereal, julian } from "astronomia";
+import { julian } from "astronomia";
 import Rainbow from "rainbowvis.js";
+import common from "./common";
 
 library.add(faMapMarkedAlt);
 
@@ -61,8 +62,9 @@ export default {
   name: "Scanhome",
   data() {
     return {
+      common: common,
       mouseRADec: [0, 0],
-      mouseAltAz: [0, 0],
+      mouseAzAlt: [0, 0],
       posSet: false,
       jde: 0,
       dishPos: {
@@ -391,30 +393,6 @@ export default {
     setInterval(this.tick, 1000);
   },
   methods: {
-    deg2hms(deg) {
-      if (deg === null || isNaN(parseFloat(deg))) return;
-      let ra = deg < 0 ? (deg + 360) / 15 : deg / 15,
-        h = Math.floor(ra),
-        rest1 = (ra - h) * 60,
-        m = Math.floor(rest1),
-        rest2 = (rest1 - m) * 60,
-        s = Math.round(rest2);
-      return "" + this.pad(h) + "ʰ " + this.pad(m) + "ᵐ " + this.pad(s) + "ˢ";
-    },
-    deg2dms(deg) {
-      if (deg === null || isNaN(parseFloat(deg))) return;
-      let d = Math.floor(deg),
-        rest1 = (deg - d) * 60,
-        m = Math.floor(rest1),
-        rest2 = (rest1 - m) * 60,
-        s = Math.round(rest2);
-      return "" + this.pad(d) + "° " + this.pad(m) + "′ " + this.pad(s) + "″";
-    },
-
-    pad(n) {
-      if (n < 0) return n > -10 ? "-0" + Math.abs(n) : n;
-      return n < 10 ? "0" + n : n;
-    },
     mapMenu(event) {
       console.log(event);
     },
@@ -425,50 +403,17 @@ export default {
       ]);
       if (radec != null) {
         this.mouseRADec = radec;
+        // this.mouseRADec[0] += 180;
       }
-      this.updateAltAz();
+      this.updateAzAlt();
     },
-    convertRADec2AltAz(coords) {
-      let eqCoord = new coord.Equatorial(
-        base.toRad(coords.ra),
-        base.toRad(coords.dec)
-      );
-
-      this.jde = julian.DateToJDE(new Date(this.state.gps.time));
-      let siderealTime = sidereal.apparent(this.jde);
-      let altaz = eqCoord.toHorizontal(
-        new globe.Coord(this.state.gps.lat, this.state.gps.lon),
-        siderealTime
-      );
-      return {
-        alt: base.toDeg(altaz.alt),
-        az: base.toDeg(altaz.az)
-      };
-    },
-    convertAltAz2RADec(coords) {
-      let eqCoord = new coord.Horizontal(
-        base.toRad(coords.az),
-        base.toRad(coords.alt)
-      );
-
-      this.jde = julian.DateToJDE(new Date(this.state.gps.time));
-      let siderealTime = sidereal.apparent(this.jde);
-      let radec = eqCoord.toEquatorial(
-        new globe.Coord(this.state.gps.lat, this.state.gps.lon),
-        siderealTime
-      );
-      return {
-        ra: base.toDeg(radec.ra),
-        dec: base.toDeg(radec.dec)
-      };
-    },
-    updateAltAz() {
+    updateAzAlt() {
       if (this.state.gps.mode >= 2) {
-        const altaz = this.convertRADec2AltAz({
+        const azalt = common.convertRADec2AzAlt(this.state, {
           ra: this.mouseRADec[0],
           dec: this.mouseRADec[1]
         });
-        this.mouseAltAz = [altaz.alt, altaz.az];
+        this.mouseAzAlt = [azalt.az, azalt.alt];
       }
     },
     mapConfigChanged() {
@@ -492,14 +437,14 @@ export default {
       let dcCounter = 0;
       this.state.dish.historyPath.forEach(coords => {
         if (lastRADec == null) {
-          lastRADec = this.convertAltAz2RADec({
+          lastRADec = common.convertAzAlt2RADec(this.state, {
             az: coords[0],
             alt: coords[1]
           });
           return;
         }
 
-        let currentRADec = this.convertAltAz2RADec({
+        let currentRADec = common.convertAzAlt2RADec(this.state, {
           az: coords[0],
           alt: coords[1]
         });
@@ -508,7 +453,11 @@ export default {
           type: "Feature",
           id: "DishTrack+" + dcCounter,
           properties: {
-            strokeColor: "#" + this.dishGradient.colorAt(this.state.dish.historyStrength[dcCounter++]),
+            strokeColor:
+              "#" +
+              this.dishGradient.colorAt(
+                this.state.dish.historyStrength[dcCounter++]
+              )
           },
           geometry: {
             // the line object as an array of point coordinates,
@@ -522,7 +471,7 @@ export default {
         });
         lastRADec = currentRADec;
 
-        // const radec = this.convertAltAz2RADec({
+        // const radec = this.convertAzAlt2RADec({
         //   az: coords[0],
         //   alt: coords[1]
         // });
@@ -533,7 +482,7 @@ export default {
         // this.dishTrack.features[0].geometry.strength;
       });
       // this.dishTrack.features[1].geometry.coordinates = this.dishTrack.features[0].geometry.coordinates[0][0];
-      let dishTarget = this.convertAltAz2RADec({
+      let dishTarget = common.convertAzAlt2RADec(this.state, {
         az: this.state.dish.az,
         alt: this.state.dish.alt
       });
@@ -640,10 +589,16 @@ export default {
     },
     tick() {
       this.celestial.redraw();
-      this.updateAltAz();
+      this.updateAzAlt();
       if (this.state.gps.mode >= 2) {
         // Update GPS pos
         // console.log(this.state.gps);
+
+        this.$store.commit(
+          "updateJDE",
+          julian.DateToJDE(new Date(this.state.gps.time))
+        );
+
         if (!this.posSet) {
           this.celestial.skyview({
             date: this.state.gps.time,

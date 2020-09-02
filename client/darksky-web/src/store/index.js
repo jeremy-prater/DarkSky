@@ -19,6 +19,7 @@ export default new Vuex.Store({
             alt: 0,
             climb: 0,
         },
+        jde: 0,
         lnb: {
             voltage: 0,
             carrier: false,
@@ -28,7 +29,7 @@ export default new Vuex.Store({
             az: 0,
             alt: 0,
             historyPath: [],
-            historyStrength: []
+            historyStrength: [],
         },
         motors: {
             stopAll: false,
@@ -66,6 +67,9 @@ export default new Vuex.Store({
             state = lodash.merge(state, newState);
             state.dish.historyPath = newState.dish.historyPath;
             state.dish.historyStrength = newState.dish.historyStrength;
+        },
+        updateJDE(state, jde) {
+            state.jde = jde;
         },
         updateTime(state, time) {
             state.location.time = time;
