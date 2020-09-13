@@ -402,6 +402,7 @@ export default {
         event.offsetY
       ]);
       if (radec != null) {
+        // radec[0] += 180;
         this.mouseRADec = radec;
         // this.mouseRADec[0] += 180;
       }
@@ -464,8 +465,8 @@ export default {
             // always as [ra -180..180 degrees, dec -90..90 degrees]
             type: "LineString",
             coordinates: [
-              [lastRADec.ra, lastRADec.dec],
-              [currentRADec.ra, currentRADec.dec]
+              [lastRADec.ra - 180, lastRADec.dec],
+              [currentRADec.ra - 180, currentRADec.dec]
             ]
           }
         });
@@ -500,7 +501,7 @@ export default {
         geometry: {
           // the location of the object as a [ra, dec] array in degrees [-180..180, -90..90]
           type: "Point",
-          coordinates: [dishTarget.ra, dishTarget.dec]
+          coordinates: [dishTarget.ra - 180, dishTarget.dec]
         }
       });
 

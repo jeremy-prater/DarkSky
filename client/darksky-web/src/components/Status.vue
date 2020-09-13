@@ -99,7 +99,7 @@ export default {
   methods: {
     tick() {
       const radec = common.convertAzAlt2RADec(this.state, {
-        az: this.state.dish.az,
+        az: this.state.dish.az - 180,
         alt: this.state.dish.alt
       });
       this.dish.ra = radec.ra;

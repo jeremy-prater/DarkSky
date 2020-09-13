@@ -235,7 +235,7 @@ class State(Singleton):
         context.logger.info("Starting Simulation Thread")
         context.simulating = True
 
-        azStep = 10
+        azStep = 5
         altStep = 2
         lnbRange = 100
 
@@ -257,12 +257,17 @@ class State(Singleton):
                 context.state["dish"]["alt"] += altStep
                 bumpAlt = True
 
-            if bumpAlt and (context.state["dish"]["alt"] == 90 or context.state["dish"]["alt"] == 0):
+            if bumpAlt and context.state["dish"]["alt"] >= 90:
                 altStep = -altStep
+                context.state["dish"]["alt"] += altStep
+            
+            if bumpAlt and context.state["dish"]["alt"] <= 0:
+                altStep = -altStep
+                context.state["dish"]["alt"] += altStep
 
             context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(
                 context.state["dish"]["az"], context.state["dish"]["alt"], context.state["lnb"]["strength"]))
 
             context.UpdateDishPositionHistory()
 
-            time.sleep(30.05)
+            time.sleep(0.05)

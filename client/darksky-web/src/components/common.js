@@ -10,6 +10,16 @@ export default {
             radian += Math.PI;
         }
         return radian;
+    }, 
+    checkDegBounds: function(degrees) {
+        while (degrees > 360)
+        {
+            degrees -= 360;
+        }
+        while (degrees < 0) {
+            degrees += 360;
+        }
+        return degrees;
     },
     convertRADec2AzAlt: function(state, coords) {
         let eqCoord = new coord.Equatorial(
@@ -23,8 +33,8 @@ export default {
             siderealTime
         );
         return {
-            az: base.toDeg(altaz.az),
-            alt: base.toDeg(altaz.alt),
+            az: this.checkDegBounds(base.toDeg(altaz.az)),
+            alt: this.checkDegBounds(base.toDeg(altaz.alt))
         };
     },
     convertAzAlt2RADec: function(state, coords) {
@@ -39,8 +49,8 @@ export default {
             siderealTime
         );
         return {
-            ra: base.toDeg(radec.ra),
-            dec: base.toDeg(radec.dec),
+            ra: this.checkDegBounds(base.toDeg(radec.ra)),
+            dec: this.checkDegBounds(base.toDeg(radec.dec))
         };
     },
     deg2hms(deg) {
