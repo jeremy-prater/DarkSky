@@ -235,12 +235,12 @@ class State(Singleton):
         context.logger.info("Starting Simulation Thread")
         context.simulating = True
 
-        azStep = 15
-        altStep = 10
+        azStep = 10
+        altStep = 2
         lnbRange = 100
 
-        context.state["dish"]["az"] = 78.25
-        context.state["dish"]["alt"] = 66.5
+        context.state["dish"]["az"] = 0
+        context.state["dish"]["alt"] = 0
 
         while (context.simulating):
             context.state["lnb"]["strength"] = math.fabs(math.cos(
@@ -248,11 +248,11 @@ class State(Singleton):
 
             bumpAlt = False
             context.state["dish"]["az"] += azStep
-            if context.state["dish"]["az"] >= 180:
+            if context.state["dish"]["az"] >= 360:
                 context.state["dish"]["az"] -= 360
                 context.state["dish"]["alt"] += altStep
                 bumpAlt = True
-            elif context.state["dish"]["az"] <= -180:
+            elif context.state["dish"]["az"] < 0:
                 context.state["dish"]["az"] += -360
                 context.state["dish"]["alt"] += altStep
                 bumpAlt = True
@@ -265,4 +265,4 @@ class State(Singleton):
 
             context.UpdateDishPositionHistory()
 
-            time.sleep(30 * 60)
+            time.sleep(30.05)

@@ -1,10 +1,20 @@
 import { coord, globe, base, sidereal } from 'astronomia';
 
 export default {
+    checkRadBounds: function(radian) {
+        while (radian > 2 * Math.PI)
+        {
+            radian -= Math.PI;
+        }
+        while (radian < 0) {
+            radian += Math.PI;
+        }
+        return radian;
+    },
     convertRADec2AzAlt: function(state, coords) {
         let eqCoord = new coord.Equatorial(
-            base.toRad(coords.ra),
-            base.toRad(coords.dec)
+            this.checkRadBounds(base.toRad(coords.ra)),
+            this.checkRadBounds(base.toRad(coords.dec))
         );
 
         let siderealTime = sidereal.apparent(state.jde);
@@ -19,8 +29,8 @@ export default {
     },
     convertAzAlt2RADec: function(state, coords) {
         let eqCoord = new coord.Horizontal(
-            base.toRad(coords.az),
-            base.toRad(coords.alt)
+            this.checkRadBounds(base.toRad(coords.az)),
+            this.checkRadBounds(base.toRad(coords.alt))
         );
 
         let siderealTime = sidereal.apparent(state.jde);
