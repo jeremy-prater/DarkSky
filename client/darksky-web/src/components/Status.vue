@@ -44,6 +44,24 @@
       </ul>
       <b-button @click="openCalibrate">Calibrate</b-button>
     </div>
+    <modal v-show="calibrating" @close="cancelCalibration" style="max-height: 70vh;">
+      <template v-slot:title>Motor Calibration</template>
+      <template v-slot:body>
+        <button type="button" class="btn btn-primary" style="margin:10px;">Az+</button>
+        <button type="button" class="btn btn-primary" style="margin:10px;">Az-</button>
+        <button type="button" class="btn btn-primary" style="margin:10px;">Alt+</button>
+        <button type="button" class="btn btn-primary" style="margin:10px;">Alt-</button>
+
+        <div class="container">
+           OffsetAz = 0
+           OffsetAlt = 0
+        </div>
+      </template>
+      <template v-slot:footer>
+        <button type="button" class="btn btn-secondary" @click="cancelCalibration">Cancel</button>
+        <button type="button" class="btn btn-primary" @click="applyCalibration">Apply Calibration</button>
+      </template>
+    </modal>
   </div>
 </template>
 
@@ -53,6 +71,7 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { faSatelliteDish, faCompass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import common from "./common";
+import Modal from "./Modal";
 
 library.add(faSatelliteDish);
 library.add(faCompass);
@@ -61,6 +80,7 @@ export default {
   name: "Status",
   data() {
     return {
+      calibrating: false,
       common: common,
       dish: {
         ra: 0,
@@ -68,9 +88,7 @@ export default {
       }
     };
   },
-  components: {
-    FontAwesomeIcon
-  },
+  components: { Modal, FontAwesomeIcon },
   computed: {
     ...mapState({
       state: state => state
@@ -101,6 +119,17 @@ export default {
       });
       this.dish.ra = radec.ra;
       this.dish.dec = radec.dec;
+    },
+    openCalibrate() {
+      this.calibrating = true;
+      console.log("Open Calibration : " + this.calibrating);
+    },
+    applyCalibration() {
+      console.log("Applying Calibration!");
+    },
+    cancelCalibration() {
+      this.calibrating = false;
+      console.log("Calibration Cancelled...");
     }
   }
 };
