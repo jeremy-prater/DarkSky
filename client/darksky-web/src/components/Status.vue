@@ -18,7 +18,7 @@
         class="statusicon"
         v-else
       />
-      
+
       <font-awesome-icon
         :icon="['fas', 'compass']"
         size="lg"
@@ -32,8 +32,7 @@
         color="orange"
         class="statusicon"
         v-else
-      />
-            System Status
+      />System Status
     </div>
     <div class="overlaypanel-text overlaypanel-item maplist">
       <ul>
@@ -43,6 +42,7 @@
         <li>Dec : {{ common.deg2dms(dish.dec) }}</li>
         <li>Strength : {{ state.lnb.strength.toFixed(5) }}</li>
       </ul>
+      <b-button @click="openCalibrate">Calibrate</b-button>
     </div>
   </div>
 </template>
@@ -50,10 +50,7 @@
 <script>
 import { mapState } from "vuex";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-  faSatelliteDish,
-  faCompass,
-} from "@fortawesome/free-solid-svg-icons";
+import { faSatelliteDish, faCompass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import common from "./common";
 
