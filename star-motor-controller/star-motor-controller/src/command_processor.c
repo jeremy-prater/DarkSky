@@ -66,8 +66,8 @@ void CommandProcessorTask(void *data) {
             }
             break;
 
-          case MOTOR_DEC_STOP_POS:
-            MotorSetStop(&darkSkyContext.motor1, packet->arg1);
+          case MOTOR_DEC_DELTA_POS:
+            MotorSetDelta(&darkSkyContext.motor1, packet->arg1);
             break;
 
           case MOTOR_RA_STATE:
@@ -90,8 +90,8 @@ void CommandProcessorTask(void *data) {
             }
             break;
 
-          case MOTOR_RA_STOP_POS:
-            MotorSetStop(&darkSkyContext.motor2, packet->arg1);
+          case MOTOR_RA_DELTA_POS:
+            MotorSetDelta(&darkSkyContext.motor2, packet->arg1);
             break;
 
           case STOP_ALL_MOTORS:

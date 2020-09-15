@@ -20,7 +20,7 @@ static inline void CheckMotorPositionBounds(Motor *motor) {
     motor->position -= MOTOR_POSITION_MAX;
   }
 
-  if (motor->position == motor->stopPosition)
+  if (motor->position == motor->deltaPosition)
   {
     MotorStop(motor);
   }
@@ -184,9 +184,9 @@ void MotorReverse(Motor *motor) {
   motor->state = MOTOR_REVERSE;
 }
 
-void MotorSetStop(Motor *motor, int16_t stopPos)
+void MotorSetDelta(Motor *motor, int16_t stopPos)
 {
-  motor->stopPosition = stopPos;
+  motor->deltaPosition = stopPos;
 }
 
 void encoder_handler_dec(const uint32_t id, const uint32_t index) {
