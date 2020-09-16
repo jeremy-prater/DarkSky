@@ -6,6 +6,7 @@ import json
 import backend_socketio
 import threading
 import struct
+from state import State
 
 
 class MotorPowerControllerReader:
@@ -14,38 +15,11 @@ class MotorPowerControllerReader:
         self.logger.info(
             "Creating DarkSky Motor Power Controller Serial Reader")
         self.serial = serial
+        self.state = State()
         self.reading = False
         self.readerThread = threading.Thread(
             target=self.ReaderThread, args=(self,), daemon=True)
         self.readerThread.start()
-
-    @staticmethod
-    def binaryToMotorState(value):
-        if value == 0:
-            return "stop"
-        elif value == 1:
-            return "forward"
-        elif value == 2:
-            return "reverse"
-        elif value == 3:
-            return "stall"
-        else:
-            return "unknown"
-
-    @staticmethod
-    def binaryToLNBState(value):
-        if value == 0:
-            return ("off", "off")
-        elif value == 1:
-            return ("13vdc", "off")
-        elif value == 2:
-            return ("13vdc", "on")
-        elif value == 3:
-            return ("18vdc", "on")
-        elif value == 4:
-            return ("18vdc", "off")
-        else:
-            return ("unknown", "unknown")
 
     @staticmethod
     def ReaderThread(context):
@@ -73,21 +47,25 @@ class MotorPowerControllerReader:
                             # We have a packet!
                             if packet.command == PacketCommand.BOOT:
                                 mcpSocketIO.SendPacket('signal.boot', True)
+
                             elif packet.command == PacketCommand.MOTOR_DEC_POSITION:
-                                mcpSocketIO.SendPacket(
-                                    'signal.motor.dec.position', packet.arg1)
+                                context.state.updateMotorPosition('dec', packet)
+                            elif packet.command == PacketCommand.MOTOR_DEC_DELTA_POS:
+                                context.state.updateMotorDelta('dec', packet)
                             elif packet.command == PacketCommand.MOTOR_DEC_STATE:
-                                mcpSocketIO.SendPacket(
-                                    'signal.motor.dec.state', MotorPowerControllerReader.binaryToMotorState(packet.arg1))
+                                context.state.updateMotorState('dec', packet)
+
                             elif packet.command == PacketCommand.MOTOR_RA_POSITION:
-                                mcpSocketIO.SendPacket(
-                                    'signal.motor.ra.position', packet.arg1)
+                                context.state.updateMotorPosition('ra', packet)
+                            elif packet.command == PacketCommand.MOTOR_RA_DELTA_POS:
+                                context.state.updateMotorDelta('ra', packet)
                             elif packet.command == PacketCommand.MOTOR_RA_STATE:
-                                mcpSocketIO.SendPacket(
-                                    'signal.motor.ra.state', MotorPowerControllerReader.binaryToMotorState(packet.arg1))
+                                context.state.updateMotorState('ra', packet)
+
                             elif packet.command == PacketCommand.LNB_STATE:
-                                mcpSocketIO.SendPacket(
-                                    'signal.lnb.power', MotorPowerControllerReader.binaryToLNBState(packet.arg1))
+                                context.state.updateLNBVoltage(packet)
+                                context.state.updateLNBCarrier(packet)
+
                         else:
                             context.incomingData.pop(0)
                     else:

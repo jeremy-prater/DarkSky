@@ -38,6 +38,39 @@ class Packet:
                       packetStruct[4],
                       packetStruct[5])
 
+    @staticmethod
+    def binaryToMotorState(value):
+        if value == 0:
+            return "stop"
+        elif value == 1:
+            return "forward"
+        elif value == 2:
+            return "reverse"
+        elif value == 3:
+            return "stall"
+        else:
+            return "unknown"
+
+    @staticmethod
+    def binaryToLNBVoltage(value):
+        if value == 0:
+            return "off"
+        elif value == 1:
+            return "13vdc"
+        elif value == 2:
+            return "18vdc"
+        else:
+            return "unknown"
+
+    @staticmethod
+    def binaryToLNBCarrier(value):
+        if value == 0:
+            return "off"
+        elif value == 1:
+            return "on"
+        else:
+            return "unknown"
+
     def GetRawBuffer(self):
         return struct.pack('IHHHHI', self.magic, self.command, self.arg1, self.arg2, self.arg3, self.checksum)
 

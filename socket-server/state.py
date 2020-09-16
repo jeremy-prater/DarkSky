@@ -151,14 +151,20 @@ class State(Singleton):
 
     # Generic motor update functions
     def updateMotorState(self, motor: str, packet: Packet):
-        self.state['motors'][motor]['state'] = State.MOTOR_STATES[packet.GetPayload()[
-            'arg1']]
+        self.state['motors'][motor]['state'] = Packet.binaryToMotorState(packet.arg1)
 
     def updateMotorPosition(self, motor: str, packet: Packet):
-        self.state['motors'][motor]['position'] = packet.GetPayload()['arg1']
+        self.state['motors'][motor]['position'] = packet.arg1
 
     def updateMotorDelta(self, motor: str, packet: Packet):
-        self.state['motors'][motor]['delta'] = packet.GetPayload()['arg1']
+        self.state['motors'][motor]['delta'] = packet.arg1
+
+    def updateLNBVoltage(self, packet: Packet):
+        context.state['lnb']['voltage'] = Packet.binaryToLNBVoltage(packet.arg1)
+
+    def updateLNBCarrier(self, packet: Packet):
+        context.state['lnb']['carrier'] = Packet.binaryToLNBCarrier(packet.arg2)
+
 
     # Generic motor request functions
     def requestMotorState(self, motor: str, state: str):
