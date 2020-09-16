@@ -160,10 +160,10 @@ class State(Singleton):
         self.state['motors'][motor]['delta'] = packet.arg1
 
     def updateLNBVoltage(self, packet: Packet):
-        context.state['lnb']['voltage'] = Packet.binaryToLNBVoltage(packet.arg1)
+        self.state['lnb']['voltage'] = Packet.binaryToLNBVoltage(packet.arg1)
 
     def updateLNBCarrier(self, packet: Packet):
-        context.state['lnb']['carrier'] = Packet.binaryToLNBCarrier(packet.arg2)
+        self.state['lnb']['carrier'] = Packet.binaryToLNBCarrier(packet.arg2)
 
 
     # Generic motor request functions

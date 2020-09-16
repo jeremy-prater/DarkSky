@@ -4,7 +4,7 @@ from packet import PacketCommand, Packet
 from mcp_read_thread import MotorPowerControllerReader
 import logging
 import json
-import backend_socketio
+from state import State
 from singleton import Singleton
 
 class MotorPowerController(Singleton):
@@ -16,6 +16,7 @@ class MotorPowerController(Singleton):
         self.ports = []
         self.port = {}
         self.readerThread = None
+        self.state = State()
 
     def GetPorts(self):
         self.ports = []
@@ -43,7 +44,8 @@ class MotorPowerController(Singleton):
 
 
     def SendStatus(self):
-        backend_socketio.SocketIOBackend.getInstance().SendPacket('comport.status', self.serial.is_open)
+        self.state.state['serial']['port'] = self.port["device"]
+        self.state.state['serial']['connected'] = self.serial.is_open
 
     def SendPacket(self, packet: Packet):
         if self.serial.is_open:

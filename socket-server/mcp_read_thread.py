@@ -31,7 +31,12 @@ class MotorPowerControllerReader:
         context.incomingData = []
 
         while (context.reading):
-            data = context.serial.read()
+            try:
+                data = context.serial.read()
+            except serial.serialutil.SerialException as err:
+                context.logger.error("Serial Error : {}".format(err))
+                break
+
             context.incomingData.append(data)
             while len(context.incomingData) >= 4:
                 header = struct.unpack('I', b''.join(context.incomingData[:4]))
@@ -46,7 +51,7 @@ class MotorPowerControllerReader:
 
                             # We have a packet!
                             if packet.command == PacketCommand.BOOT:
-                                mcpSocketIO.SendPacket('signal.boot', True)
+                                mcpSocketIO.SendMessage('signal.boot', True)
 
                             elif packet.command == PacketCommand.MOTOR_DEC_POSITION:
                                 context.state.updateMotorPosition('dec', packet)

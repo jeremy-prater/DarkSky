@@ -32,5 +32,8 @@ if __name__ == "__main__":
         logger.info('Starting simulation threads')
         mpc.ConnectSimulator()
         State().StartSimulation()
+    else:
+        ports = mpc.GetPorts()
+        mpc.Connect(ports[0])
 
     server.Listen()
