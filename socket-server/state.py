@@ -39,12 +39,12 @@ class State(Singleton):
                 'ra': {
                     'state': 'unknown',
                     'position': 0,
-                    'stopAt': 0
+                    'delta': 0
                 },
                 'dec': {
                     'state': 'unknown',
                     'position': 0,
-                    'stopAt': 0
+                    'delta': 0
                 }
             },
             'serial': {
@@ -63,12 +63,12 @@ class State(Singleton):
                 'ra': {
                     'state': 'stopped',
                     'position': 0,
-                    'stopAt': 0
+                    'delta': 0
                 },
                 'dec': {
                     'state': 'stopped',
                     'position': 0,
-                    'stopAt': 0
+                    'delta': 0
                 }
             }
         }
@@ -114,8 +114,8 @@ class State(Singleton):
     def updateDecPosition(self, packet: Packet):
         self.updateMotorPosition('dec', packet)
 
-    def updateDecStopAt(self, packet: Packet):
-        self.updateMotorStopAt('dec', packet)
+    def updateDecDelta(self, packet: Packet):
+        self.updateMotorDelta('dec', packet)
 
     # RA motor updates
     def updateRaState(self, packet: Packet):
@@ -124,8 +124,8 @@ class State(Singleton):
     def updateRaPosition(self, packet: Packet):
         self.updateMotorPosition('ra', packet)
 
-    def updateRaStopAt(self, packet: Packet):
-        self.updateMotorStopAt('ra', packet)
+    def updateRaDelta(self, packet: Packet):
+        self.updateMotorDelta('ra', packet)
 
     # Motor request methods
 
@@ -136,8 +136,8 @@ class State(Singleton):
     def requestDecPosition(self, packet: Packet):
         self.requestMotorPosition('dec', packet)
 
-    def requestDecStopAt(self, packet: Packet):
-        self.requestMotorStopAt('dec', packet)
+    def requestDecDelta(self, packet: Packet):
+        self.requestMotorDelta('dec', packet)
 
     # RA motor requests
     def requestRaState(self, packet: Packet):
@@ -146,8 +146,8 @@ class State(Singleton):
     def requestRaPosition(self, packet: Packet):
         self.requestMotorPosition('ra', packet)
 
-    def requestRaStopAt(self, packet: Packet):
-        self.requestMotorStopAt('ra', packet)
+    def requestRaDelta(self, packet: Packet):
+        self.requestMotorDelta('ra', packet)
 
     # Generic motor update functions
     def updateMotorState(self, motor: str, packet: Packet):
@@ -157,8 +157,8 @@ class State(Singleton):
     def updateMotorPosition(self, motor: str, packet: Packet):
         self.state['motors'][motor]['position'] = packet.GetPayload()['arg1']
 
-    def updateMotorStopAt(self, motor: str, packet: Packet):
-        self.state['motors'][motor]['stopAt'] = packet.GetPayload()['arg1']
+    def updateMotorDelta(self, motor: str, packet: Packet):
+        self.state['motors'][motor]['delta'] = packet.GetPayload()['arg1']
 
     # Generic motor request functions
     def requestMotorState(self, motor: str, state: str):
@@ -169,8 +169,8 @@ class State(Singleton):
         self.requestedState['motors'][motor]['position'] = state
         self.processStateUpdate()
 
-    def requestMotorStopAt(self, motor: str, state: int):
-        self.requestedState['motors'][motor]['stopAt'] = state
+    def requestMotorDelta(self, motor: str, state: int):
+        self.requestedState['motors'][motor]['delta'] = state
         self.processStateUpdate()
 
     # Compare requested state to actual state and issue commands
@@ -190,7 +190,7 @@ class State(Singleton):
             pass
         if self.requestedState['motor']['ra']['position'] != self.state['motor']['ra']['position']:
             pass
-        if self.requestedState['motor']['ra']['stopAt'] != self.state['motor']['ra']['stopAt']:
+        if self.requestedState['motor']['ra']['delta'] != self.state['motor']['ra']['delta']:
             pass
 
         # Dec motor state
@@ -198,7 +198,7 @@ class State(Singleton):
             pass
         if self.requestedState['motor']['dec']['position'] != self.state['motor']['dec']['position']:
             pass
-        if self.requestedState['motor']['dec']['stopAt'] != self.state['motor']['dec']['stopAt']:
+        if self.requestedState['motor']['dec']['delta'] != self.state['motor']['dec']['delta']:
             pass
 
     def UpdateDishPositionHistory(self):

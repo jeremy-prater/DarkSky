@@ -36,12 +36,12 @@ export default new Vuex.Store({
             ra: {
                 state: 'unknown',
                 position: 0,
-                stopAt: 0,
+                delta: 0,
             },
             dec: {
                 state: 'unknown',
                 position: 0,
-                stopAt: 0,
+                delta: 0,
             },
         },
         serial: {
