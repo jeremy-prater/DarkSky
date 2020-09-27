@@ -54,18 +54,18 @@ class MotorPowerControllerReader:
                                 mcpSocketIO.SendMessage('signal.boot', True)
 
                             elif packet.command == PacketCommand.MOTOR_DEC_POSITION:
-                                context.state.updateMotorPosition('dec', packet)
+                                context.state.updateDecPosition(packet)
                             elif packet.command == PacketCommand.MOTOR_DEC_DELTA_POS:
-                                context.state.updateMotorDelta('dec', packet)
+                                context.state.updateDecDelta(packet)
                             elif packet.command == PacketCommand.MOTOR_DEC_STATE:
-                                context.state.updateMotorState('dec', packet)
+                                context.state.updateDecState(packet)
 
                             elif packet.command == PacketCommand.MOTOR_RA_POSITION:
-                                context.state.updateMotorPosition('ra', packet)
+                                context.state.updateRaPosition(packet)
                             elif packet.command == PacketCommand.MOTOR_RA_DELTA_POS:
-                                context.state.updateMotorDelta('ra', packet)
+                                context.state.updateRaDelta(packet)
                             elif packet.command == PacketCommand.MOTOR_RA_STATE:
-                                context.state.updateMotorState('ra', packet)
+                                context.state.updateRaState(packet)
 
                             elif packet.command == PacketCommand.LNB_STATE:
                                 context.state.updateLNBVoltage(packet)
