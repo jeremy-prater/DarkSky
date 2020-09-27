@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 const lodash = require('lodash');
-// const common = require('../components/common');
+const common = require('../components/common');
 
 Vue.use(Vuex);
 
@@ -102,11 +102,25 @@ export default new Vuex.Store({
             }
 
             // Check for state differences!
-            // const stateDiff = common.default.diffObjects(state.requested, state.actual);
-            // console.log(JSON.stringify(stateDiff));
+            const stateDiff = common.default.diffObjects(state.requested, state.actual);
+            console.log(JSON.stringify(stateDiff));
+
+            if (state.requested.motors.stopAll && state.actual.motors.stopAll) {
+                console.log("Motor Stop All acknowledged!");
+                this.commit("requestStopAll", false);
+            }
+            
+            // if (state.requested.motors.stopAll && state.actual.motors.stopAll) {
+            //     console.log("Motor Stop All acknowledged!");
+            //     this.commit("requestStopAll", false);
+            // }
         },
         updateJDE(state, jde) {
             state.actual.jde = jde;
+        },
+        requestStopAll(state, payload) {
+            state.requested.motors.stopAll = payload;
+            this._vm.$socket.emit('request.stopAll', payload);
         },
         requestDecMotorState(state, payload) {
             state.requested.decMotor.state = payload;

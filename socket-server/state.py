@@ -20,7 +20,7 @@ class State(Singleton):
         self.logger = logging.getLogger(__name__)
         self.logger.info('Init')
         self.state = {
-            'calibrating' : False,
+            'calibrating': False,
             'gps': {
                 'mode': 0
             },
@@ -55,7 +55,7 @@ class State(Singleton):
         }
 
         self.requestedState = {
-            'calibrating' : False,
+            'calibrating': False,
             'lnb': {
                 'voltage': 0,
                 'carrier': False
@@ -115,7 +115,8 @@ class State(Singleton):
         self.requestMotorState('dec', value)
 
     def requestDecPosition(self, client: str, value: int):
-        self.logger.info("{} : Request Dec Position : {}".format(client, value))
+        self.logger.info(
+            "{} : Request Dec Position : {}".format(client, value))
         self.requestMotorPosition('dec', value)
 
     def requestDecDelta(self, client: str, value: int):
@@ -151,9 +152,27 @@ class State(Singleton):
         self.logger.info("{} : Request Calibrating : {}".format(client, value))
         # self.processStateUpdate()
 
+    # Generic motor request functions
+    def requestMotorState(self, motor: str, state: str):
+        self.requestedState['motors'][motor]['state'] = state
+        self.processStateUpdate()
+
+    def requestMotorPosition(self, motor: str, state: int):
+        self.requestedState['motors'][motor]['position'] = state
+        self.processStateUpdate()
+
+    def requestMotorDelta(self, motor: str, state: int):
+        self.requestedState['motors'][motor]['delta'] = state
+        self.processStateUpdate()
+
+    def requestStopAll(self, client: str, value: bool):
+        self.requestedState['motors']['stopAll'] = value
+        self.processStateUpdate()
+
     # State update methods
 
     # Dec motor updates
+
     def updateDecState(self, packet: Packet):
         self.updateMotorState('dec', packet)
 
@@ -173,9 +192,13 @@ class State(Singleton):
     def updateRaDelta(self, packet: Packet):
         self.updateMotorDelta('ra', packet)
 
+    def updateStopAll(self, packet:Packet):
+        self.state['motors']['stopAll'] = packet.arg1
+
     # Generic motor update functions
     def updateMotorState(self, motor: str, packet: Packet):
-        self.state['motors'][motor]['state'] = Packet.binaryToMotorState(packet.arg1)
+        self.state['motors'][motor]['state'] = Packet.binaryToMotorState(
+            packet.arg1)
 
     def updateMotorPosition(self, motor: str, packet: Packet):
         self.state['motors'][motor]['position'] = packet.arg1
@@ -189,22 +212,11 @@ class State(Singleton):
     def updateLNBCarrier(self, packet: Packet):
         self.state['lnb']['carrier'] = Packet.binaryToLNBCarrier(packet.arg2)
 
-
-    # Generic motor request functions
-    def requestMotorState(self, motor: str, state: str):
-        self.requestedState['motors'][motor]['state'] = state
-        self.processStateUpdate()
-
-    def requestMotorPosition(self, motor: str, state: int):
-        self.requestedState['motors'][motor]['position'] = state
-        self.processStateUpdate()
-
-    def requestMotorDelta(self, motor: str, state: int):
-        self.requestedState['motors'][motor]['delta'] = state
-        self.processStateUpdate()
-
     # Compare requested state to actual state and issue commands
     def processStateUpdate(self):
+        from mcp_serial import MotorPowerController
+        mpc = MotorPowerController()
+
         # LNB State
         if self.requestedState['lnb']['voltage'] != self.state['lnb']['voltage']:
             pass
@@ -212,23 +224,29 @@ class State(Singleton):
             pass
 
         # Stop all motor state
-        if self.requestedState['motor']['stopAll'] != self.state['motor']['stopAll']:
-            pass
+        if self.requestedState['motors']['stopAll'] != self.state['motors']['stopAll']:
+            if self.requestedState['motors']['stopAll'] == True:
+                self.logger.info("Stopping all motors!!")
+            else:
+                self.logger.info("Motors Safe to restart")
+            mpc.SendPacket(Packet.CreateFromStruct(
+                PacketCommand.STOP_ALL_MOTORS, self.requestedState['motors']['stopAll'], 0, 0))
+            # self.state['motors']['stopAll'] = self.requestedState['motors']['stopAll']
 
         # RA motor state
-        if self.requestedState['motor']['ra']['state'] != self.state['motor']['ra']['state']:
+        if self.requestedState['motors']['ra']['state'] != self.state['motors']['ra']['state']:
             pass
-        if self.requestedState['motor']['ra']['position'] != self.state['motor']['ra']['position']:
+        if self.requestedState['motors']['ra']['position'] != self.state['motors']['ra']['position']:
             pass
-        if self.requestedState['motor']['ra']['delta'] != self.state['motor']['ra']['delta']:
+        if self.requestedState['motors']['ra']['delta'] != self.state['motors']['ra']['delta']:
             pass
 
         # Dec motor state
-        if self.requestedState['motor']['dec']['state'] != self.state['motor']['dec']['state']:
+        if self.requestedState['motors']['dec']['state'] != self.state['motors']['dec']['state']:
             pass
-        if self.requestedState['motor']['dec']['position'] != self.state['motor']['dec']['position']:
+        if self.requestedState['motors']['dec']['position'] != self.state['motors']['dec']['position']:
             pass
-        if self.requestedState['motor']['dec']['delta'] != self.state['motor']['dec']['delta']:
+        if self.requestedState['motors']['dec']['delta'] != self.state['motors']['dec']['delta']:
             pass
 
     def UpdateDishPositionHistory(self):
@@ -290,7 +308,7 @@ class State(Singleton):
             if bumpAlt and context.state["dish"]["alt"] >= 90:
                 altStep = -altStep
                 context.state["dish"]["alt"] += altStep
-            
+
             if bumpAlt and context.state["dish"]["alt"] <= 0:
                 altStep = -altStep
                 context.state["dish"]["alt"] += altStep

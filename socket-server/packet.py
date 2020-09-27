@@ -18,6 +18,8 @@ class PacketCommand(IntEnum):
 
 
 class Packet:
+    Magic = 0xDADAF00D
+
     def __init__(self, magic: int, command: PacketCommand, arg1: int, arg2: int, arg3: int, checksum: int):
         self.magic = magic
         self.command = command
@@ -37,6 +39,10 @@ class Packet:
                       packetStruct[3],
                       packetStruct[4],
                       packetStruct[5])
+
+    @staticmethod
+    def CreateFromStruct(command: PacketCommand, arg1: int, arg2: int, arg3: int):
+        return Packet(Packet.Magic, command, arg1, arg2, arg3, 0)
 
     @staticmethod
     def binaryToMotorState(value):

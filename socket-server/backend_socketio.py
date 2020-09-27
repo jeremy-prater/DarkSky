@@ -34,6 +34,7 @@ class SocketIOBackend(Singleton):
         self.sio.on('request.ra.state', self.state.requestRaState)
         self.sio.on('request.ra.position', self.state.requestRaPosition)
         self.sio.on('request.ra.delta', self.state.requestRaDelta)
+        self.sio.on('request.stopAll', self.state.requestStopAll)
         self.sio.on('request.lnb.voltage', self.state.requestLnbVoltage)
         self.sio.on('request.lnb.carrier', self.state.requestLnbCarrier)
         self.sio.on('request.calibration', self.state.requestCalibration)

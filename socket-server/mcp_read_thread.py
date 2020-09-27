@@ -40,7 +40,7 @@ class MotorPowerControllerReader:
             context.incomingData.append(data)
             while len(context.incomingData) >= 4:
                 header = struct.unpack('I', b''.join(context.incomingData[:4]))
-                if header[0] != 0xDADAF00D:
+                if header[0] != Packet.Magic:
                     context.incomingData.pop(0)
                 else:
                     if len(context.incomingData) >= 16:
@@ -52,6 +52,10 @@ class MotorPowerControllerReader:
                             # We have a packet!
                             if packet.command == PacketCommand.BOOT:
                                 mcpSocketIO.SendMessage('signal.boot', True)
+
+                            elif packet.command == PacketCommand.STOP_ALL_MOTORS:
+                                context.state.updateStopAll(packet)
+
 
                             elif packet.command == PacketCommand.MOTOR_DEC_POSITION:
                                 context.state.updateDecPosition(packet)

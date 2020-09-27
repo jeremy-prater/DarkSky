@@ -110,6 +110,7 @@ export default {
   },
   methods: {
     calibrationMove(axis, direction) {
+      this.$store.commit("requestStopAll", true);
       console.log(
         "Calibration move : " +
           axis +
