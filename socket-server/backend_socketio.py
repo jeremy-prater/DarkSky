@@ -17,6 +17,8 @@ class SocketIOBackend(Singleton):
         logging.getLogger('socketio').setLevel(logging.WARNING)
         logging.getLogger('engineio').setLevel(logging.WARNING)
 
+        self.state = State()
+
         self.sioLock = threading.Lock()
 
         self.sio = socketio.Server(
@@ -25,11 +27,16 @@ class SocketIOBackend(Singleton):
         self.sio.on('connect', self.connect)
         self.sio.on('disconnect', self.disconnect)
         # self.sio.on('comport.connect', self.comportConnect)
-        # self.sio.on('request.dec.state', self.decState)
-        # self.sio.on('request.ra.state', self.raState)
-        # self.sio.on('request.lnb.state', self.lnbState)
-
-        self.state = State()
+        # self.sio.on('updateRequestedState', self.state.updateRequestedState)
+        self.sio.on('request.dec.state', self.state.requestDecState)
+        self.sio.on('request.dec.position', self.state.requestDecPosition)
+        self.sio.on('request.dec.delta', self.state.requestDecDelta)
+        self.sio.on('request.ra.state', self.state.requestRaState)
+        self.sio.on('request.ra.position', self.state.requestRaPosition)
+        self.sio.on('request.ra.delta', self.state.requestRaDelta)
+        self.sio.on('request.lnb.voltage', self.state.requestLnbVoltage)
+        self.sio.on('request.lnb.carrier', self.state.requestLnbCarrier)
+        self.sio.on('request.calibration', self.state.requestCalibration)
 
         self.stateThread = threading.Thread(
             target=self.StateUpdate, args=(self,), daemon=True)

@@ -20,6 +20,7 @@ class State(Singleton):
         self.logger = logging.getLogger(__name__)
         self.logger.info('Init')
         self.state = {
+            'calibrating' : False,
             'gps': {
                 'mode': 0
             },
@@ -54,6 +55,7 @@ class State(Singleton):
         }
 
         self.requestedState = {
+            'calibrating' : False,
             'lnb': {
                 'voltage': 0,
                 'carrier': False
@@ -105,6 +107,50 @@ class State(Singleton):
     # packet.arg1 = darkSkyContext.lnb.power;
     # packet.arg2 = darkSkyContext.lnb.carrier;
 
+    # Motor request methods
+
+    # Dec motor requests
+    def requestDecState(self, client: str, value: str):
+        self.logger.info("{} : Request Dec State : {}".format(client, value))
+        self.requestMotorState('dec', value)
+
+    def requestDecPosition(self, client: str, value: int):
+        self.logger.info("{} : Request Dec Position : {}".format(client, value))
+        self.requestMotorPosition('dec', value)
+
+    def requestDecDelta(self, client: str, value: int):
+        self.logger.info("{} : Request Dec Delta : {}".format(client, value))
+        self.requestMotorDelta('dec', value)
+
+    # RA motor requests
+    def requestRaState(self, client: str, value: str):
+        self.logger.info("{} : Request Ra State : {}".format(client, value))
+        self.requestMotorState('ra', value)
+
+    def requestRaPosition(self, client: str, value: int):
+        self.logger.info("{} : Request Ra Position : {}".format(client, value))
+        self.requestMotorPosition('ra', value)
+
+    def requestRaDelta(self, client: str, value: int):
+        self.logger.info("{} : Request Ra Delta : {}".format(client, value))
+        self.requestMotorDelta('ra', value)
+
+    def requestLnbVoltage(self, client: str, value: int):
+        self.logger.info("{} : Request LNB Voltage : {}".format(client, value))
+        self.requestedState['lnb']['voltage'] = value
+        self.processStateUpdate()
+
+    def requestLnbCarrier(self, client: str, value: int):
+        self.logger.info("{} : Request LNB Carrier : {}".format(client, value))
+        self.requestedState['lnb']['carrier'] = value
+        self.processStateUpdate()
+
+    def requestCalibration(self, client: str, value: bool):
+        self.requestedState['calibrating'] = value
+        self.state['calibrating'] = value
+        self.logger.info("{} : Request Calibrating : {}".format(client, value))
+        # self.processStateUpdate()
+
     # State update methods
 
     # Dec motor updates
@@ -126,28 +172,6 @@ class State(Singleton):
 
     def updateRaDelta(self, packet: Packet):
         self.updateMotorDelta('ra', packet)
-
-    # Motor request methods
-
-    # Dec motor requests
-    def requestDecState(self, packet: Packet):
-        self.requestMotorState('dec', packet)
-
-    def requestDecPosition(self, packet: Packet):
-        self.requestMotorPosition('dec', packet)
-
-    def requestDecDelta(self, packet: Packet):
-        self.requestMotorDelta('dec', packet)
-
-    # RA motor requests
-    def requestRaState(self, packet: Packet):
-        self.requestMotorState('ra', packet)
-
-    def requestRaPosition(self, packet: Packet):
-        self.requestMotorPosition('ra', packet)
-
-    def requestRaDelta(self, packet: Packet):
-        self.requestMotorDelta('ra', packet)
 
     # Generic motor update functions
     def updateMotorState(self, motor: str, packet: Packet):

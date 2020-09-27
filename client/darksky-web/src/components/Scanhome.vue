@@ -7,10 +7,10 @@
       </div>
       <div class="overlaypanel-text overlaypanel-item maplist">
         <ul>
-          <li>Lat : {{ state.gps.lat }}</li>
-          <li>Lng : {{ state.gps.lon }}</li>
-          <li>Time : {{ state.gps.time }}</li>
-          <li>JDE : {{ state.jde }}</li>
+          <li>Lat : {{ state.actual.gps.lat }}</li>
+          <li>Lng : {{ state.actual.gps.lon }}</li>
+          <li>Time : {{ state.actual.gps.time }}</li>
+          <li>JDE : {{ state.actual.jde }}</li>
           <li>RA : {{ common.deg2hms(mouseRADec[0]) }} ({{ common.deg2dms(mouseRADec[0]) }})</li>
           <li>Dec : {{ common.deg2dms(mouseRADec[1]) }}</li>
           <li>Az : {{ common.deg2dms(mouseAzAlt[0]) }}</li>
@@ -409,7 +409,7 @@ export default {
       this.updateAzAlt();
     },
     updateAzAlt() {
-      if (this.state.gps.mode >= 2) {
+      if (this.state.actual.gps.mode >= 2) {
         const azalt = common.convertRADec2AzAlt(this.state, {
           ra: this.mouseRADec[0],
           dec: this.mouseRADec[1]
@@ -433,10 +433,10 @@ export default {
       this.dishTrack.features = [];
       // Convert incoming lineString from backend
       // this.dishTrack.features[0].geometry.coordinates[0] = [];
-      // this.dishTrack.features[0].geometry.strength[0] = this.state.dish.historyStrength;
+      // this.dishTrack.features[0].geometry.strength[0] = this.state.actual.dish.historyStrength;
       let lastRADec = null;
       let dcCounter = 0;
-      this.state.dish.historyPath.forEach(coords => {
+      this.state.actual.dish.historyPath.forEach(coords => {
         if (lastRADec == null) {
           lastRADec = common.convertAzAlt2RADec(this.state, {
             az: coords[0],
@@ -457,7 +457,7 @@ export default {
             strokeColor:
               "#" +
               this.dishGradient.colorAt(
-                this.state.dish.historyStrength[dcCounter++]
+                this.state.actual.dish.historyStrength[dcCounter++]
               )
           },
           geometry: {
@@ -484,8 +484,8 @@ export default {
       });
       // this.dishTrack.features[1].geometry.coordinates = this.dishTrack.features[0].geometry.coordinates[0][0];
       let dishTarget = common.convertAzAlt2RADec(this.state, {
-        az: this.state.dish.az,
-        alt: this.state.dish.alt
+        az: this.state.actual.dish.az,
+        alt: this.state.actual.dish.alt
       });
 
       this.dishTrack.features.push({
@@ -529,7 +529,7 @@ export default {
       };
 
       // Add more line segments!!
-      if (this.state.gps.mode >= 2) {
+      if (this.state.actual.gps.mode >= 2) {
         this.generateDishTrack(null, null);
       }
 
@@ -562,7 +562,7 @@ export default {
                 //  Set object styles fill color, line color & width etc.
                 this.celestial.setStyle({
                   stroke:
-                    "#" + this.dishGradient.colorAt(this.state.lnb.strength),
+                    "#" + this.dishGradient.colorAt(this.state.actual.lnb.strength),
                   width: 3
                 });
                 // Start the drawing path
@@ -591,19 +591,19 @@ export default {
     tick() {
       this.celestial.redraw();
       this.updateAzAlt();
-      if (this.state.gps.mode >= 2) {
+      if (this.state.actual.gps.mode >= 2) {
         // Update GPS pos
-        // console.log(this.state.gps);
+        // console.log(this.state.actual.gps);
 
         this.$store.commit(
           "updateJDE",
-          julian.DateToJDE(new Date(this.state.gps.time))
+          julian.DateToJDE(new Date(this.state.actual.gps.time))
         );
 
         if (!this.posSet) {
           this.celestial.skyview({
-            date: this.state.gps.time,
-            location: [this.state.gps.lat, this.state.gps.lon]
+            date: this.state.actual.gps.time,
+            location: [this.state.actual.gps.lat, this.state.actual.gps.lon]
           });
           this.posSet = true;
         }

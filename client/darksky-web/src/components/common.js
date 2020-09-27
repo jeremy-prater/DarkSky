@@ -1,19 +1,34 @@
 import { coord, globe, base, sidereal } from 'astronomia';
+const lodash = require('lodash');
+
+function diff(obj1, obj2) {
+    return lodash.reduce(
+        obj1,
+        function(result, value, key) {
+            if (lodash.isPlainObject(value)) {
+                result[key] = diff(value, obj2[key]);
+            } else if (!lodash.isEqual(value, obj2[key])) {
+                result[key] = value;
+            }
+            return result;
+        },
+        {}
+    );
+}
 
 export default {
+    diffObjects: diff,
     checkRadBounds: function(radian) {
-        while (radian > 2 * Math.PI)
-        {
+        while (radian > 2 * Math.PI) {
             radian -= Math.PI;
         }
         while (radian < 0) {
             radian += Math.PI;
         }
         return radian;
-    }, 
+    },
     checkDegBounds: function(degrees) {
-        while (degrees > 360)
-        {
+        while (degrees > 360) {
             degrees -= 360;
         }
         while (degrees < 0) {
@@ -27,14 +42,14 @@ export default {
             this.checkRadBounds(base.toRad(coords.dec))
         );
 
-        let siderealTime = sidereal.apparent(state.jde);
+        let siderealTime = sidereal.apparent(state.actual.jde);
         let altaz = eqCoord.toHorizontal(
-            new globe.Coord(state.gps.lat, state.gps.lon),
+            new globe.Coord(state.actual.gps.lat, state.actual.gps.lon),
             siderealTime
         );
         return {
             az: this.checkDegBounds(base.toDeg(altaz.az)),
-            alt: this.checkDegBounds(base.toDeg(altaz.alt))
+            alt: this.checkDegBounds(base.toDeg(altaz.alt)),
         };
     },
     convertAzAlt2RADec: function(state, coords) {
@@ -43,14 +58,14 @@ export default {
             this.checkRadBounds(base.toRad(coords.alt))
         );
 
-        let siderealTime = sidereal.apparent(state.jde);
+        let siderealTime = sidereal.apparent(state.actual.jde);
         let radec = eqCoord.toEquatorial(
-            new globe.Coord(state.gps.lat, state.gps.lon),
+            new globe.Coord(state.actual.gps.lat, state.actual.gps.lon),
             siderealTime
         );
         return {
             ra: this.checkDegBounds(base.toDeg(radec.ra)),
-            dec: this.checkDegBounds(base.toDeg(radec.dec))
+            dec: this.checkDegBounds(base.toDeg(radec.dec)),
         };
     },
     deg2hms(deg) {
