@@ -44,8 +44,8 @@ class MotorPowerController(Singleton):
 
 
     def SendStatus(self):
-        self.state.state['serial']['port'] = self.port["device"]
-        self.state.state['serial']['connected'] = self.serial.is_open
+        self.state.update('serial.port', self.port["device"])
+        self.state.update('serial.connected', self.serial.is_open)
 
     def SendPacket(self, packet: Packet):
         if self.serial.is_open:

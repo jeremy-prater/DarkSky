@@ -21,64 +21,47 @@ class State(Singleton):
         self.logger.info('Init')
         self.state = {
             'calibrating': False,
-            'gps': {
-                'mode': 0
-            },
-            'lnb': {
-                'voltage': 0,
-                'carrier': False,
-                'strength': 0
-            },
-            'dish': {
-                'alt': 0,
-                'az': 0,
-                'historyPath': [],
-                'historyStrength': []
-            },
-            'motors': {
-                'stopAll': False,
-                'ra': {
-                    'state': 'unknown',
-                    'position': 0,
-                    'delta': 0
-                },
-                'dec': {
-                    'state': 'unknown',
-                    'position': 0,
-                    'delta': 0
-                }
-            },
-            'serial': {
-                'port': '',
-                'connected': False
-            }
+            'gps.mode': 0,
+            'lnb.voltage': 0,
+            'lnb.carrier': False,
+            'lnb.strength': 0,
+            'dish.alt': 0,
+            'dish.az': 0,
+            'dish.historyPath': [],
+            'dish.historyStrength': [],
+            'motors.stopAll': False,
+            'motors.ra.state': 'unknown',
+            'motors.ra.position': 0,
+            'motors.ra.delta': 0,
+            'motors.dec.state': 'unknown',
+            'motors.dec.position': 0,
+            'motors.dec.delta': 0,
+            'serial.port': '',
+            'serial.connected': False,
         }
 
-        self.requestedState = {
-            'calibrating': False,
-            'lnb': {
-                'voltage': 0,
-                'carrier': False
-            },
-            'motors': {
-                'stopAll': False,
-                'ra': {
-                    'state': 'stopped',
-                    'position': 0,
-                    'delta': 0
-                },
-                'dec': {
-                    'state': 'stopped',
-                    'position': 0,
-                    'delta': 0
-                }
-            }
-        }
+        self.requestedState = []
+
+    def update(self, key, value):
+        if key in self.state and self.state[key] == value:
+            return
+
+        self.logger.info("State set {} -> {}".format(key, value))
+        self.state[key] = value
+        # Trigger update diff function
+
+    def get(self, key):
+        value = None
+        if key in self.state:
+            value = self.state[key]
+        self.logger.info("State get {} <- {}".format(key, value))
+        return value
 
     def updateGPS(self, gpsFix):
         # self.logger.info(gpsFix)
         # self.logger.info('GPS Update {}.{} @ {}'.format(gpsFix['lat'], gpsFix['lon'], gpsFix['time']))
-        self.state['gps'] = gpsFix
+        for key in gpsFix:
+            self.update('gps.' + key, gpsFix[key])
 
     # Control board state updates
 
@@ -110,6 +93,7 @@ class State(Singleton):
     # Motor request methods
 
     # Dec motor requests
+
     def requestDecState(self, client: str, value: str):
         self.logger.info("{} : Request Dec State : {}".format(client, value))
         self.requestMotorState('dec', value)
@@ -138,35 +122,34 @@ class State(Singleton):
 
     def requestLnbVoltage(self, client: str, value: int):
         self.logger.info("{} : Request LNB Voltage : {}".format(client, value))
-        self.requestedState['lnb']['voltage'] = value
+        self.requestedState.append({'lnb.voltage': value})
         self.processStateUpdate()
 
     def requestLnbCarrier(self, client: str, value: int):
         self.logger.info("{} : Request LNB Carrier : {}".format(client, value))
-        self.requestedState['lnb']['carrier'] = value
+        self.requestedState.append({'lnb.carrier': value})
         self.processStateUpdate()
 
     def requestCalibration(self, client: str, value: bool):
-        self.requestedState['calibrating'] = value
-        self.state['calibrating'] = value
         self.logger.info("{} : Request Calibrating : {}".format(client, value))
+        self.state.update('calibrating', value)
         # self.processStateUpdate()
 
     # Generic motor request functions
-    def requestMotorState(self, motor: str, state: str):
-        self.requestedState['motors'][motor]['state'] = state
+    def requestMotorState(self, motor: str, value: str):
+        self.requestedState.append({'motors.' + motor + '.state': value})
         self.processStateUpdate()
 
-    def requestMotorPosition(self, motor: str, state: int):
-        self.requestedState['motors'][motor]['position'] = state
+    def requestMotorPosition(self, motor: str, value: int):
+        self.requestedState.append({'motors.' + motor + '.position': value})
         self.processStateUpdate()
 
-    def requestMotorDelta(self, motor: str, state: int):
-        self.requestedState['motors'][motor]['delta'] = state
+    def requestMotorDelta(self, motor: str, value: int):
+        self.requestedState.append({'motors.' + motor + '.delta': value})
         self.processStateUpdate()
 
     def requestStopAll(self, client: str, value: bool):
-        self.requestedState['motors']['stopAll'] = value
+        self.requestedState.append({'motors.stopAll': value})
         self.processStateUpdate()
 
     # State update methods
@@ -192,89 +175,64 @@ class State(Singleton):
     def updateRaDelta(self, packet: Packet):
         self.updateMotorDelta('ra', packet)
 
-    def updateStopAll(self, packet:Packet):
-        self.state['motors']['stopAll'] = packet.arg1
+    def updateStopAll(self, packet: Packet):
+        self.state.update('motors.stopAll', packet.arg1)
 
     # Generic motor update functions
     def updateMotorState(self, motor: str, packet: Packet):
-        self.state['motors'][motor]['state'] = Packet.binaryToMotorState(
-            packet.arg1)
+        self.state.update('motors.' + motor + '.state',
+                          Packet.binaryToMotorState(packet.arg1))
 
     def updateMotorPosition(self, motor: str, packet: Packet):
-        self.state['motors'][motor]['position'] = packet.arg1
+        self.state.update('motors.' + motor + '.position', packet.arg1)
 
     def updateMotorDelta(self, motor: str, packet: Packet):
-        self.state['motors'][motor]['delta'] = packet.arg1
+        self.state.update('motors.' + motor + '.delta', packet.arg1)
 
     def updateLNBVoltage(self, packet: Packet):
-        self.state['lnb']['voltage'] = Packet.binaryToLNBVoltage(packet.arg1)
+        self.state.update(
+            'lnb.voltage', Packet.binaryToLNBVoltage(packet.arg1))
 
     def updateLNBCarrier(self, packet: Packet):
-        self.state['lnb']['carrier'] = Packet.binaryToLNBCarrier(packet.arg2)
+        self.state.update(
+            'lnb.carrier', Packet.binaryToLNBCarrier(packet.arg2))
 
     # Compare requested state to actual state and issue commands
     def processStateUpdate(self):
         from mcp_serial import MotorPowerController
-        mpc = MotorPowerController()
+        mpc=MotorPowerController()
 
         # LNB State
-        if self.requestedState['lnb']['voltage'] != self.state['lnb']['voltage']:
-            pass
-        if self.requestedState['lnb']['carrier'] != self.state['lnb']['carrier']:
-            pass
 
         # Stop all motor state
-        if self.requestedState['motors']['stopAll'] != self.state['motors']['stopAll']:
-            if self.requestedState['motors']['stopAll'] == True:
-                self.logger.info("Stopping all motors!!")
-            else:
-                self.logger.info("Motors Safe to restart")
-            mpc.SendPacket(Packet.CreateFromStruct(
-                PacketCommand.STOP_ALL_MOTORS, self.requestedState['motors']['stopAll'], 0, 0))
-            # self.state['motors']['stopAll'] = self.requestedState['motors']['stopAll']
 
         # RA motor state
-        if self.requestedState['motors']['ra']['state'] != self.state['motors']['ra']['state']:
-            pass
-        if self.requestedState['motors']['ra']['position'] != self.state['motors']['ra']['position']:
-            pass
-        if self.requestedState['motors']['ra']['delta'] != self.state['motors']['ra']['delta']:
-            pass
-
-        # Dec motor state
-        if self.requestedState['motors']['dec']['state'] != self.state['motors']['dec']['state']:
-            pass
-        if self.requestedState['motors']['dec']['position'] != self.state['motors']['dec']['position']:
-            pass
-        if self.requestedState['motors']['dec']['delta'] != self.state['motors']['dec']['delta']:
-            pass
 
     def UpdateDishPositionHistory(self):
-        if len(self.state["dish"]["historyPath"]) == 0:
-            self.state["dish"]["historyPath"].append(
-                [self.state["dish"]["az"], self.state["dish"]["alt"]])
-            self.state["dish"]["historyStrength"].append(
-                self.state["lnb"]["strength"])
+        if len(self.state.get("dish.historyPath")) == 0:
+            self.state.get("dish.historyPath").append(
+                [self.state.get("dish.az"), self.state.get("dish.alt")])
+            self.state.get("dish.historyStrength").append(
+                self.state.get("lnb.strength"))
             return
 
-        daz = abs(self.state["dish"]["az"] -
-                  self.state["dish"]["historyPath"][0][0])
-        dalt = abs(self.state["dish"]["alt"] -
-                   self.state["dish"]["historyPath"][0][1])
+        dazalt=self.state.get("dish.historyPath")[0]
+        daz=abs(self.state.get("dish.az") - dazalt[0])
+        dalt=abs(self.state.get("dish.alt") - dazalt[1])
 
         if daz >= 1 or dalt >= 1:
-            self.state["dish"]["historyPath"].insert(0,
-                                                     [self.state["dish"]["az"], self.state["dish"]["alt"]])
-            self.state["dish"]["historyStrength"].insert(0,
-                                                         self.state["lnb"]["strength"])
+            self.state.get("dish.historyPath").insert(
+                0, [self.state.get("dish.az"), self.state.get("dish.alt")])
+            self.state.get("dish.historyStrength").insert(
+                0, self.state.get("lnb.strength"))
 
-        if len(self.state["dish"]["historyPath"]) > 2500:
-            self.state["dish"]["historyPath"].pop()
-            self.state["dish"]["historyStrength"].pop()
+        if len(self.state.get("dish.historyPath")) > 2500:
+            self.state.get("dish.historyPath").pop()
+            self.state.get("dish.historyStrength").pop()
 
     def StartSimulation(self):
-        self.simulating = False
-        self.simulationThread = threading.Thread(
+        self.simulating=False
+        self.simulationThread=threading.Thread(
             target=self.SimulationThread, args=(self,), daemon=True)
         self.simulationThread.start()
 
@@ -287,34 +245,35 @@ class State(Singleton):
         altStep = 2
         lnbRange = 100
 
-        context.state["dish"]["az"] = 0
-        context.state["dish"]["alt"] = 0
+        context.state.update("dish.az", 0)
+        context.state.update("dish.alt", 0)
 
         while (context.simulating):
-            context.state["lnb"]["strength"] = math.fabs(math.cos(
-                (context.state["dish"]["az"] / 180) * math.pi)) * math.fabs(math.cos((context.state["dish"]["alt"] / 90) * math.pi)) * lnbRange
-
             bumpAlt = False
-            context.state["dish"]["az"] += azStep
-            if context.state["dish"]["az"] >= 360:
-                context.state["dish"]["az"] -= 360
-                context.state["dish"]["alt"] += altStep
+            curAz = context.state.get("dish.az") + azStep
+            curAlt = context.state.get("dish.alt")
+            context.state.update("dish.az", curAz)
+
+            if curAz >= 360:
+                curAz -= 360
+                curAlt += altStep
                 bumpAlt = True
-            elif context.state["dish"]["az"] < 0:
-                context.state["dish"]["az"] += -360
-                context.state["dish"]["alt"] += altStep
+            elif curAz < 0:
+                curAz += 360
+                curAlt += altStep
                 bumpAlt = True
 
-            if bumpAlt and context.state["dish"]["alt"] >= 90:
+            if bumpAlt and (curAlt >= 90 or curAlt <= 0):
                 altStep = -altStep
-                context.state["dish"]["alt"] += altStep
+                curAlt += altStep
 
-            if bumpAlt and context.state["dish"]["alt"] <= 0:
-                altStep = -altStep
-                context.state["dish"]["alt"] += altStep
+            curStrength = math.fabs(math.cos((context.state.get("dish.az") / 180) * math.pi)) * math.fabs(math.cos((context.state.get("dish.alt") / 90) * math.pi)) * lnbRange
 
-            context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(
-                context.state["dish"]["az"], context.state["dish"]["alt"], context.state["lnb"]["strength"]))
+            context.state.update("dish.az", curAz)
+            context.state.update("dish.alt", curAlt)
+            context.state.update("lnb.strength", curStrength)
+
+            context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(curAz, curAlt, curStrength))
 
             context.UpdateDishPositionHistory()
 
