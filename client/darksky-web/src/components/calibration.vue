@@ -1,6 +1,6 @@
 <template>
     <modal
-      v-show="state.actual.calibrating"
+      v-show="state.getByKey('calibrating')"
       @close="cancelCalibration"
       style="max-height: 70vh;"
     >

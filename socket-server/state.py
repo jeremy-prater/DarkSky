@@ -6,7 +6,7 @@ import time
 import random
 from packet import Packet, PacketCommand
 from singleton import Singleton
-
+from astropy.time import Time
 
 class State(Singleton):
     MOTOR_STATES = [
@@ -38,7 +38,9 @@ class State(Singleton):
             'motors.dec.delta': 0,
             'serial.port': '',
             'serial.connected': False,
-            'jde': 0,
+            'time.jde': 0,
+            'time.sidereal.local': 0,
+            'time.sidereal.gmt': 0,
         }
 
         self.requestedState = []
@@ -62,7 +64,15 @@ class State(Singleton):
         # self.logger.info(gpsFix)
         # self.logger.info('GPS Update {}.{} @ {}'.format(gpsFix['lat'], gpsFix['lon'], gpsFix['time']))
         for key in gpsFix:
-            self.update('gps.' + key, gpsFix[key])
+            if key != 'time':
+                self.update('gps.' + key, gpsFix[key])
+            else:
+                if (gpsFix['mode'] >= 2):
+                    time = Time(gpsFix[key], format='fits', scale='utc', location=(gpsFix['lon'], gpsFix['lat']))
+                    self.update('gps.' + key, time.value)
+                    self.update('time.jde', time.jd)
+                    self.update('time.sidereal.local', time.sidereal_time('apparent').hour)
+                    self.update('time.sidereal.gmt', time.sidereal_time('apparent', 'greenwich').hour)
 
     # Control board state updates
 
@@ -133,7 +143,7 @@ class State(Singleton):
 
     def requestCalibration(self, client: str, value: bool):
         self.logger.info("{} : Request Calibrating : {}".format(client, value))
-        self.state.update('calibrating', value)
+        self.update('calibrating', value)
         # self.processStateUpdate()
 
     # Generic motor request functions
@@ -177,25 +187,25 @@ class State(Singleton):
         self.updateMotorDelta('ra', packet)
 
     def updateStopAll(self, packet: Packet):
-        self.state.update('motors.stopAll', packet.arg1)
+        self.update('motors.stopAll', packet.arg1)
 
     # Generic motor update functions
     def updateMotorState(self, motor: str, packet: Packet):
-        self.state.update('motors.' + motor + '.state',
+        self.update('motors.' + motor + '.state',
                           Packet.binaryToMotorState(packet.arg1))
 
     def updateMotorPosition(self, motor: str, packet: Packet):
-        self.state.update('motors.' + motor + '.position', packet.arg1)
+        self.update('motors.' + motor + '.position', packet.arg1)
 
     def updateMotorDelta(self, motor: str, packet: Packet):
-        self.state.update('motors.' + motor + '.delta', packet.arg1)
+        self.update('motors.' + motor + '.delta', packet.arg1)
 
     def updateLNBVoltage(self, packet: Packet):
-        self.state.update(
+        self.update(
             'lnb.voltage', Packet.binaryToLNBVoltage(packet.arg1))
 
     def updateLNBCarrier(self, packet: Packet):
-        self.state.update(
+        self.update(
             'lnb.carrier', Packet.binaryToLNBCarrier(packet.arg2))
 
     # Compare requested state to actual state and issue commands

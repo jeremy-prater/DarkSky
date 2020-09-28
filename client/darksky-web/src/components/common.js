@@ -42,9 +42,9 @@ export default {
             this.checkRadBounds(base.toRad(coords.dec))
         );
 
-        let siderealTime = sidereal.apparent(state.actual.jde);
+        let siderealTime = sidereal.apparent(state.getByKey('jde'));
         let altaz = eqCoord.toHorizontal(
-            new globe.Coord(state.actual.gps.lat, state.actual.gps.lon),
+            new globe.Coord(state.getByKey('gps.lat'), state.getByKey('gps.lon')),
             siderealTime
         );
         return {
@@ -58,9 +58,9 @@ export default {
             this.checkRadBounds(base.toRad(coords.alt))
         );
 
-        let siderealTime = sidereal.apparent(state.actual.jde);
+        let siderealTime = sidereal.apparent(state.getByKey('jde'));
         let radec = eqCoord.toEquatorial(
-            new globe.Coord(state.actual.gps.lat, state.actual.gps.lon),
+            new globe.Coord(state.getByKey('gps.lat'), state.getByKey('gps.lon')),
             siderealTime
         );
         return {
