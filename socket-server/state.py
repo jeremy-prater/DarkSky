@@ -38,6 +38,7 @@ class State(Singleton):
             'motors.dec.delta': 0,
             'serial.port': '',
             'serial.connected': False,
+            'jde': 0,
         }
 
         self.requestedState = []
@@ -245,14 +246,14 @@ class State(Singleton):
         altStep = 2
         lnbRange = 100
 
-        context.state.update("dish.az", 0)
-        context.state.update("dish.alt", 0)
+        print(context)
+        context.update("dish.az", 0)
+        context.update("dish.alt", 0)
 
         while (context.simulating):
             bumpAlt = False
             curAz = context.state.get("dish.az") + azStep
             curAlt = context.state.get("dish.alt")
-            context.state.update("dish.az", curAz)
 
             if curAz >= 360:
                 curAz -= 360
@@ -269,12 +270,12 @@ class State(Singleton):
 
             curStrength = math.fabs(math.cos((context.state.get("dish.az") / 180) * math.pi)) * math.fabs(math.cos((context.state.get("dish.alt") / 90) * math.pi)) * lnbRange
 
-            context.state.update("dish.az", curAz)
-            context.state.update("dish.alt", curAlt)
-            context.state.update("lnb.strength", curStrength)
+            context.update("dish.az", curAz)
+            context.update("dish.alt", curAlt)
+            context.update("lnb.strength", curStrength)
 
             context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(curAz, curAlt, curStrength))
 
             context.UpdateDishPositionHistory()
 
-            time.sleep(0.05)
+            time.sleep(10.0)
