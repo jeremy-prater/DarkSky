@@ -1,17 +1,30 @@
 <template>
   <div>
-    <div id="celestial-map" class="celestialmap" @mousemove="updateCoords" @contextmenu="mapMenu"></div>
+    <div
+      id="celestial-map"
+      class="celestialmap"
+      @mousemove="updateCoords"
+      @contextmenu="mapMenu"
+    ></div>
     <div class="overlaypanel mappanel">
       <div class="overlaypanel-title">
-        <font-awesome-icon :icon="['fa', 'map-marked-alt']" size="lg" class="statusicon" />Map overlay
+        <font-awesome-icon
+          :icon="['fa', 'map-marked-alt']"
+          size="lg"
+          class="statusicon"
+        />Map overlay
       </div>
       <div class="overlaypanel-text overlaypanel-item maplist">
         <ul>
-          <li>Lat : {{ state.getByKey('gps.lat') }}</li>
-          <li>Lng : {{ state.getByKey('gps.lon') }}</li>
-          <li>Time : {{ state.getByKey('gps.time') }}</li>
-          <li>JDE : {{ state.getByKey('jde') }}</li>
-          <li>RA : {{ common.deg2hms(mouseRADec[0]) }} ({{ common.deg2dms(mouseRADec[0]) }})</li>
+          <li>Lat : {{ state.image["gps.lat"] }}</li>
+          <li>Lng : {{ state.image["gps.lon"] }}</li>
+          <li>Time : {{ state.image["gps.time"] }}</li>
+          <li>JDE : {{ state.image["time.jde"] }}</li>
+          <li>
+            RA : {{ common.deg2hms(mouseRADec[0]) }} ({{
+              common.deg2dms(mouseRADec[0])
+            }})
+          </li>
           <li>Dec : {{ common.deg2dms(mouseRADec[1]) }}</li>
           <li>Az : {{ common.deg2dms(mouseAzAlt[0]) }}</li>
           <li>Alt : {{ common.deg2dms(mouseAzAlt[1]) }}</li>
@@ -22,22 +35,26 @@
         class="overlaypanel-text"
         v-model="celestialConfig.stars.show"
         @input="mapConfigChanged"
-      >Stars</b-form-checkbox>
+        >Stars</b-form-checkbox
+      >
       <b-form-checkbox
         class="overlaypanel-text"
         v-model="celestialConfig.dsos.show"
         @input="mapConfigChanged"
-      >Deep space objects</b-form-checkbox>
+        >Deep space objects</b-form-checkbox
+      >
       <b-form-checkbox
         class="overlaypanel-text"
         v-model="celestialConfig.planets.show"
         @input="mapConfigChanged"
-      >Planets</b-form-checkbox>
+        >Planets</b-form-checkbox
+      >
       <b-form-checkbox
         class="overlaypanel-text"
         v-model="celestialConfig.mw.show"
         @input="mapConfigChanged"
-      >Milkyway</b-form-checkbox>
+        >Milkyway</b-form-checkbox
+      >
 
       <b-button @click="resetView">Reset View</b-button>
       <!-- v-color-picker v-model="color"></v-color-picker -->
@@ -50,7 +67,7 @@ import { mapState } from "vuex";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-// import { Celestial } from "d3-celestial";
+import { Celestial } from "d3-celestial";
 // import { julian } from "astronomia";
 import Rainbow from "rainbowvis.js";
 import common from "./common";
@@ -65,7 +82,6 @@ export default {
       mouseRADec: [0, 0],
       mouseAzAlt: [0, 0],
       posSet: false,
-      jde: 0,
       dishPos: {
         alt: 0,
         az: 0
@@ -373,23 +389,22 @@ export default {
   },
   mounted() {
     console.log("Created Scanhome...");
-    // window.addEventListener(
-    //   "resize",
-    //   function(event) {
-    //     this.resize(event);
-    //   }.bind(this)
-    // );
+    window.addEventListener(
+      "resize",
+      function(event) {
+        this.resize(event);
+      }.bind(this)
+    );
 
-    // this.celestial = Celestial();
-    // this.timestamp = moment();
-    // this.celestial.add({
-    //   file: "",
-    //   type: "json",
-    //   callback: this.generateDishTrack,
-    //   redraw: this.redrawDishTrack
-    // });
-    // this.celestial.display(this.celestialConfig);
-    // setInterval(this.tick, 1000);
+    this.celestial = Celestial();
+    this.celestial.add({
+      file: "",
+      type: "json",
+      callback: this.generateDishTrack,
+      redraw: this.redrawDishTrack
+    });
+    this.celestial.display(this.celestialConfig);
+    setInterval(this.tick, 1000);
   },
   methods: {
     mapMenu(event) {
@@ -401,14 +416,12 @@ export default {
         event.offsetY
       ]);
       if (radec != null) {
-        // radec[0] += 180;
         this.mouseRADec = radec;
-        // this.mouseRADec[0] += 180;
       }
       this.updateAzAlt();
     },
     updateAzAlt() {
-      if (this.state.getByKey("gps.mode") >= 2) {
+      if (this.state.image["gps.mode"] >= 2) {
         const azalt = common.convertRADec2AzAlt(this.state, {
           ra: this.mouseRADec[0],
           dec: this.mouseRADec[1]
@@ -435,7 +448,7 @@ export default {
       // this.dishTrack.features[0].geometry.strength[0] = this.state.actual.dish.historyStrength;
       let lastRADec = null;
       let dcCounter = 0;
-      this.state.getByKey("dish.historyPath").forEach(coords => {
+      this.state.image["dish.historyPath"].forEach(coords => {
         if (lastRADec == null) {
           lastRADec = common.convertAzAlt2RADec(this.state, {
             az: coords[0],
@@ -456,7 +469,7 @@ export default {
             strokeColor:
               "#" +
               this.dishGradient.colorAt(
-                this.state.getByKey('dish.historyStrength')[dcCounter++]
+                this.state.image["dish.historyStrength"][dcCounter++]
               )
           },
           geometry: {
@@ -483,8 +496,8 @@ export default {
       });
       // this.dishTrack.features[1].geometry.coordinates = this.dishTrack.features[0].geometry.coordinates[0][0];
       let dishTarget = common.convertAzAlt2RADec(this.state, {
-        az: this.state.getByKey("dish.az"),
-        alt: this.state.getByKey("dish.alt")
+        az: this.state.image["dish.az"],
+        alt: this.state.image["dish.alt"]
       });
 
       this.dishTrack.features.push({
@@ -528,7 +541,7 @@ export default {
       };
 
       // Add more line segments!!
-      if (this.state.getByKey("gps.mode") >= 2) {
+      if (this.state.image["gps.mode"] >= 2) {
         this.generateDishTrack(null, null);
       }
 
@@ -562,9 +575,7 @@ export default {
                 this.celestial.setStyle({
                   stroke:
                     "#" +
-                    this.dishGradient.colorAt(
-                      this.state.getByKey("lnb.strength")
-                    ),
+                    this.dishGradient.colorAt(this.state.image["lnb.strength"]),
                   width: 3
                 });
                 // Start the drawing path
@@ -592,6 +603,20 @@ export default {
     },
     tick() {
       // What is this for?
+      // if (this.state.image["gps.mode"] >= 2) {
+      //   const gpsLat = this.state.image["gps.lat"];
+      //   const gpsLon = this.state.image["gps.lon"];
+      //   if (
+      //     this.celestialConfig.geopos == null ||
+      //     this.celestialConfig.geopos[0] != gpsLat ||
+      //     this.celestialConfig.geopos[1] != gpsLon
+      //   ) {
+      //     const curGPS = [gpsLat, gpsLon];
+      //     console.log("GPS Coords changed : " + curGPS);
+      //     this.celestialConfig.geopos = curGPS;
+      //     this.celestial.reload(this.celestialConfig);
+      //   }
+      // }
 
       this.celestial.redraw();
       this.updateAzAlt();

@@ -288,4 +288,4 @@ class State(Singleton):
 
             context.UpdateDishPositionHistory()
 
-            time.sleep(10.0)
+            time.sleep(60.0)

@@ -1,4 +1,4 @@
-import { coord, globe, base, sidereal } from 'astronomia';
+import { coord, globe, base } from 'astronomia';
 const lodash = require('lodash');
 
 function diff(obj1, obj2) {
@@ -20,10 +20,10 @@ export default {
     diffObjects: diff,
     checkRadBounds: function(radian) {
         while (radian > 2 * Math.PI) {
-            radian -= Math.PI;
+            radian -= 2 * Math.PI;
         }
         while (radian < 0) {
-            radian += Math.PI;
+            radian += 2 * Math.PI;
         }
         return radian;
     },
@@ -42,10 +42,12 @@ export default {
             this.checkRadBounds(base.toRad(coords.dec))
         );
 
-        let siderealTime = sidereal.apparent(state.getByKey('jde'));
         let altaz = eqCoord.toHorizontal(
-            new globe.Coord(state.getByKey('gps.lat'), state.getByKey('gps.lon')),
-            siderealTime
+            new globe.Coord(
+                state.image['gps.lat'],
+                state.image['gps.lon']
+            ),
+            state.image['time.sidereal.gmt']
         );
         return {
             az: this.checkDegBounds(base.toDeg(altaz.az)),
@@ -58,10 +60,9 @@ export default {
             this.checkRadBounds(base.toRad(coords.alt))
         );
 
-        let siderealTime = sidereal.apparent(state.getByKey('jde'));
         let radec = eqCoord.toEquatorial(
-            new globe.Coord(state.getByKey('gps.lat'), state.getByKey('gps.lon')),
-            siderealTime
+            new globe.Coord(state.image['gps.lat'], state.image['gps.lon']),
+            state.image['time.sidereal.gmt']
         );
         return {
             ra: this.checkDegBounds(base.toDeg(radec.ra)),

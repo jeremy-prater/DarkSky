@@ -9,7 +9,7 @@
         size="lg"
         color="green"
         class="statusicon"
-        v-if="state.actual.motorServerConnected"
+        v-if="state.motorServerConnected"
       />
       <font-awesome-icon
         :icon="['fas', 'satellite-dish']"
@@ -24,7 +24,7 @@
         size="lg"
         color="green"
         class="statusicon"
-        v-if="state.actual.motorServerConnected && state.actual.gps.mode >= 2"
+        v-if="state.motorServerConnected && gpsMode >= 2"
       />
       <font-awesome-icon
         :icon="['fas', 'compass']"
@@ -36,11 +36,11 @@
     </div>
     <div class="overlaypanel-text overlaypanel-item maplist">
       <ul>
-        <li>Az : {{ common.deg2dms(state.actual.dish.az) }}</li>
-        <li>Alt : {{ common.deg2dms(state.actual.dish.alt) }}</li>
+        <li>Az : {{ common.deg2dms(state.image['dish.az']) }}</li>
+        <li>Alt : {{ common.deg2dms(state.image['dish.alt']) }}</li>
         <li>RA : {{ common.deg2hms(dish.ra) }}</li>
         <li>Dec : {{ common.deg2dms(dish.dec) }}</li>
-        <li>Strength : {{ state.actual.lnb.strength.toFixed(5) }}</li>
+        <li>Strength : {{ state.image['lnb.strength'].toFixed(5) }}</li>
       </ul>
       <b-button @click="openCalibrate">Calibrate</b-button>
     </div>
@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faSatelliteDish, faCompass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -87,9 +87,13 @@ export default {
   },
   components: { FontAwesomeIcon, Calibration },
   computed: {
+    ...mapGetters(["getByKey"]),
     ...mapState({
       state: state => state
-    })
+    }),
+    gpsMode: function() {
+      return this.getByKey("gps.mode");
+    }
   },
   mounted() {
     console.log("Created Status panel...");
@@ -111,8 +115,8 @@ export default {
   methods: {
     tick() {
       const radec = common.convertAzAlt2RADec(this.state, {
-        az: this.state.actual.dish.az - 180,
-        alt: this.state.actual.dish.alt
+        az: this.state.image['dish.az'] - 180,
+        alt: this.state.image['dish.alt']
       });
       this.dish.ra = radec.ra;
       this.dish.dec = radec.dec;
