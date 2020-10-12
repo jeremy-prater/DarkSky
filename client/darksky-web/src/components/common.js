@@ -1,4 +1,4 @@
-import { coord, globe, base } from 'astronomia';
+import { coord, globe, base, sidereal } from 'astronomia';
 const lodash = require('lodash');
 
 function diff(obj1, obj2) {
@@ -43,10 +43,7 @@ export default {
         );
 
         let altaz = eqCoord.toHorizontal(
-            new globe.Coord(
-                state.image['gps.lat'],
-                state.image['gps.lon']
-            ),
+            new globe.Coord(state.image['gps.lat'], state.image['gps.lon']),
             state.image['time.sidereal.gmt']
         );
         return {

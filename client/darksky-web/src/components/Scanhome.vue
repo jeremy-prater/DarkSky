@@ -20,6 +20,7 @@
           <li>Lng : {{ state.image["gps.lon"] }}</li>
           <li>Time : {{ state.image["gps.time"] }}</li>
           <li>JDE : {{ state.image["time.jde"] }}</li>
+          <li>Sidereal: {{ state.image["time.sidereal.gmt"] }}</li>
           <li>
             RA : {{ common.deg2hms(mouseRADec[0]) }} ({{
               common.deg2dms(mouseRADec[0])
@@ -603,20 +604,29 @@ export default {
     },
     tick() {
       // What is this for?
-      // if (this.state.image["gps.mode"] >= 2) {
-      //   const gpsLat = this.state.image["gps.lat"];
-      //   const gpsLon = this.state.image["gps.lon"];
-      //   if (
-      //     this.celestialConfig.geopos == null ||
-      //     this.celestialConfig.geopos[0] != gpsLat ||
-      //     this.celestialConfig.geopos[1] != gpsLon
-      //   ) {
-      //     const curGPS = [gpsLat, gpsLon];
-      //     console.log("GPS Coords changed : " + curGPS);
-      //     this.celestialConfig.geopos = curGPS;
-      //     this.celestial.reload(this.celestialConfig);
-      //   }
-      // }
+      if (this.state.image["gps.mode"] >= 2) {
+        const gpsLat = this.state.image["gps.lat"];
+        const gpsLon = this.state.image["gps.lon"];
+        if (
+          this.celestialConfig.geopos == null ||
+          this.celestialConfig.geopos[0] != gpsLat ||
+          this.celestialConfig.geopos[1] != gpsLon
+        ) {
+          this.posSet = true;
+          const curGPS = [gpsLat, gpsLon];
+          console.log("GPS Coords changed : " + curGPS);
+          this.celestialConfig.geopos = curGPS;
+          this.celestial.reload(this.celestialConfig);
+        }
+      }
+
+      if (this.posSet) {
+        this.posSet = false;
+        this.celestial.skyview({
+          date: this.state.image["gps.time"],
+          location: [this.state.image["gps.lat"], this.state.image["gps.lon"]]
+        });
+      }
 
       this.celestial.redraw();
       this.updateAzAlt();

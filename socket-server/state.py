@@ -71,8 +71,8 @@ class State(Singleton):
                     time = Time(gpsFix[key], format='fits', scale='utc', location=(gpsFix['lon'], gpsFix['lat']))
                     self.update('gps.' + key, time.value)
                     self.update('time.jde', time.jd)
-                    self.update('time.sidereal.local', time.sidereal_time('apparent').hour)
-                    self.update('time.sidereal.gmt', time.sidereal_time('apparent', 'greenwich').hour)
+                    self.update('time.sidereal.local', time.sidereal_time('apparent').hour * 3600)
+                    self.update('time.sidereal.gmt', time.sidereal_time('apparent', 'greenwich').hour * 3600)
 
     # Control board state updates
 
