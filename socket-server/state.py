@@ -270,8 +270,8 @@ class State(Singleton):
         while (context.simulating):
             curAz = context.state.get("dish.az")
             curAlt = context.state.get("dish.alt")
-            curStrength = math.fabs(math.cos((context.state.get("dish.az") / 180) * math.pi)) * math.fabs(
-                math.cos((context.state.get("dish.alt") / 90) * math.pi)) * lnbRange
+            curStrength = math.fabs(math.cos((curAz / 180) * math.pi)) * math.fabs(
+                math.cos((curAlt / 90) * math.pi)) * lnbRange
 
             context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(
                 curAz, curAlt, curStrength))
@@ -281,8 +281,7 @@ class State(Singleton):
             time.sleep(60.0)
 
             bumpAlt = False
-            curAz = context.state.get("dish.az") + azStep
-            curAlt = context.state.get("dish.alt")
+            curAz = curAz + azStep
 
             if curAz >= 360:
                 curAz -= 360
