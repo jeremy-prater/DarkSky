@@ -42,16 +42,17 @@ export default {
             this.checkRadBounds(base.toRad(coords.dec))
         );
 
-        let lat = state.image['gps.lat'];
-        let lon = state.image['gps.lon'];
+        let lat = base.toRad(state.image['gps.lat']);
+        let lon = base.toRad(this.checkDegBounds(-state.image['gps.lon']));
 
         let altaz = eqCoord.toHorizontal(
             new globe.Coord(lat, lon),
             state.image['time.sidereal.gmt']
         );
+
         return {
-            az: this.checkDegBounds(base.toDeg(altaz.az)),
-            alt: this.checkDegBounds(base.toDeg(altaz.alt)),
+            az: this.checkDegBounds(base.toDeg(altaz.az) - 180),
+            alt: base.toDeg(altaz.alt),
         };
     },
     convertAzAlt2RADec: function(state, coords) {
@@ -60,16 +61,17 @@ export default {
             this.checkRadBounds(base.toRad(coords.alt))
         );
 
-        let lat = state.image['gps.lat'];
-        let lon = state.image['gps.lon'];
+        let lat = base.toRad(state.image['gps.lat']);
+        let lon = base.toRad(this.checkDegBounds(-state.image['gps.lon']));
 
         let radec = eqCoord.toEquatorial(
             new globe.Coord(lat, lon),
             state.image['time.sidereal.gmt']
         );
+
         return {
-            ra: this.checkDegBounds(base.toDeg(radec.ra)),
-            dec: this.checkDegBounds(base.toDeg(radec.dec)),
+            ra: base.toDeg(radec.ra),
+            dec: base.toDeg(radec.dec),
         };
     },
     deg2hms(deg) {
@@ -80,16 +82,33 @@ export default {
             m = Math.floor(rest1),
             rest2 = (rest1 - m) * 60,
             s = Math.round(rest2);
-        return '' + this.pad(h) + 'ʰ ' + this.pad(m) + 'ᵐ ' + this.pad(s) + 'ˢ';
+        return (
+            '' +
+            this.pad(h) +
+            'ʰ ' +
+            this.pad(Math.abs(m)) +
+            'ᵐ ' +
+            this.pad(Math.abs(s)) +
+            'ˢ'
+        );
     },
     deg2dms(deg) {
         if (deg === null || isNaN(parseFloat(deg))) return;
-        let d = Math.floor(deg),
+
+        let d = deg < 0 ? Math.ceil(deg) : Math.floor(deg),
             rest1 = (deg - d) * 60,
-            m = Math.floor(rest1),
+            m = rest1 < 0 ? Math.ceil(rest1) : Math.floor(rest1),
             rest2 = (rest1 - m) * 60,
             s = Math.round(rest2);
-        return '' + this.pad(d) + '° ' + this.pad(m) + '′ ' + this.pad(s) + '″';
+        return (
+            '' +
+            this.pad(d) +
+            '° ' +
+            this.pad(Math.abs(m)) +
+            '′ ' +
+            this.pad(Math.abs(s)) +
+            '″'
+        );
     },
 
     pad(n) {

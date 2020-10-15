@@ -78,9 +78,9 @@ class State(Singleton):
                     self.update('gps.' + key, time.value)
                     self.update('time.jde', time.jd)
                     self.update('time.sidereal.local',
-                                time.sidereal_time('apparent').hour * 3600)
+                                time.sidereal_time('mean').hour * 3600)
                     self.update('time.sidereal.gmt', time.sidereal_time(
-                        'apparent', 'greenwich').hour * 3600)
+                        'mean', 'greenwich').hour * 3600)
 
     # Control board state updates
 

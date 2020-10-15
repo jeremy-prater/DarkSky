@@ -427,6 +427,8 @@ export default {
           ra: this.mouseRADec[0],
           dec: this.mouseRADec[1]
         });
+        if (azalt.alt >= 180)
+          azalt.alt -= 360;
         this.mouseAzAlt = [azalt.az, azalt.alt];
       }
     },
@@ -614,7 +616,9 @@ export default {
         ) {
           this.posSet = true;
           const curGPS = [gpsLat, gpsLon];
-          console.log("GPS Coords changed : " + curGPS);
+          console.log(
+            "GPS Coords changed @ Lat : " + curGPS[0] + " Lon : " + curGPS[1]
+          );
           this.celestialConfig.geopos = curGPS;
           this.celestial.reload(this.celestialConfig);
         }
