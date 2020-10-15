@@ -7,6 +7,8 @@ import random
 from packet import Packet, PacketCommand
 from singleton import Singleton
 from astropy.time import Time
+from astropy.coordinates import EarthLocation
+
 
 class State(Singleton):
     MOTOR_STATES = [
@@ -68,11 +70,17 @@ class State(Singleton):
                 self.update('gps.' + key, gpsFix[key])
             else:
                 if (gpsFix['mode'] >= 2):
-                    time = Time(gpsFix[key], format='fits', scale='utc', location=(gpsFix['lon'], gpsFix['lat']))
+                    eLocation = EarthLocation.from_geodetic(lon=gpsFix['lon'],
+                                                            lat=gpsFix['lat'],
+                                                            height=gpsFix['alt'])
+                    time = Time(gpsFix[key], format='fits',
+                                scale='utc', location=eLocation)
                     self.update('gps.' + key, time.value)
                     self.update('time.jde', time.jd)
-                    self.update('time.sidereal.local', time.sidereal_time('apparent').hour * 3600)
-                    self.update('time.sidereal.gmt', time.sidereal_time('apparent', 'greenwich').hour * 3600)
+                    self.update('time.sidereal.local',
+                                time.sidereal_time('apparent').hour * 3600)
+                    self.update('time.sidereal.gmt', time.sidereal_time(
+                        'apparent', 'greenwich').hour * 3600)
 
     # Control board state updates
 
@@ -192,7 +200,7 @@ class State(Singleton):
     # Generic motor update functions
     def updateMotorState(self, motor: str, packet: Packet):
         self.update('motors.' + motor + '.state',
-                          Packet.binaryToMotorState(packet.arg1))
+                    Packet.binaryToMotorState(packet.arg1))
 
     def updateMotorPosition(self, motor: str, packet: Packet):
         self.update('motors.' + motor + '.position', packet.arg1)
@@ -211,7 +219,7 @@ class State(Singleton):
     # Compare requested state to actual state and issue commands
     def processStateUpdate(self):
         from mcp_serial import MotorPowerController
-        mpc=MotorPowerController()
+        mpc = MotorPowerController()
 
         # LNB State
 
@@ -227,9 +235,9 @@ class State(Singleton):
                 self.state.get("lnb.strength"))
             return
 
-        dazalt=self.state.get("dish.historyPath")[0]
-        daz=abs(self.state.get("dish.az") - dazalt[0])
-        dalt=abs(self.state.get("dish.alt") - dazalt[1])
+        dazalt = self.state.get("dish.historyPath")[0]
+        daz = abs(self.state.get("dish.az") - dazalt[0])
+        dalt = abs(self.state.get("dish.alt") - dazalt[1])
 
         if daz >= 1 or dalt >= 1:
             self.state.get("dish.historyPath").insert(
@@ -242,8 +250,8 @@ class State(Singleton):
             self.state.get("dish.historyStrength").pop()
 
     def StartSimulation(self):
-        self.simulating=False
-        self.simulationThread=threading.Thread(
+        self.simulating = False
+        self.simulationThread = threading.Thread(
             target=self.SimulationThread, args=(self,), daemon=True)
         self.simulationThread.start()
 
@@ -256,11 +264,22 @@ class State(Singleton):
         altStep = 2
         lnbRange = 100
 
-        print(context)
-        context.update("dish.az", 0)
-        context.update("dish.alt", 0)
+        context.update("dish.az", 246 + (51/60) + (40 / 3600))
+        context.update("dish.alt", 30 + (18/60) + (30 / 3600))
 
         while (context.simulating):
+            curAz = context.state.get("dish.az")
+            curAlt = context.state.get("dish.alt")
+            curStrength = math.fabs(math.cos((context.state.get("dish.az") / 180) * math.pi)) * math.fabs(
+                math.cos((context.state.get("dish.alt") / 90) * math.pi)) * lnbRange
+
+            context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(
+                curAz, curAlt, curStrength))
+
+            context.UpdateDishPositionHistory()
+
+            time.sleep(60.0)
+
             bumpAlt = False
             curAz = context.state.get("dish.az") + azStep
             curAlt = context.state.get("dish.alt")
@@ -278,14 +297,6 @@ class State(Singleton):
                 altStep = -altStep
                 curAlt += altStep
 
-            curStrength = math.fabs(math.cos((context.state.get("dish.az") / 180) * math.pi)) * math.fabs(math.cos((context.state.get("dish.alt") / 90) * math.pi)) * lnbRange
-
             context.update("dish.az", curAz)
             context.update("dish.alt", curAlt)
             context.update("lnb.strength", curStrength)
-
-            context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(curAz, curAlt, curStrength))
-
-            context.UpdateDishPositionHistory()
-
-            time.sleep(60.0)

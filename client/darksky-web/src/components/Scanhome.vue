@@ -134,7 +134,7 @@ export default {
         container: "celestial-map", // ID of parent element, e.g. div, null = html-body
         datapath: "data/", // Path/URL to data files, empty = subfolder 'data'
         stars: {
-          show: false, // Show stars
+          show: true, // Show stars
           limit: 5, // Show only stars brighter than limit magnitude
           colors: true, // Show stars in spectral colors, if not use default color
           style: { fill: "#ffffff", opacity: 1 }, // Default style for stars
@@ -437,7 +437,7 @@ export default {
     },
     resetView() {
       console.log("Resetting View");
-      this.posSet = false;
+      this.posSet = true;
     },
     generateDishTrack(error, json) {
       error;
@@ -478,8 +478,8 @@ export default {
             // always as [ra -180..180 degrees, dec -90..90 degrees]
             type: "LineString",
             coordinates: [
-              [lastRADec.ra - 180, lastRADec.dec],
-              [currentRADec.ra - 180, currentRADec.dec]
+              [lastRADec.ra + 180, lastRADec.dec],
+              [currentRADec.ra + 180, currentRADec.dec]
             ]
           }
         });
@@ -514,7 +514,7 @@ export default {
         geometry: {
           // the location of the object as a [ra, dec] array in degrees [-180..180, -90..90]
           type: "Point",
-          coordinates: [dishTarget.ra - 180, dishTarget.dec]
+          coordinates: [dishTarget.ra + 180, dishTarget.dec]
         }
       });
 

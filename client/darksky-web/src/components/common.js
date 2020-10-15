@@ -1,4 +1,4 @@
-import { coord, globe, base, sidereal } from 'astronomia';
+import { coord, globe, base } from 'astronomia';
 const lodash = require('lodash');
 
 function diff(obj1, obj2) {
@@ -42,8 +42,11 @@ export default {
             this.checkRadBounds(base.toRad(coords.dec))
         );
 
+        let lat = state.image['gps.lat'];
+        let lon = state.image['gps.lon'];
+
         let altaz = eqCoord.toHorizontal(
-            new globe.Coord(state.image['gps.lat'], state.image['gps.lon']),
+            new globe.Coord(lat, lon),
             state.image['time.sidereal.gmt']
         );
         return {
@@ -57,8 +60,11 @@ export default {
             this.checkRadBounds(base.toRad(coords.alt))
         );
 
+        let lat = state.image['gps.lat'];
+        let lon = state.image['gps.lon'];
+
         let radec = eqCoord.toEquatorial(
-            new globe.Coord(state.image['gps.lat'], state.image['gps.lon']),
+            new globe.Coord(lat, lon),
             state.image['time.sidereal.gmt']
         );
         return {

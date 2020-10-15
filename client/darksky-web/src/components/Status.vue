@@ -36,11 +36,13 @@
     </div>
     <div class="overlaypanel-text overlaypanel-item maplist">
       <ul>
-        <li>Az : {{ common.deg2dms(state.image['dish.az']) }}</li>
-        <li>Alt : {{ common.deg2dms(state.image['dish.alt']) }}</li>
-        <li>RA : {{ common.deg2hms(dish.ra) }}</li>
+        <li>Az : {{ common.deg2dms(state.image["dish.az"]) }}</li>
+        <li>Alt : {{ common.deg2dms(state.image["dish.alt"]) }}</li>
+        <li>
+          RA : {{ common.deg2hms(dish.ra) }} ({{ common.deg2dms(dish.ra) }})
+        </li>
         <li>Dec : {{ common.deg2dms(dish.dec) }}</li>
-        <li>Strength : {{ state.image['lnb.strength'].toFixed(5) }}</li>
+        <li>Strength : {{ state.image["lnb.strength"].toFixed(5) }}</li>
       </ul>
       <b-button @click="openCalibrate">Calibrate</b-button>
     </div>
@@ -115,8 +117,8 @@ export default {
   methods: {
     tick() {
       const radec = common.convertAzAlt2RADec(this.state, {
-        az: this.state.image['dish.az'] - 180,
-        alt: this.state.image['dish.alt']
+        az: this.state.image["dish.az"],
+        alt: this.state.image["dish.alt"]
       });
       this.dish.ra = radec.ra;
       this.dish.dec = radec.dec;
