@@ -264,8 +264,8 @@ class State(Singleton):
         altStep = 2
         lnbRange = 100
 
-        context.update("dish.az", 246 + (51/60) + (40 / 3600))
-        context.update("dish.alt", 30 + (18/60) + (30 / 3600))
+        context.update("dish.az", 0)
+        context.update("dish.alt", 0)
 
         while (context.simulating):
             curAz = context.state.get("dish.az")
@@ -278,7 +278,7 @@ class State(Singleton):
 
             context.UpdateDishPositionHistory()
 
-            time.sleep(60.0)
+            time.sleep(0.1)
 
             bumpAlt = False
             curAz = curAz + azStep

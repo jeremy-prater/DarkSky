@@ -427,8 +427,7 @@ export default {
           ra: this.mouseRADec[0],
           dec: this.mouseRADec[1]
         });
-        if (azalt.alt >= 180)
-          azalt.alt -= 360;
+        azalt.alt = common.convertToD3RA(azalt.alt)
         this.mouseAzAlt = [azalt.az, azalt.alt];
       }
     },
@@ -480,8 +479,8 @@ export default {
             // always as [ra -180..180 degrees, dec -90..90 degrees]
             type: "LineString",
             coordinates: [
-              [lastRADec.ra + 180, lastRADec.dec],
-              [currentRADec.ra + 180, currentRADec.dec]
+              [common.convertToD3RA(lastRADec.ra), lastRADec.dec],
+              [common.convertToD3RA(currentRADec.ra), currentRADec.dec]
             ]
           }
         });
@@ -516,7 +515,7 @@ export default {
         geometry: {
           // the location of the object as a [ra, dec] array in degrees [-180..180, -90..90]
           type: "Point",
-          coordinates: [dishTarget.ra + 180, dishTarget.dec]
+          coordinates: [common.convertToD3RA(dishTarget.ra), dishTarget.dec]
         }
       });
 

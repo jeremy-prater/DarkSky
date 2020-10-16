@@ -57,7 +57,7 @@ export default {
     },
     convertAzAlt2RADec: function(state, coords) {
         let eqCoord = new coord.Horizontal(
-            this.checkRadBounds(base.toRad(coords.az)),
+            this.checkRadBounds(base.toRad(coords.az - 180)),
             this.checkRadBounds(base.toRad(coords.alt))
         );
 
@@ -69,10 +69,21 @@ export default {
             state.image['time.sidereal.gmt']
         );
 
+        radec;
+
         return {
             ra: base.toDeg(radec.ra),
             dec: base.toDeg(radec.dec),
         };
+    },
+    convertToD3RA: function(value) {
+        while (value > 180) {
+            value -= 360;
+        }
+        while (value < -180) {
+            value += 360;
+        }
+        return value;
     },
     deg2hms(deg) {
         if (deg === null || isNaN(parseFloat(deg))) return;
