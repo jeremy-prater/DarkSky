@@ -51,77 +51,50 @@ export default new Vuex.Store({
         updateState(state, newState) {
             state.image = lodash.merge(state.image, newState);
             state.image['dish.historyPath'] = newState['dish.historyPath'];
-            state.image['dish.historyStrength'] = newState['dish.historyStrength'];
-
-            // if (state.firstUpdate) {
-            //     state.firstUpdate = false;
-            //     state.requested.calibrating = state.actual.calibrating;
-            //     state.requested.lnb = state.actual.lnb;
-            //     state.requested.motors = state.actual.motors;
-            // }
-
-            // // Check for state differences!
-            // const stateDiff = common.default.diffObjects(state.requested, state.actual);
-            // console.log(JSON.stringify(stateDiff));
-
-            // if (state.requested.motors.stopAll && state.actual.motors.stopAll) {
-            //     console.log("Motor Stop All acknowledged!");
-            //     this.commit("requestStopAll", false);
-            // }
-
-            // if (state.requested.motors.stopAll && state.actual.motors.stopAll) {
-            //     console.log("Motor Stop All acknowledged!");
-            //     this.commit("requestStopAll", false);
-            // }
+            state.image['dish.historyStrength'] =
+                newState['dish.historyStrength'];
         },
         requestStopAll(state, payload) {
-            state.requested.motors.stopAll = payload;
-            this._vm.$socket.emit('stopAll', payload);
+            state;
+            this._vm.$socket.emit('requestState', {
+                'motors.stopAll': payload,
+            });
         },
         requestDecMotorState(state, payload) {
             state;
             payload;
-            // state.requested.decMotor.state = payload;
         },
         requestDecMotorPosition(state, payload) {
             state;
             payload;
-            // state.requested.decMotor.position = payload;
         },
         requestDecMotorStopPos(state, payload) {
             state;
             payload;
-            // state.requested.decMotor.stopPos = payload;
         },
         requestRAMotorState(state, payload) {
             state;
             payload;
-            // state.requested.raMotor.state = payload;
         },
         requestRAMotorPosition(state, payload) {
             state;
             payload;
-            // state.requested.raMotor.position = payload;
         },
         requestRAMotorStopPos(state, payload) {
             state;
             payload;
-            // state.requested.raMotor.stopPos = payload;
         },
         requestLNBVoltage(state, payload) {
             state;
             payload;
-            // state.requested.lnbState.voltage = payload;
         },
         requestLNBCarrier(state, payload) {
             state;
             payload;
-            // state.requested.lnbState.carrier = payload;
         },
         requestCalibration(state, payload) {
             state;
-            // state.requested.calibrating = payload;
-            this._vm.$socket.emit('calibration', payload);
+            this._vm.$socket.emit('requestState', { calibration: payload });
         },
     },
     getters: {

@@ -112,7 +112,6 @@ class State(Singleton):
     # Motor request methods
 
     # Dec motor requests
-
     def requestDecState(self, client: str, value: str):
         self.logger.info("{} : Request Dec State : {}".format(client, value))
         self.requestMotorState('dec', value)
@@ -170,6 +169,10 @@ class State(Singleton):
     def requestStopAll(self, client: str, value: bool):
         self.requestedState.append({'motors.stopAll': value})
         self.processStateUpdate()
+
+    def requestState(self, client: str, states: dict):
+        for state in states.items():
+            self.logger.info("Request State : {} : {} -> {}".format(client, state[0], state[1]))
 
     # State update methods
 
