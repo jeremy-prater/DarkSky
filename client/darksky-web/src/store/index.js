@@ -94,7 +94,7 @@ export default new Vuex.Store({
         },
         requestCalibration(state, payload) {
             state;
-            this._vm.$socket.emit('requestState', { calibration: payload });
+            this._vm.$socket.emit('requestState', { calibrating: payload });
         },
     },
     getters: {

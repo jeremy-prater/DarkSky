@@ -1,12 +1,11 @@
-astropy==4.0.3
+astropy==4.1
 autopep8==1.5.4
 coloredlogs==14.0
 dnspython==1.16.0
-eventlet==0.28.0
+eventlet==0.29.1
 gpsd-py3==0.3.0
 greenlet==0.4.17
 humanfriendly==8.2
-monotonic==1.5
 numpy==1.19.2
 pycodestyle==2.6.0
 pyrtlsdr==0.2.92

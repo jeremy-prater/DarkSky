@@ -45,7 +45,7 @@ class Packet:
         return Packet(Packet.Magic, command, arg1, arg2, arg3, 0)
 
     @staticmethod
-    def binaryToMotorState(value):
+    def BinaryToMotorState(value):
         if value == 0:
             return "stop"
         elif value == 1:
@@ -58,7 +58,20 @@ class Packet:
             return "unknown"
 
     @staticmethod
-    def binaryToLNBVoltage(value):
+    def MotorStateToBinary(value):
+        if value == "stop":
+            return 0
+        elif value == "forward":
+            return 1
+        elif value == "reverse":
+            return 2
+        elif value == "stall":
+            return 3
+        else:
+            return 4
+
+    @staticmethod
+    def BinaryToLNBVoltage(value):
         if value == 0:
             return "off"
         elif value == 1:
@@ -69,7 +82,18 @@ class Packet:
             return "unknown"
 
     @staticmethod
-    def binaryToLNBCarrier(value):
+    def LNBVoltageToBinary(value):
+        if value == "off":
+            return 0
+        elif value == "13vdc":
+            return 1
+        elif value == "18vdc":
+            return 2
+        else:
+            return 3
+
+    @staticmethod
+    def BinaryToLNBCarrier(value):
         if value == 0:
             return "off"
         elif value == 1:
@@ -77,11 +101,23 @@ class Packet:
         else:
             return "unknown"
 
+    @staticmethod
+    def LNBCarrierToBinary(value):
+        if value == "off":
+            return 0
+        elif value == "on":
+            return 1
+        else:
+            return 2
+
     def GetRawBuffer(self):
         return struct.pack('IHHHHI', self.magic, self.command, self.arg1, self.arg2, self.arg3, self.checksum)
 
     def IsValid(self):
         return self.checksum == self.GenerateChecksum()
+
+    def IsEqual(self, packet):
+        return (self.checksum == packet.checksum) and (self.magic == packet.magic) and (self.command == packet.command) and (self.arg1 == packet.arg1) and (self.arg2 == packet.arg2) and (self.arg3 == packet.arg3)
 
     def SetChecksum(self):
         self.checksum = self.GenerateChecksum()
