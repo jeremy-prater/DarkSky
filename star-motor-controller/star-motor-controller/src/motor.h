@@ -20,6 +20,7 @@ typedef enum {
   MOTOR_STOP,
   MOTOR_FORWARD,
   MOTOR_REVERSE,
+  MOTOR_COMPLETE,
   MOTOR_STALL
 } MOTOR_STATE;
 
@@ -33,7 +34,7 @@ typedef enum {
 typedef struct {
   xSemaphoreHandle positionMutex;
   int16_t position; // Range [0, 11000) pulses per revolution
-  int16_t deltaPosition;
+  uint16_t deltaPosition;
   QUADRATURE_STATE quadratureState;
 
   xSemaphoreHandle stateMutex;

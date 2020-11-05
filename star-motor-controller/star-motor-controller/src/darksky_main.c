@@ -56,6 +56,10 @@ void DarkSkyMain(void *data) {
     // Show some sign of life!
     vTaskDelay(500 / portTICK_RATE_MS);
 
+    packet.command = STOP_ALL_MOTORS;
+    packet.arg1 = darkSkyContext.motor1.state;
+    SendCommPacket(&packet);
+
     packet.command = MOTOR_DEC_STATE;
     packet.arg1 = darkSkyContext.motor1.state;
     SendCommPacket(&packet);

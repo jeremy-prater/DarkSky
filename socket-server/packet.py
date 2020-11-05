@@ -53,6 +53,8 @@ class Packet:
         elif value == 2:
             return "reverse"
         elif value == 3:
+            return "complete"
+        elif value == 4:
             return "stall"
         else:
             return "unknown"
@@ -65,10 +67,12 @@ class Packet:
             return 1
         elif value == "reverse":
             return 2
-        elif value == "stall":
+        elif value == "complete":
             return 3
-        else:
+        elif value == "stall":
             return 4
+        else:
+            return 5
 
     @staticmethod
     def BinaryToLNBVoltage(value):

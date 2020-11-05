@@ -95,8 +95,11 @@ void CommandProcessorTask(void *data) {
             break;
 
           case STOP_ALL_MOTORS:
-            MotorStop(&darkSkyContext.motor1);
-            MotorStop(&darkSkyContext.motor2);
+            darkSkyContext.allMotorStop = packet->arg1;
+            if (darkSkyContext.allMotorStop) {
+              MotorStop(&darkSkyContext.motor1);
+              MotorStop(&darkSkyContext.motor2);
+            }
             break;
 
           case LNB_STATE:

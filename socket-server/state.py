@@ -50,7 +50,7 @@ class State(Singleton):
 
         self.requestedStateCondition = threading.Condition()
         self.requestedState = deque()
-        self.currentRequestedState = None
+        requestedState = None
 
         self.requestProcessingThread = threading.Thread(
             target=self.processRequestedState, args=(), daemon=True)
@@ -106,76 +106,99 @@ class State(Singleton):
 
     def processRequestedState(self):
         self.logger.info("Staring State Processing Thread")
+        count = 0
         while True:
             with self.requestedStateCondition:
-                while len(self.requestedState) and (self.currentRequestedState == None):
-                    currentStateRequest = self.requestedState.pop()
+                while len(self.requestedState):
+                    currentStateRequest = self.requestedState[-1]
                     state = currentStateRequest[0]
                     value = currentStateRequest[1]
                     self.logger.info(
-                        "Processing state request {} -> {}".format(state, value))
-                    self.processStateUpdate(state, value)
+                        "Processing state request : Ref {} : {} -> {}".format(count, state, value))
+                    count = count + 1
+                    if self.processStateUpdate(state, value):
+                        count = 0
+                        self.requestedState.pop()
+                    else:
+                        time.sleep(0.100)
 
-                self.logger.info("processRequestedState --> Sleep...")
-                self.requestedStateCondition.wait()
-                self.logger.info("processRequestedState --> Wake!!")
+                # self.logger.info("processRequestedState --> Sleep...")
+                self.requestedStateCondition.wait(1)
+                # self.logger.info("processRequestedState --> Wake!!")
+                self.safetyTick()
+
+    def safetyTick(self):
+        pass
 
     # Compare requested state to actual state and issue commands
     def processStateUpdate(self, state: str, value):
-        if self.currentRequestedState != None:
-            self.logger.error(
-                "processStateUpdate was called and currentRequestedState is not None!")
-            self.logger.error("currentRequestedState.magic    : {}".format(
-                self.currentRequestedState.magic))
-            self.logger.error("currentRequestedState.command  : {}".format(
-                self.currentRequestedState.command))
-            self.logger.error("currentRequestedState.arg1     : {}".format(
-                self.currentRequestedState.arg1))
-            self.logger.error("currentRequestedState.arg2     : {}".format(
-                self.currentRequestedState.arg2))
-            self.logger.error("currentRequestedState.arg3     : {}".format(
-                self.currentRequestedState.arg3))
-            self.logger.error("currentRequestedState.checksum : {}".format(
-                self.currentRequestedState.checksum))
+        # self.logger.info("Processing state update {} -> {}".format(state, value))
+        requestedState = None
 
-        from mcp_serial import MotorPowerController
-        mpc = MotorPowerController()
-        # Stop all motor state
-
-        self.logger.info("Processing state update {} -> {}".format(state, value))
+        # Catch all
+        if state.state[state] == value:
+            return True
 
         # Calibration
         if (state == "calibrating"):
             # We don't set the currentRequestedState here because this is an internal state
             self.state[state] = value
+            return True
+
+        # Stop all motors
+        elif (state == "motors.stopAll"):
+            requestedState = Packet.CreateFromStruct(
+                PacketCommand.STOP_ALL_MOTORS, value, 0, 0))
+            return False
 
         # DEC motor state
         elif (state == "motors.dec.state"):
-            self.currentRequestedState = Packet.CreateFromStruct(
-                PacketCommand.MOTOR_DEC_STATE, Packet.MotorStateToBinary(value), 0, 0)
+            requestedState=Packet.CreateFromStruct(
+                PacketCommand.MOTOR_DEC_STATE, Packet.MotorStateToBinary(value), 0, 0))
 
-        # packet.command = MOTOR_DEC_POSITION;
-        # packet.arg1 = darkSkyContext.motor1.position;
+        # DEC motor state
+        elif (state == "motors.dec.position"):
+            requestedState=Packet.CreateFromStruct(
+                PacketCommand.MOTOR_DEC_POSITION, value, 0, 0))
 
-        # packet.command = MOTOR_DEC_DELTA_POS;
-        # packet.arg1 = darkSkyContext.motor1.deltaPosition;
+        # DEC motor delta position
+        elif (state == "motors.dec.delta"):
+            requestedState=Packet.CreateFromStruct(
+                PacketCommand.MOTOR_DEC_DELTA_POS, value, 0, 0))
 
         # RA motor state
-        # packet.command = MOTOR_RA_STATE;
-        # packet.arg1 = darkSkyContext.motor2.state;
+        elif (state == "motors.ra.state"):
+            requestedState=Packet.CreateFromStruct(
+                PacketCommand.MOTOR_RA_STATE, Packet.MotorStateToBinary(value), 0, 0))
 
-        # packet.command = MOTOR_RA_POSITION;
-        # packet.arg1 = darkSkyContext.motor2.position;
+        # RA motor state
+        elif (state == "motors.ra.position"):
+            requestedState=Packet.CreateFromStruct(
+                PacketCommand.MOTOR_RA_POSITION, value, 0, 0))
 
-        # packet.command = MOTOR_RA_DELTA_POS;
-        # packet.arg1 = darkSkyContext.motor2.deltaPosition;
+        # RA motor delta position
+        elif (state == "motors.ra.delta"):
+            requestedState=Packet.CreateFromStruct(
+                PacketCommand.MOTOR_RA_DELTA_POS, value, 0, 0)
 
         # LNB State
-        # packet.command = LNB_STATE;
-        # packet.arg1 = darkSkyContext.lnb.power;
-        # packet.arg2 = darkSkyContext.lnb.carrier;
+        elif (state == "lnb.voltage"):
+            requestedState=Packet.CreateFromStruct(
+                PacketCommand.LNB_STATE, value, self.state['lnb.carrier'], 0)
+        elif (state == "lnb.carrier"):
+            requestedState=Packet.CreateFromStruct(
+                PacketCommand.LNB_STATE, self.state['lnb.power'], value, 0)
+
+        # Default case
         else:
-            self.logger.error("Unknown state flag! {} -> {}".format(state, value))
+            self.logger.error(
+                "Unknown state flag! {} -> {}".format(state, value))
+            return True
+
+        if requestedState != None:
+            from mcp_serial import MotorPowerController
+            MotorPowerController().SendPacket(requestedState)
+            return False
 
     # State update methods
 
@@ -229,9 +252,9 @@ class State(Singleton):
                 self.state.get("lnb.strength"))
             return
 
-        dazalt = self.state.get("dish.historyPath")[0]
-        daz = abs(self.state.get("dish.az") - dazalt[0])
-        dalt = abs(self.state.get("dish.alt") - dazalt[1])
+        dazalt=self.state.get("dish.historyPath")[0]
+        daz=abs(self.state.get("dish.az") - dazalt[0])
+        dalt=abs(self.state.get("dish.alt") - dazalt[1])
 
         if daz >= 1 or dalt >= 1:
             self.state.get("dish.historyPath").insert(
@@ -244,27 +267,27 @@ class State(Singleton):
             self.state.get("dish.historyStrength").pop()
 
     def StartSimulation(self):
-        self.simulating = False
-        self.simulationThread = threading.Thread(
+        self.simulating=False
+        self.simulationThread=threading.Thread(
             target=self.SimulationThread, args=(self,), daemon=True)
         self.simulationThread.start()
 
     @staticmethod
     def SimulationThread(context):
         context.logger.info("Starting Simulation Thread")
-        context.simulating = True
+        context.simulating=True
 
-        azStep = 5
-        altStep = 2
-        lnbRange = 100
+        azStep=5
+        altStep=2
+        lnbRange=100
 
         context.update("dish.az", 0)
         context.update("dish.alt", 0)
 
         while (context.simulating):
-            curAz = context.state.get("dish.az")
-            curAlt = context.state.get("dish.alt")
-            curStrength = math.fabs(math.cos((curAz / 180) * math.pi)) * math.fabs(
+            curAz=context.state.get("dish.az")
+            curAlt=context.state.get("dish.alt")
+            curStrength=math.fabs(math.cos((curAz / 180) * math.pi)) * math.fabs(
                 math.cos((curAlt / 90) * math.pi)) * lnbRange
 
             context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(
@@ -274,20 +297,20 @@ class State(Singleton):
 
             time.sleep(0.1)
 
-            bumpAlt = False
-            curAz = curAz + azStep
+            bumpAlt=False
+            curAz=curAz + azStep
 
             if curAz >= 360:
                 curAz -= 360
                 curAlt += altStep
-                bumpAlt = True
+                bumpAlt=True
             elif curAz < 0:
                 curAz += 360
                 curAlt += altStep
-                bumpAlt = True
+                bumpAlt=True
 
             if bumpAlt and (curAlt >= 90 or curAlt <= 0):
-                altStep = -altStep
+                altStep=-altStep
                 curAlt += altStep
 
             context.update("dish.az", curAz)

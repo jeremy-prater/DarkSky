@@ -20,9 +20,11 @@ static inline void CheckMotorPositionBounds(Motor *motor) {
     motor->position -= MOTOR_POSITION_MAX;
   }
 
-  if (--motor->deltaPosition == 0)
+  motor->deltaPosition--;
+  
+  if (motor->deltaPosition == 0)
   {
-    MotorStop(motor);
+    MotorCompleteMove(motor);
   }
 }
 
@@ -159,6 +161,11 @@ void MotorStop(Motor *motor) {
 }
 
 void MotorForward(Motor *motor) {
+  if (darkSkyContext.allMotorStop || motor->deltaPosition == 0) {
+    MotorStop(motor);
+    return;
+  }
+
   if (motor->state == MOTOR_FORWARD) {
     return;
   }
@@ -172,6 +179,11 @@ void MotorForward(Motor *motor) {
 }
 
 void MotorReverse(Motor *motor) {
+  if (darkSkyContext.allMotorStop || motor->deltaPosition == 0) {
+    MotorStop(motor);
+    return;
+  }
+
   if (motor->state == MOTOR_REVERSE) {
     return;
   }
@@ -188,6 +200,12 @@ void MotorSetDelta(Motor *motor, int16_t deltaPos)
 {
   motor->deltaPosition = deltaPos;
 }
+
+void MotorCompleteMove(Motor *motor) {
+  MotorStop(motor);  
+  motor->state = MOTOR_COMPLETE;
+}
+
 
 void encoder_handler_dec(const uint32_t id, const uint32_t index) {
   Assert(id == ID_PIOC);
