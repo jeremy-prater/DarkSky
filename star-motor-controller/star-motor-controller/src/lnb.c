@@ -20,8 +20,6 @@ void LNBInit(void)
 	LNBCarrier(LNB_CARRIER_OFF);
 }
 
-void LNBInit(void);
-
 void LNBPower(LNB_POWER_STATE powerState)
 {
     darkSkyContext.lnb.power = powerState;

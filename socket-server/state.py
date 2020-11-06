@@ -148,33 +148,33 @@ class State(Singleton):
         # Stop all motors
         elif (state == "motors.stopAll"):
             requestedState = Packet.CreateFromStruct(
-                PacketCommand.STOP_ALL_MOTORS, value, 0, 0))
+                PacketCommand.STOP_ALL_MOTORS, value, 0, 0)
             return False
 
         # DEC motor state
         elif (state == "motors.dec.state"):
             requestedState=Packet.CreateFromStruct(
-                PacketCommand.MOTOR_DEC_STATE, Packet.MotorStateToBinary(value), 0, 0))
+                PacketCommand.MOTOR_DEC_STATE, Packet.MotorStateToBinary(value), 0, 0)
 
         # DEC motor state
         elif (state == "motors.dec.position"):
             requestedState=Packet.CreateFromStruct(
-                PacketCommand.MOTOR_DEC_POSITION, value, 0, 0))
+                PacketCommand.MOTOR_DEC_POSITION, value, 0, 0)
 
         # DEC motor delta position
         elif (state == "motors.dec.delta"):
             requestedState=Packet.CreateFromStruct(
-                PacketCommand.MOTOR_DEC_DELTA_POS, value, 0, 0))
+                PacketCommand.MOTOR_DEC_DELTA_POS, value, 0, 0)
 
         # RA motor state
         elif (state == "motors.ra.state"):
             requestedState=Packet.CreateFromStruct(
-                PacketCommand.MOTOR_RA_STATE, Packet.MotorStateToBinary(value), 0, 0))
+                PacketCommand.MOTOR_RA_STATE, Packet.MotorStateToBinary(value), 0, 0)
 
         # RA motor state
         elif (state == "motors.ra.position"):
             requestedState=Packet.CreateFromStruct(
-                PacketCommand.MOTOR_RA_POSITION, value, 0, 0))
+                PacketCommand.MOTOR_RA_POSITION, value, 0, 0)
 
         # RA motor delta position
         elif (state == "motors.ra.delta"):
