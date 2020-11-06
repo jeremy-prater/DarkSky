@@ -53,11 +53,13 @@ void DarkSkyMain(void *data) {
   packet.header = COMM_PACKET_HEADER;
 
   for (;;) {
+    ioport_toggle_pin_level(IOPORT_LED_TX);
+
     // Show some sign of life!
     vTaskDelay(500 / portTICK_RATE_MS);
 
     packet.command = STOP_ALL_MOTORS;
-    packet.arg1 = darkSkyContext.motor1.state;
+    packet.arg1 = darkSkyContext.allMotorStop;
     SendCommPacket(&packet);
 
     packet.command = MOTOR_DEC_STATE;

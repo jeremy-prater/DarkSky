@@ -85,7 +85,7 @@ status_code_t SendCommBlob(const uint8_t *blob, size_t length) {
       1000 / portTICK_RATE_MS); // context->comm.txMutex);
 
   xSemaphoreGive(lock);
-  ioport_toggle_pin_level(IOPORT_LED_TX);
+  // ioport_toggle_pin_level(IOPORT_LED_TX);
 
   return result;
 }
@@ -104,7 +104,7 @@ status_code_t SendCommString(const char *message) {
       1000 / portTICK_RATE_MS); // context->comm.txMutex);
 
   xSemaphoreGive(lock);
-  ioport_toggle_pin_level(IOPORT_LED_TX);
+  // ioport_toggle_pin_level(IOPORT_LED_TX);
 
   return result;
 }

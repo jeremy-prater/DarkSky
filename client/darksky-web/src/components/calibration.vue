@@ -120,6 +120,7 @@ export default {
           this.calibration.step +
           " units"
       );
+      this.$store.commit("requestStopAll", false);
       if (axis === "az") {
         if (direction === "left") {
           this.calibration.offsetAz += this.calibration.step;

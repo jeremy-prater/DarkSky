@@ -21,6 +21,13 @@ class State(Singleton):
 
     HighPriorityStates = ['motors.stopAll']
 
+    StateSpamList = [
+        'gps.time',
+        'time.jde',
+        'time.sidereal.local',
+        'time.sidereal.gmt'
+    ]
+
     def init(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info('Init')
@@ -60,7 +67,9 @@ class State(Singleton):
         if key in self.state and self.state[key] == value:
             return
 
-        self.logger.info("State set {} -> {}".format(key, value))
+        if key not in State.StateSpamList:
+            self.logger.info("State set {} -> {}".format(key, value))
+
         self.state[key] = value
         # Trigger update diff function
 
@@ -120,7 +129,7 @@ class State(Singleton):
                         count = 0
                         self.requestedState.pop()
                     else:
-                        time.sleep(0.100)
+                        time.sleep(1)
 
                 # self.logger.info("processRequestedState --> Sleep...")
                 self.requestedStateCondition.wait(1)
@@ -136,7 +145,7 @@ class State(Singleton):
         requestedState = None
 
         # Catch all
-        if state.state[state] == value:
+        if self.state[state] == value:
             return True
 
         # Calibration
@@ -149,44 +158,43 @@ class State(Singleton):
         elif (state == "motors.stopAll"):
             requestedState = Packet.CreateFromStruct(
                 PacketCommand.STOP_ALL_MOTORS, value, 0, 0)
-            return False
 
         # DEC motor state
         elif (state == "motors.dec.state"):
-            requestedState=Packet.CreateFromStruct(
+            requestedState = Packet.CreateFromStruct(
                 PacketCommand.MOTOR_DEC_STATE, Packet.MotorStateToBinary(value), 0, 0)
 
         # DEC motor state
         elif (state == "motors.dec.position"):
-            requestedState=Packet.CreateFromStruct(
+            requestedState = Packet.CreateFromStruct(
                 PacketCommand.MOTOR_DEC_POSITION, value, 0, 0)
 
         # DEC motor delta position
         elif (state == "motors.dec.delta"):
-            requestedState=Packet.CreateFromStruct(
+            requestedState = Packet.CreateFromStruct(
                 PacketCommand.MOTOR_DEC_DELTA_POS, value, 0, 0)
 
         # RA motor state
         elif (state == "motors.ra.state"):
-            requestedState=Packet.CreateFromStruct(
+            requestedState = Packet.CreateFromStruct(
                 PacketCommand.MOTOR_RA_STATE, Packet.MotorStateToBinary(value), 0, 0)
 
         # RA motor state
         elif (state == "motors.ra.position"):
-            requestedState=Packet.CreateFromStruct(
+            requestedState = Packet.CreateFromStruct(
                 PacketCommand.MOTOR_RA_POSITION, value, 0, 0)
 
         # RA motor delta position
         elif (state == "motors.ra.delta"):
-            requestedState=Packet.CreateFromStruct(
+            requestedState = Packet.CreateFromStruct(
                 PacketCommand.MOTOR_RA_DELTA_POS, value, 0, 0)
 
         # LNB State
         elif (state == "lnb.voltage"):
-            requestedState=Packet.CreateFromStruct(
+            requestedState = Packet.CreateFromStruct(
                 PacketCommand.LNB_STATE, value, self.state['lnb.carrier'], 0)
         elif (state == "lnb.carrier"):
-            requestedState=Packet.CreateFromStruct(
+            requestedState = Packet.CreateFromStruct(
                 PacketCommand.LNB_STATE, self.state['lnb.power'], value, 0)
 
         # Default case
@@ -252,9 +260,9 @@ class State(Singleton):
                 self.state.get("lnb.strength"))
             return
 
-        dazalt=self.state.get("dish.historyPath")[0]
-        daz=abs(self.state.get("dish.az") - dazalt[0])
-        dalt=abs(self.state.get("dish.alt") - dazalt[1])
+        dazalt = self.state.get("dish.historyPath")[0]
+        daz = abs(self.state.get("dish.az") - dazalt[0])
+        dalt = abs(self.state.get("dish.alt") - dazalt[1])
 
         if daz >= 1 or dalt >= 1:
             self.state.get("dish.historyPath").insert(
@@ -267,27 +275,27 @@ class State(Singleton):
             self.state.get("dish.historyStrength").pop()
 
     def StartSimulation(self):
-        self.simulating=False
-        self.simulationThread=threading.Thread(
+        self.simulating = False
+        self.simulationThread = threading.Thread(
             target=self.SimulationThread, args=(self,), daemon=True)
         self.simulationThread.start()
 
     @staticmethod
     def SimulationThread(context):
         context.logger.info("Starting Simulation Thread")
-        context.simulating=True
+        context.simulating = True
 
-        azStep=5
-        altStep=2
-        lnbRange=100
+        azStep = 5
+        altStep = 2
+        lnbRange = 100
 
         context.update("dish.az", 0)
         context.update("dish.alt", 0)
 
         while (context.simulating):
-            curAz=context.state.get("dish.az")
-            curAlt=context.state.get("dish.alt")
-            curStrength=math.fabs(math.cos((curAz / 180) * math.pi)) * math.fabs(
+            curAz = context.state.get("dish.az")
+            curAlt = context.state.get("dish.alt")
+            curStrength = math.fabs(math.cos((curAz / 180) * math.pi)) * math.fabs(
                 math.cos((curAlt / 90) * math.pi)) * lnbRange
 
             context.logger.info("Simulation AZ : {}, ALT : {}, LNB : {}".format(
@@ -297,20 +305,20 @@ class State(Singleton):
 
             time.sleep(0.1)
 
-            bumpAlt=False
-            curAz=curAz + azStep
+            bumpAlt = False
+            curAz = curAz + azStep
 
             if curAz >= 360:
                 curAz -= 360
                 curAlt += altStep
-                bumpAlt=True
+                bumpAlt = True
             elif curAz < 0:
                 curAz += 360
                 curAlt += altStep
-                bumpAlt=True
+                bumpAlt = True
 
             if bumpAlt and (curAlt >= 90 or curAlt <= 0):
-                altStep=-altStep
+                altStep = -altStep
                 curAlt += altStep
 
             context.update("dish.az", curAz)
