@@ -6,15 +6,15 @@
 
 #define MOTOR_POSITION_MAX 11000
 
-#define MOTOR_DEC_UP IOPORT_CREATE_PIN(PIOC, 13)    // Pin 50
-#define MOTOR_DEC_DOWN IOPORT_CREATE_PIN(PIOC, 15)  // Pin 48
-#define MOTOR_DEC_ENC_1 IOPORT_CREATE_PIN(PIOC, 17) // Pin 46
-#define MOTOR_DEC_ENC_2 IOPORT_CREATE_PIN(PIOC, 19) // Pin 44
+#define MOTOR_ALT_UP IOPORT_CREATE_PIN(PIOC, 13)    // Pin 50
+#define MOTOR_ALT_DOWN IOPORT_CREATE_PIN(PIOC, 15)  // Pin 48
+#define MOTOR_ALT_ENC_1 IOPORT_CREATE_PIN(PIOC, 17) // Pin 46
+#define MOTOR_ALT_ENC_2 IOPORT_CREATE_PIN(PIOC, 19) // Pin 44
 
-#define MOTOR_RA_UP IOPORT_CREATE_PIN(PIOC, 12)    // Pin 51
-#define MOTOR_RA_DOWN IOPORT_CREATE_PIN(PIOC, 14)  // Pin 49
-#define MOTOR_RA_ENC_1 IOPORT_CREATE_PIN(PIOC, 16) // Pin 47
-#define MOTOR_RA_ENC_2 IOPORT_CREATE_PIN(PIOC, 18) // Pin 45
+#define MOTOR_AZ_UP IOPORT_CREATE_PIN(PIOC, 12)    // Pin 51
+#define MOTOR_AZ_DOWN IOPORT_CREATE_PIN(PIOC, 14)  // Pin 49
+#define MOTOR_AZ_ENC_1 IOPORT_CREATE_PIN(PIOC, 16) // Pin 47
+#define MOTOR_AZ_ENC_2 IOPORT_CREATE_PIN(PIOC, 18) // Pin 45
 
 typedef enum {
   MOTOR_STOP,
@@ -56,7 +56,7 @@ void MotorSetDelta(Motor *motor, int16_t stopPos);
 void MotorCompleteMove(Motor *motor);
 
 // Interrupt declarations
-void encoder_handler_dec(const uint32_t id, const uint32_t index);
-void encoder_handler_ra(const uint32_t id, const uint32_t index);
+void encoder_handler_alt(const uint32_t id, const uint32_t index);
+void encoder_handler_az(const uint32_t id, const uint32_t index);
 
 #endif /* MOTOR_H_ */

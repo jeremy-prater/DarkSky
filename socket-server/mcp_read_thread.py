@@ -49,7 +49,7 @@ class MotorPowerControllerReader:
                             context.incomingData[:16])
                         if packet != None:
                             del context.incomingData[:16]
-                            # context.logger.info("MPC-Reader : <<- packet in : {}".format(packet.command))
+                            # context.logger.info("MPC-Reader : <<- packet in : {:04X} -> {}".format(packet.command, packet.arg1))
                             context.mpc.processReceivedPacket(packet)
                         else:
                             context.incomingData.pop(0)

@@ -154,35 +154,35 @@ export default {
       }
     },
     allMotorsOff() {
-      EventBus.$emit("motor.dec.state", "stop");
-      EventBus.$emit("motor.ra.state", "stop");
+      EventBus.$emit("motor.alt.state", "stop");
+      EventBus.$emit("motor.az.state", "stop");
     },
     decMotorUp() {
-      if (this.state.mcpState.dec.state == "foward") {
-        EventBus.$emit("motor.dec.state", "stop");
+      if (this.state.mcpState.alt.state == "foward") {
+        EventBus.$emit("motor.alt.state", "stop");
       } else {
-        EventBus.$emit("motor.dec.state", "forward");
+        EventBus.$emit("motor.alt.state", "forward");
       }
     },
     decMotorDown() {
-      if (this.state.mcpState.dec.state == "reverse") {
-        EventBus.$emit("motor.dec.state", "stop");
+      if (this.state.mcpState.alt.state == "reverse") {
+        EventBus.$emit("motor.alt.state", "stop");
       } else {
-        EventBus.$emit("motor.dec.state", "reverse");
+        EventBus.$emit("motor.alt.state", "reverse");
       }
     },
     raMotorLeft() {
-      if (this.state.mcpState.ra.state == "forward") {
-        EventBus.$emit("motor.ra.state", "stop");
+      if (this.state.mcpState.az.state == "forward") {
+        EventBus.$emit("motor.az.state", "stop");
       } else {
-        EventBus.$emit("motor.ra.state", "forward");
+        EventBus.$emit("motor.az.state", "forward");
       }
     },
     raMotorRight() {
-      if (this.state.mcpState.ra.state == "reverse") {
-        EventBus.$emit("motor.ra.state", "stop");
+      if (this.state.mcpState.az.state == "reverse") {
+        EventBus.$emit("motor.az.state", "stop");
       } else {
-        EventBus.$emit("motor.ra.state", "reverse");
+        EventBus.$emit("motor.az.state", "reverse");
       }
     }
   }

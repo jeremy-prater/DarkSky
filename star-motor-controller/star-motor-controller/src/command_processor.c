@@ -4,6 +4,7 @@
 #include "darksky.h"
 #include "leds.h"
 #include "motor.h"
+#include "comm.h"
 #include <portmacro.h>
 #include <semphr.h>
 #include <string.h>
@@ -30,23 +31,26 @@ void CommandProcessorTask(void *data) {
           packet = (CommPacket *)&ApplicationBuffer[bufferIndex];
           if (packet->header == COMM_PACKET_HEADER) {
             foundHeader = true;
-            // Move everything back to 0 since we found a header marker
-            // ... unless were already at 0
-            if (bufferIndex != 0) {
-              memmove(ApplicationBuffer, &ApplicationBuffer[bufferIndex],
-                      sizeof(CommPacket));
-            }
-            ApplicationBufferLevel -= sizeof(CommPacket);
             break;
           }
         }
+
+        if (bufferIndex > 0 ) {
+          // Move everything back to 0 since we found a header marker
+          // ... unless were already at 0
+          memmove(ApplicationBuffer, &ApplicationBuffer[bufferIndex], bufferIndex);
+          ApplicationBufferLevel -= bufferIndex;
+        }
+
+        packet = (CommPacket *)ApplicationBuffer;
+
 
         if (foundHeader) {
           ioport_toggle_pin_level(IOPORT_LED_ST);
           switch (packet->command) {
           // case BOOT:
           // break;
-          case MOTOR_DEC_STATE:
+          case MOTOR_AZ_STATE:
             switch (packet->arg1) {
             case MOTOR_FORWARD:
               MotorForward(&darkSkyContext.motor1);
@@ -60,17 +64,17 @@ void CommandProcessorTask(void *data) {
             }
             break;
 
-          case MOTOR_DEC_POSITION:
+          case MOTOR_AZ_POSITION:
             if (packet->arg1 < MOTOR_POSITION_MAX) {
               darkSkyContext.motor1.position = packet->arg1;
             }
             break;
 
-          case MOTOR_DEC_DELTA_POS:
+          case MOTOR_AZ_DELTA_POS:
             MotorSetDelta(&darkSkyContext.motor1, packet->arg1);
             break;
 
-          case MOTOR_RA_STATE:
+          case MOTOR_ALT_STATE:
             switch (packet->arg1) {
             case MOTOR_FORWARD:
               MotorForward(&darkSkyContext.motor2);
@@ -84,15 +88,16 @@ void CommandProcessorTask(void *data) {
             }
             break;
 
-          case MOTOR_RA_POSITION:
+          case MOTOR_ALT_POSITION:
             if (packet->arg1 < MOTOR_POSITION_MAX) {
               darkSkyContext.motor2.position = packet->arg1;
             }
             break;
 
-          case MOTOR_RA_DELTA_POS:
+          case MOTOR_ALT_DELTA_POS:
             MotorSetDelta(&darkSkyContext.motor2, packet->arg1);
             break;
+
 
           case STOP_ALL_MOTORS:
             darkSkyContext.allMotorStop = packet->arg1;
@@ -112,6 +117,11 @@ void CommandProcessorTask(void *data) {
           default:
             break;
           }
+
+          SendCommPacket(packet);
+
+          memmove(ApplicationBuffer, &ApplicationBuffer[sizeof(CommPacket)], sizeof(CommPacket));
+          ApplicationBufferLevel -= sizeof(CommPacket);
         }
       }
       xSemaphoreGive(ApplicationBufferMutex);

@@ -124,7 +124,7 @@ export default {
       this.dish.dec = radec.dec;
     },
     openCalibrate() {
-      this.$store.commit("requestCalibration", true);
+      this.$store.commit("requestControllerState", {state:"calibrating", value: true});
       console.log("Open Calibration...");
     }
   }

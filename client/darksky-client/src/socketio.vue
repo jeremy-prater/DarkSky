@@ -45,30 +45,30 @@ export default {
     });
 
     // Commands to MCP
-    EventBus.$on("motor.ra.state", motorState => {
+    EventBus.$on("motor.az.state", motorState => {
       console.log(`Setting RA Motor to : ${motorState}`);
-      this.socket.emit("request.ra.state", motorState);
+      this.socket.emit("request.az.state", motorState);
     });
-    EventBus.$on("motor.dec.state", motorState => {
+    EventBus.$on("motor.alt.state", motorState => {
       console.log(`Setting DEC Motor to : ${motorState}`);
-      this.socket.emit("request.dec.state", motorState);
+      this.socket.emit("request.alt.state", motorState);
     });
 
     // Events from MCP
     this.socket.on("signal.boot", value => {
       this.$store.commit("signal.boot", value);
     });
-    this.socket.on("signal.motor.dec.position", value => {
-      this.$store.commit("signalMotorDecPosition", value);
+    this.socket.on("signal.motor.alt.position", value => {
+      this.$store.commit("signalMororAltPosition", value);
     });
-    this.socket.on("signal.motor.dec.state", value => {
-      this.$store.commit("signalMotorDecState", value);
+    this.socket.on("signal.motor.alt.state", value => {
+      this.$store.commit("signalMororAltState", value);
     });
-    this.socket.on("signal.motor.ra.position", value => {
-      this.$store.commit("signalMotorRaPosition", value);
+    this.socket.on("signal.motor.az.position", value => {
+      this.$store.commit("signalMororAzPosition", value);
     });
-    this.socket.on("signal.motor.ra.state", value => {
-      this.$store.commit("signalMotorRaState", value);
+    this.socket.on("signal.motor.az.state", value => {
+      this.$store.commit("signalMororAzState", value);
     });
     this.socket.on("signal.lnb.power", value => {
       this.$store.commit("signalLNBPower", value);

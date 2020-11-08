@@ -3,15 +3,15 @@
 #include <pio.h>
 #include <pmc.h>
 
-#define MOTOR_DEC_UP IOPORT_CREATE_PIN(PIOC, 13)    // Pin 50
-#define MOTOR_DEC_DOWN IOPORT_CREATE_PIN(PIOC, 15)  // Pin 48
-#define MOTOR_DEC_ENC_1 IOPORT_CREATE_PIN(PIOC, 17) // Pin 46
-#define MOTOR_DEC_ENC_2 IOPORT_CREATE_PIN(PIOC, 19) // Pin 44
+#define MOTOR_ALT_UP IOPORT_CREATE_PIN(PIOC, 13)    // Pin 50
+#define MOTOR_ALT_DOWN IOPORT_CREATE_PIN(PIOC, 15)  // Pin 48
+#define MOTOR_ALT_ENC_1 IOPORT_CREATE_PIN(PIOC, 17) // Pin 46
+#define MOTOR_ALT_ENC_2 IOPORT_CREATE_PIN(PIOC, 19) // Pin 44
 
-#define MOTOR_RA_LEFT IOPORT_CREATE_PIN(PIOC, 12)  // Pin 51
-#define MOTOR_RA_RIGHT IOPORT_CREATE_PIN(PIOC, 14) // Pin 49
-#define MOTOR_RA_ENC_1 IOPORT_CREATE_PIN(PIOC, 16) // Pin 47
-#define MOTOR_RA_ENC_2 IOPORT_CREATE_PIN(PIOC, 18) // Pin 45
+#define MOTOR_AZ_LEFT IOPORT_CREATE_PIN(PIOC, 12)  // Pin 51
+#define MOTOR_AZ_RIGHT IOPORT_CREATE_PIN(PIOC, 14) // Pin 49
+#define MOTOR_AZ_ENC_1 IOPORT_CREATE_PIN(PIOC, 16) // Pin 47
+#define MOTOR_AZ_ENC_2 IOPORT_CREATE_PIN(PIOC, 18) // Pin 45
 
 static inline void CheckMotorPositionBounds(Motor *motor) {
   if (motor->position < 0) {
@@ -25,6 +25,11 @@ static inline void CheckMotorPositionBounds(Motor *motor) {
   if (motor->deltaPosition == 0)
   {
     MotorCompleteMove(motor);
+  }
+
+  if (motor->state != MOTOR_FORWARD && motor->state != MOTOR_REVERSE)
+  {
+    MotorSetDelta(motor, 0);
   }
 }
 
@@ -78,62 +83,62 @@ static inline int16_t GeneratePositionChange(QUADRATURE_STATE oldState,
 }
 
 void MotorInit(void) {
-  darkSkyContext.motor1.pinForward = MOTOR_DEC_UP;
-  darkSkyContext.motor1.pinReverse = MOTOR_DEC_DOWN;
-  darkSkyContext.motor1.pinEnc_1 = MOTOR_DEC_ENC_1;
-  darkSkyContext.motor1.pinEnc_2 = MOTOR_DEC_ENC_2;
+  darkSkyContext.motor1.pinForward = MOTOR_ALT_UP;
+  darkSkyContext.motor1.pinReverse = MOTOR_ALT_DOWN;
+  darkSkyContext.motor1.pinEnc_1 = MOTOR_ALT_ENC_1;
+  darkSkyContext.motor1.pinEnc_2 = MOTOR_ALT_ENC_2;
 
-  darkSkyContext.motor2.pinForward = MOTOR_RA_UP;
-  darkSkyContext.motor2.pinReverse = MOTOR_RA_DOWN;
-  darkSkyContext.motor2.pinEnc_1 = MOTOR_RA_ENC_1;
-  darkSkyContext.motor2.pinEnc_2 = MOTOR_RA_ENC_2;
+  darkSkyContext.motor2.pinForward = MOTOR_AZ_UP;
+  darkSkyContext.motor2.pinReverse = MOTOR_AZ_DOWN;
+  darkSkyContext.motor2.pinEnc_1 = MOTOR_AZ_ENC_1;
+  darkSkyContext.motor2.pinEnc_2 = MOTOR_AZ_ENC_2;
 
   // Enable all ioport pins
-  ioport_enable_pin(MOTOR_DEC_UP);
-  ioport_enable_pin(MOTOR_DEC_DOWN);
-  ioport_enable_pin(MOTOR_DEC_ENC_1);
-  ioport_enable_pin(MOTOR_DEC_ENC_2);
-  ioport_enable_pin(MOTOR_RA_LEFT);
-  ioport_enable_pin(MOTOR_RA_RIGHT);
-  ioport_enable_pin(MOTOR_RA_ENC_1);
-  ioport_enable_pin(MOTOR_RA_ENC_2);
+  ioport_enable_pin(MOTOR_ALT_UP);
+  ioport_enable_pin(MOTOR_ALT_DOWN);
+  ioport_enable_pin(MOTOR_ALT_ENC_1);
+  ioport_enable_pin(MOTOR_ALT_ENC_2);
+  ioport_enable_pin(MOTOR_AZ_LEFT);
+  ioport_enable_pin(MOTOR_AZ_RIGHT);
+  ioport_enable_pin(MOTOR_AZ_ENC_1);
+  ioport_enable_pin(MOTOR_AZ_ENC_2);
 
   // Setup motor control output pins
-  ioport_set_pin_dir(MOTOR_DEC_UP, IOPORT_DIR_OUTPUT);
-  ioport_set_pin_dir(MOTOR_DEC_DOWN, IOPORT_DIR_OUTPUT);
-  ioport_set_pin_dir(MOTOR_RA_LEFT, IOPORT_DIR_OUTPUT);
-  ioport_set_pin_dir(MOTOR_RA_RIGHT, IOPORT_DIR_OUTPUT);
+  ioport_set_pin_dir(MOTOR_ALT_UP, IOPORT_DIR_OUTPUT);
+  ioport_set_pin_dir(MOTOR_ALT_DOWN, IOPORT_DIR_OUTPUT);
+  ioport_set_pin_dir(MOTOR_AZ_LEFT, IOPORT_DIR_OUTPUT);
+  ioport_set_pin_dir(MOTOR_AZ_RIGHT, IOPORT_DIR_OUTPUT);
 
   StopAllMotors();
 
   // Setup motor encoder input pins
-  ioport_set_pin_dir(MOTOR_DEC_ENC_1, IOPORT_DIR_INPUT);
-  ioport_set_pin_dir(MOTOR_DEC_ENC_2, IOPORT_DIR_INPUT);
-  ioport_set_pin_dir(MOTOR_RA_ENC_1, IOPORT_DIR_INPUT);
-  ioport_set_pin_dir(MOTOR_RA_ENC_2, IOPORT_DIR_INPUT);
+  ioport_set_pin_dir(MOTOR_ALT_ENC_1, IOPORT_DIR_INPUT);
+  ioport_set_pin_dir(MOTOR_ALT_ENC_2, IOPORT_DIR_INPUT);
+  ioport_set_pin_dir(MOTOR_AZ_ENC_1, IOPORT_DIR_INPUT);
+  ioport_set_pin_dir(MOTOR_AZ_ENC_2, IOPORT_DIR_INPUT);
 
   darkSkyContext.motor1.quadratureState =
-      GenerateQuadratureState(ioport_get_pin_level(MOTOR_DEC_ENC_1),
-                              ioport_get_pin_level(MOTOR_DEC_ENC_2));
+      GenerateQuadratureState(ioport_get_pin_level(MOTOR_ALT_ENC_1),
+                              ioport_get_pin_level(MOTOR_ALT_ENC_2));
   darkSkyContext.motor2.quadratureState =
-      GenerateQuadratureState(ioport_get_pin_level(MOTOR_RA_ENC_1),
-                              ioport_get_pin_level(MOTOR_RA_ENC_2));
+      GenerateQuadratureState(ioport_get_pin_level(MOTOR_AZ_ENC_1),
+                              ioport_get_pin_level(MOTOR_AZ_ENC_2));
 
   // Setup interrupts for Encoder GPIOs
   pmc_enable_periph_clk(ID_PIOC);
 
-  // Dec Encoder 1/2
+  // Alt Encoder 1/2
   pio_set_input(PIOC, PIO_PC17, PIO_DEFAULT);
   pio_set_input(PIOC, PIO_PC19, PIO_DEFAULT);
 
-  // RA Encoder 1/2
+  // Az Encoder 1/2
   pio_set_input(PIOC, PIO_PC16, PIO_DEFAULT);
   pio_set_input(PIOC, PIO_PC18, PIO_DEFAULT);
 
-  pio_handler_set(PIOC, ID_PIOC, PIO_PC17, PIO_IT_EDGE, encoder_handler_dec);
-  pio_handler_set(PIOC, ID_PIOC, PIO_PC19, PIO_IT_EDGE, encoder_handler_dec);
-  pio_handler_set(PIOC, ID_PIOC, PIO_PC16, PIO_IT_EDGE, encoder_handler_ra);
-  pio_handler_set(PIOC, ID_PIOC, PIO_PC18, PIO_IT_EDGE, encoder_handler_ra);
+  pio_handler_set(PIOC, ID_PIOC, PIO_PC17, PIO_IT_EDGE, encoder_handler_alt);
+  pio_handler_set(PIOC, ID_PIOC, PIO_PC19, PIO_IT_EDGE, encoder_handler_alt);
+  pio_handler_set(PIOC, ID_PIOC, PIO_PC16, PIO_IT_EDGE, encoder_handler_az);
+  pio_handler_set(PIOC, ID_PIOC, PIO_PC18, PIO_IT_EDGE, encoder_handler_az);
 
   pio_enable_interrupt(PIOC, PIO_PC17);
   pio_enable_interrupt(PIOC, PIO_PC19);
@@ -145,10 +150,10 @@ void MotorInit(void) {
 
 void StopAllMotors(void) {
   // Set all motor drives of off
-  ioport_set_pin_level(MOTOR_DEC_UP, IOPORT_PIN_LEVEL_LOW);
-  ioport_set_pin_level(MOTOR_DEC_DOWN, IOPORT_PIN_LEVEL_LOW);
-  ioport_set_pin_level(MOTOR_RA_LEFT, IOPORT_PIN_LEVEL_LOW);
-  ioport_set_pin_level(MOTOR_RA_RIGHT, IOPORT_PIN_LEVEL_LOW);
+  ioport_set_pin_level(MOTOR_ALT_UP, IOPORT_PIN_LEVEL_LOW);
+  ioport_set_pin_level(MOTOR_ALT_DOWN, IOPORT_PIN_LEVEL_LOW);
+  ioport_set_pin_level(MOTOR_AZ_LEFT, IOPORT_PIN_LEVEL_LOW);
+  ioport_set_pin_level(MOTOR_AZ_RIGHT, IOPORT_PIN_LEVEL_LOW);
 
   darkSkyContext.motor1.state = MOTOR_STOP;
   darkSkyContext.motor2.state = MOTOR_STOP;
@@ -203,11 +208,12 @@ void MotorSetDelta(Motor *motor, int16_t deltaPos)
 
 void MotorCompleteMove(Motor *motor) {
   MotorStop(motor);  
+  MotorSetDelta(motor, 0);
   motor->state = MOTOR_COMPLETE;
 }
 
 
-void encoder_handler_dec(const uint32_t id, const uint32_t index) {
+void encoder_handler_alt(const uint32_t id, const uint32_t index) {
   Assert(id == ID_PIOC);
   Assert((index == PIO_PC17) || (index == PIO_PC19));
 
@@ -221,7 +227,7 @@ void encoder_handler_dec(const uint32_t id, const uint32_t index) {
   darkSkyContext.motor1.quadratureState = newState;
 }
 
-void encoder_handler_ra(const uint32_t id, const uint32_t index) {
+void encoder_handler_az(const uint32_t id, const uint32_t index) {
   Assert(id == ID_PIOC);
   Assert((index == PIO_PC16) || (index == PIO_PC18));
 

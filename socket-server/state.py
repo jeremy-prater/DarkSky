@@ -42,12 +42,12 @@ class State(Singleton):
             'dish.historyPath': [],
             'dish.historyStrength': [],
             'motors.stopAll': False,
-            'motors.ra.state': 'unknown',
-            'motors.ra.position': 0,
-            'motors.ra.delta': 0,
-            'motors.dec.state': 'unknown',
-            'motors.dec.position': 0,
-            'motors.dec.delta': 0,
+            'motors.az.state': 'unknown',
+            'motors.az.position': 0,
+            'motors.az.delta': 0,
+            'motors.alt.state': 'unknown',
+            'motors.alt.position': 0,
+            'motors.alt.delta': 0,
             'serial.port': '',
             'serial.connected': False,
             'time.jde': 0,
@@ -56,6 +56,7 @@ class State(Singleton):
         }
 
         self.requestedStateCondition = threading.Condition()
+        self.requestedStateUpdatedCondition = threading.Condition()
         self.requestedState = deque()
         requestedState = None
 
@@ -69,6 +70,18 @@ class State(Singleton):
 
         if key not in State.StateSpamList:
             self.logger.info("State set {} -> {}".format(key, value))
+
+        if len(self.requestedState) > 0:
+            currentStateRequest = self.requestedState[-1]
+            curKey = currentStateRequest[0]
+            curValue = currentStateRequest[1]
+            if curKey == key and curValue == value:
+                # Pop the thing from the deqeue
+                self.requestedState.pop()
+                # Wake up the processing thread
+                with self.requestedStateUpdatedCondition:
+                    self.requestedStateUpdatedCondition.notify()
+
 
         self.state[key] = value
         # Trigger update diff function
@@ -117,24 +130,25 @@ class State(Singleton):
         self.logger.info("Staring State Processing Thread")
         count = 0
         while True:
-            with self.requestedStateCondition:
-                while len(self.requestedState):
-                    currentStateRequest = self.requestedState[-1]
-                    state = currentStateRequest[0]
-                    value = currentStateRequest[1]
-                    self.logger.info(
-                        "Processing state request : Ref {} : {} -> {}".format(count, state, value))
-                    count = count + 1
-                    if self.processStateUpdate(state, value):
-                        count = 0
-                        self.requestedState.pop()
-                    else:
-                        time.sleep(1)
+            with self.requestedStateUpdatedCondition:
+                with self.requestedStateCondition:
+                    while len(self.requestedState):
+                        currentStateRequest = self.requestedState[-1]
+                        state = currentStateRequest[0]
+                        value = currentStateRequest[1]
+                        self.logger.info(
+                            "Processing state request : Ref {} : {} -> {}".format(count, state, value))
+                        count = count + 1
+                        if self.processStateUpdate(state, value):
+                            count = 0
+                            self.requestedState.pop()
+                        else:
+                            self.requestedStateUpdatedCondition.wait(0.5)
 
-                # self.logger.info("processRequestedState --> Sleep...")
-                self.requestedStateCondition.wait(1)
-                # self.logger.info("processRequestedState --> Wake!!")
-                self.safetyTick()
+                    # self.logger.info("processRequestedState --> Sleep...")
+                    self.requestedStateCondition.wait(0.1)
+                    # self.logger.info("processRequestedState --> Wake!!")
+                    self.safetyTick()
 
     def safetyTick(self):
         pass
@@ -151,6 +165,8 @@ class State(Singleton):
         # Calibration
         if (state == "calibrating"):
             # We don't set the currentRequestedState here because this is an internal state
+            self.requestState("local" , {"motors.stopAll": False})
+            self.requestState("local" , {"motors.stopAll": True})
             self.state[state] = value
             return True
 
@@ -160,34 +176,34 @@ class State(Singleton):
                 PacketCommand.STOP_ALL_MOTORS, value, 0, 0)
 
         # DEC motor state
-        elif (state == "motors.dec.state"):
+        elif (state == "motors.alt.state"):
             requestedState = Packet.CreateFromStruct(
-                PacketCommand.MOTOR_DEC_STATE, Packet.MotorStateToBinary(value), 0, 0)
+                PacketCommand.MOTOR_ALT_STATE, Packet.MotorStateToBinary(value), 0, 0)
 
         # DEC motor state
-        elif (state == "motors.dec.position"):
+        elif (state == "motors.alt.position"):
             requestedState = Packet.CreateFromStruct(
-                PacketCommand.MOTOR_DEC_POSITION, value, 0, 0)
+                PacketCommand.MOTOR_ALT_POSITION, value, 0, 0)
 
         # DEC motor delta position
-        elif (state == "motors.dec.delta"):
+        elif (state == "motors.alt.delta"):
             requestedState = Packet.CreateFromStruct(
-                PacketCommand.MOTOR_DEC_DELTA_POS, value, 0, 0)
+                PacketCommand.MOTOR_ALT_DELTA_POS, value, 0, 0)
 
         # RA motor state
-        elif (state == "motors.ra.state"):
+        elif (state == "motors.az.state"):
             requestedState = Packet.CreateFromStruct(
-                PacketCommand.MOTOR_RA_STATE, Packet.MotorStateToBinary(value), 0, 0)
+                PacketCommand.MOTOR_AZ_STATE, Packet.MotorStateToBinary(value), 0, 0)
 
         # RA motor state
-        elif (state == "motors.ra.position"):
+        elif (state == "motors.az.position"):
             requestedState = Packet.CreateFromStruct(
-                PacketCommand.MOTOR_RA_POSITION, value, 0, 0)
+                PacketCommand.MOTOR_AZ_POSITION, value, 0, 0)
 
         # RA motor delta position
-        elif (state == "motors.ra.delta"):
+        elif (state == "motors.az.delta"):
             requestedState = Packet.CreateFromStruct(
-                PacketCommand.MOTOR_RA_DELTA_POS, value, 0, 0)
+                PacketCommand.MOTOR_AZ_DELTA_POS, value, 0, 0)
 
         # LNB State
         elif (state == "lnb.voltage"):
@@ -211,24 +227,24 @@ class State(Singleton):
     # State update methods
 
     # Dec motor updates
-    def updateDecState(self, packet: Packet):
-        self.updateMotorState('dec', packet)
+    def updateAltState(self, packet: Packet):
+        self.updateMotorState('alt', packet)
 
-    def updateDecPosition(self, packet: Packet):
-        self.updateMotorPosition('dec', packet)
+    def updateAltPosition(self, packet: Packet):
+        self.updateMotorPosition('alt', packet)
 
-    def updateDecDelta(self, packet: Packet):
-        self.updateMotorDelta('dec', packet)
+    def updateAltDelta(self, packet: Packet):
+        self.updateMotorDelta('alt', packet)
 
     # RA motor updates
-    def updateRaState(self, packet: Packet):
-        self.updateMotorState('ra', packet)
+    def updateAzState(self, packet: Packet):
+        self.updateMotorState('az', packet)
 
-    def updateRaPosition(self, packet: Packet):
-        self.updateMotorPosition('ra', packet)
+    def updateAzPosition(self, packet: Packet):
+        self.updateMotorPosition('az', packet)
 
-    def updateRaDelta(self, packet: Packet):
-        self.updateMotorDelta('ra', packet)
+    def updateAzDelta(self, packet: Packet):
+        self.updateMotorDelta('az', packet)
 
     def updateStopAll(self, packet: Packet):
         self.update('motors.stopAll', packet.arg1)

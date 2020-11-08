@@ -132,14 +132,15 @@ void CommTask(void *data) {
         100 / portTICK_RATE_MS); // context->comm.txMutex);
 
     if (bytes_received > 0) {
-      Assert(ApplicationBufferLevel + bytes_received < COMM_APP_BUFFER_SIZE);
       xSemaphoreTake(ApplicationBufferMutex, portMAX_DELAY);
-      memcpy(&ApplicationBuffer[ApplicationBufferLevel], CommRxBuffer,
-             bytes_received);
-      ApplicationBufferLevel += bytes_received;
+      if (ApplicationBufferLevel + bytes_received < COMM_APP_BUFFER_SIZE) {
+        memcpy(&ApplicationBuffer[ApplicationBufferLevel], CommRxBuffer,
+              bytes_received);
+        ApplicationBufferLevel += bytes_received;
+        ioport_toggle_pin_level(IOPORT_LED_RX);
+        xTaskNotifyGive(darkSkyTasks[TASK_CommandProcessor].taskHandle);
+      }
       xSemaphoreGive(ApplicationBufferMutex);
-      ioport_toggle_pin_level(IOPORT_LED_RX);
-      xTaskNotifyGive(darkSkyTasks[TASK_CommandProcessor].taskHandle);
     }
   }
 

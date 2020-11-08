@@ -67,18 +67,18 @@ class MotorPowerController(Singleton):
             pass
         elif packet.command == PacketCommand.STOP_ALL_MOTORS:
             self.state.updateStopAll(packet)
-        elif packet.command == PacketCommand.MOTOR_DEC_POSITION:
-            self.state.updateDecPosition(packet)
-        elif packet.command == PacketCommand.MOTOR_DEC_DELTA_POS:
-            self.state.updateDecDelta(packet)
-        elif packet.command == PacketCommand.MOTOR_DEC_STATE:
-            self.state.updateDecState(packet)
-        elif packet.command == PacketCommand.MOTOR_RA_POSITION:
-            self.state.updateRaPosition(packet)
-        elif packet.command == PacketCommand.MOTOR_RA_DELTA_POS:
-            self.state.updateRaDelta(packet)
-        elif packet.command == PacketCommand.MOTOR_RA_STATE:
-            self.state.updateRaState(packet)
+        elif packet.command == PacketCommand.MOTOR_ALT_POSITION:
+            self.state.updateAltPosition(packet)
+        elif packet.command == PacketCommand.MOTOR_ALT_DELTA_POS:
+            self.state.updateAltDelta(packet)
+        elif packet.command == PacketCommand.MOTOR_ALT_STATE:
+            self.state.updateAltState(packet)
+        elif packet.command == PacketCommand.MOTOR_AZ_POSITION:
+            self.state.updateAzPosition(packet)
+        elif packet.command == PacketCommand.MOTOR_AZ_DELTA_POS:
+            self.state.updateAzDelta(packet)
+        elif packet.command == PacketCommand.MOTOR_AZ_STATE:
+            self.state.updateAzState(packet)
         elif packet.command == PacketCommand.LNB_STATE:
             self.state.updateLNBVoltage(packet)
             self.state.updateLNBCarrier(packet)

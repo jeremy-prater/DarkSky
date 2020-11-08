@@ -72,28 +72,28 @@ const store = new Vuex.Store({
                 console.log('MCP booted');
             }
         },
-        signalMotorDecPosition(state, value) {
-            if (value != state.mcpState.dec.position) {
-                state.mcpState.dec.position = value;
-                console.log(`mcpState.dec.position = ${value}`);
+        signalMororAltPosition(state, value) {
+            if (value != state.mcpState.alt.position) {
+                state.mcpState.alt.position = value;
+                console.log(`mcpState.alt.position = ${value}`);
             }
         },
-        signalMotorDecState(state, value) {
-            if (value != state.mcpState.dec.state) {
-                state.mcpState.dec.state = value;
-                console.log(`mcpState.dec.state = ${value}`);
+        signalMororAltState(state, value) {
+            if (value != state.mcpState.alt.state) {
+                state.mcpState.alt.state = value;
+                console.log(`mcpState.alt.state = ${value}`);
             }
         },
-        signalMotorRaPosition(state, value) {
-            if (value != state.mcpState.ra.position) {
-                state.mcpState.ra.position = value;
-                console.log(`mcpState.ra.position = ${value}`);
+        signalMororAzPosition(state, value) {
+            if (value != state.mcpState.az.position) {
+                state.mcpState.az.position = value;
+                console.log(`mcpState.az.position = ${value}`);
             }
         },
-        signalMotorRaState(state, value) {
-            if (value != state.mcpState.ra.state) {
-                state.mcpState.ra.state = value;
-                console.log(`mcpState.ra.state = ${value}`);
+        signalMororAzState(state, value) {
+            if (value != state.mcpState.az.state) {
+                state.mcpState.az.state = value;
+                console.log(`mcpState.az.state = ${value}`);
             }
         },
         signalLNBPower(state, value) {

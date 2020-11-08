@@ -56,33 +56,33 @@ void DarkSkyMain(void *data) {
     ioport_toggle_pin_level(IOPORT_LED_TX);
 
     // Show some sign of life!
-    vTaskDelay(500 / portTICK_RATE_MS);
+    vTaskDelay(200 / portTICK_RATE_MS);
 
     packet.command = STOP_ALL_MOTORS;
     packet.arg1 = darkSkyContext.allMotorStop;
     SendCommPacket(&packet);
 
-    packet.command = MOTOR_DEC_STATE;
+    packet.command = MOTOR_AZ_STATE;
     packet.arg1 = darkSkyContext.motor1.state;
     SendCommPacket(&packet);
 
-    packet.command = MOTOR_DEC_POSITION;
+    packet.command = MOTOR_AZ_POSITION;
     packet.arg1 = darkSkyContext.motor1.position;
     SendCommPacket(&packet);
 
-    packet.command = MOTOR_DEC_DELTA_POS;
+    packet.command = MOTOR_AZ_DELTA_POS;
     packet.arg1 = darkSkyContext.motor1.deltaPosition;
     SendCommPacket(&packet);
 
-    packet.command = MOTOR_RA_STATE;
+    packet.command = MOTOR_ALT_STATE;
     packet.arg1 = darkSkyContext.motor2.state;
     SendCommPacket(&packet);
 
-    packet.command = MOTOR_RA_POSITION;
+    packet.command = MOTOR_ALT_POSITION;
     packet.arg1 = darkSkyContext.motor2.position;
     SendCommPacket(&packet);
 
-    packet.command = MOTOR_RA_DELTA_POS;
+    packet.command = MOTOR_ALT_DELTA_POS;
     packet.arg1 = darkSkyContext.motor2.deltaPosition;
     SendCommPacket(&packet);
 

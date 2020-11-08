@@ -110,7 +110,6 @@ export default {
   },
   methods: {
     calibrationMove(axis, direction) {
-      this.$store.commit("requestStopAll", true);
       console.log(
         "Calibration move : " +
           axis +
@@ -120,27 +119,32 @@ export default {
           this.calibration.step +
           " units"
       );
-      this.$store.commit("requestStopAll", false);
       if (axis === "az") {
+        this.$store.commit("requestControllerState", {state:"motors.az.delta", value: this.calibration.step});
         if (direction === "left") {
           this.calibration.offsetAz += this.calibration.step;
+          this.$store.commit("requestControllerState", {state:"motors.az.state", value: "forward"});
         } else if (direction === "right") {
           this.calibration.offsetAz -= this.calibration.step;
+          this.$store.commit("requestControllerState", {state:"motors.az.state", value: "reverse"});
         }
       } else if (axis === "alt") {
+        this.$store.commit("requestControllerState", {state:"motors.alt.delta", value: this.calibration.step});
         if (direction === "up") {
           this.calibration.offsetAlt += this.calibration.step;
+          this.$store.commit("requestControllerState", {state:"motors.alt.state", value: "forward"});
         } else if (direction === "down") {
           this.calibration.offsetAlt -= this.calibration.step;
+          this.$store.commit("requestControllerState", {state:"motors.alt.state", value: "reverse"});
         }
       }
     },
     applyCalibration() {
-      this.$store.commit("requestCalibration", false);
+      this.$store.commit("requestControllerState", {state:"calibrating", value: false});
       console.log("Applying Calibration!");
     },
     cancelCalibration() {
-      this.$store.commit("requestCalibration", false);
+      this.$store.commit("requestControllerState", {state:"calibrating", value: false});
       console.log("Calibration Cancelled...");
     }
   }

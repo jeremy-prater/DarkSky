@@ -19,12 +19,12 @@ export default new Vuex.Store({
             'dish.historyPath': [],
             'dish.historyStrength': [],
             'motors.stopAll': false,
-            'motors.ra.state': 'unknown',
-            'motors.ra.position': 0,
-            'motors.ra.delta': 0,
-            'motors.dec.state': 'unknown',
-            'motors.dec.position': 0,
-            'motors.dec.delta': 0,
+            'motors.az.state': 'unknown',
+            'motors.az.position': 0,
+            'motors.az.delta': 0,
+            'motors.alt.state': 'unknown',
+            'motors.alt.position': 0,
+            'motors.alt.delta': 0,
             'serial.port': '',
             'serial.connected': false,
             'time.jde': 0,
@@ -54,47 +54,11 @@ export default new Vuex.Store({
             state.image['dish.historyStrength'] =
                 newState['dish.historyStrength'];
         },
-        requestStopAll(state, payload) {
+        requestControllerState(state, payload) {
             state;
             this._vm.$socket.emit('requestState', {
-                'motors.stopAll': payload,
+                [payload.state]: payload.value,
             });
-        },
-        requestDecMotorState(state, payload) {
-            state;
-            payload;
-        },
-        requestDecMotorPosition(state, payload) {
-            state;
-            payload;
-        },
-        requestDecMotorStopPos(state, payload) {
-            state;
-            payload;
-        },
-        requestRAMotorState(state, payload) {
-            state;
-            payload;
-        },
-        requestRAMotorPosition(state, payload) {
-            state;
-            payload;
-        },
-        requestRAMotorStopPos(state, payload) {
-            state;
-            payload;
-        },
-        requestLNBVoltage(state, payload) {
-            state;
-            payload;
-        },
-        requestLNBCarrier(state, payload) {
-            state;
-            payload;
-        },
-        requestCalibration(state, payload) {
-            state;
-            this._vm.$socket.emit('requestState', { calibrating: payload });
         },
     },
     getters: {
