@@ -14,8 +14,8 @@
 //#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 typedef struct {
-  Motor motor1;
-  Motor motor2;
+  Motor motorAlt;
+  Motor motorAz;
   Comm comm;
   LNB lnb;
   bool allMotorStop;

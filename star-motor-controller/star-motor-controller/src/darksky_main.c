@@ -62,28 +62,28 @@ void DarkSkyMain(void *data) {
     packet.arg1 = darkSkyContext.allMotorStop;
     SendCommPacket(&packet);
 
-    packet.command = MOTOR_AZ_STATE;
-    packet.arg1 = darkSkyContext.motor1.state;
-    SendCommPacket(&packet);
-
-    packet.command = MOTOR_AZ_POSITION;
-    packet.arg1 = darkSkyContext.motor1.position;
-    SendCommPacket(&packet);
-
-    packet.command = MOTOR_AZ_DELTA_POS;
-    packet.arg1 = darkSkyContext.motor1.deltaPosition;
-    SendCommPacket(&packet);
-
     packet.command = MOTOR_ALT_STATE;
-    packet.arg1 = darkSkyContext.motor2.state;
+    packet.arg1 = darkSkyContext.motorAlt.state;
     SendCommPacket(&packet);
 
     packet.command = MOTOR_ALT_POSITION;
-    packet.arg1 = darkSkyContext.motor2.position;
+    packet.arg1 = darkSkyContext.motorAlt.position;
     SendCommPacket(&packet);
 
     packet.command = MOTOR_ALT_DELTA_POS;
-    packet.arg1 = darkSkyContext.motor2.deltaPosition;
+    packet.arg1 = darkSkyContext.motorAlt.deltaPosition;
+    SendCommPacket(&packet);
+
+    packet.command = MOTOR_AZ_STATE;
+    packet.arg1 = darkSkyContext.motorAz.state;
+    SendCommPacket(&packet);
+
+    packet.command = MOTOR_AZ_POSITION;
+    packet.arg1 = darkSkyContext.motorAz.position;
+    SendCommPacket(&packet);
+
+    packet.command = MOTOR_AZ_DELTA_POS;
+    packet.arg1 = darkSkyContext.motorAz.deltaPosition;
     SendCommPacket(&packet);
 
     packet.command = LNB_STATE;

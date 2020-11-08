@@ -50,60 +50,59 @@ void CommandProcessorTask(void *data) {
           switch (packet->command) {
           // case BOOT:
           // break;
-          case MOTOR_AZ_STATE:
-            switch (packet->arg1) {
-            case MOTOR_FORWARD:
-              MotorForward(&darkSkyContext.motor1);
-              break;
-            case MOTOR_REVERSE:
-              MotorReverse(&darkSkyContext.motor1);
-              break;
-            case MOTOR_STOP:
-            default:
-              MotorStop(&darkSkyContext.motor1);
-            }
-            break;
-
-          case MOTOR_AZ_POSITION:
-            if (packet->arg1 < MOTOR_POSITION_MAX) {
-              darkSkyContext.motor1.position = packet->arg1;
-            }
-            break;
-
-          case MOTOR_AZ_DELTA_POS:
-            MotorSetDelta(&darkSkyContext.motor1, packet->arg1);
-            break;
-
           case MOTOR_ALT_STATE:
             switch (packet->arg1) {
             case MOTOR_FORWARD:
-              MotorForward(&darkSkyContext.motor2);
+              MotorForward(&darkSkyContext.motorAlt);
               break;
             case MOTOR_REVERSE:
-              MotorReverse(&darkSkyContext.motor2);
+              MotorReverse(&darkSkyContext.motorAlt);
               break;
             case MOTOR_STOP:
             default:
-              MotorStop(&darkSkyContext.motor2);
+              MotorStop(&darkSkyContext.motorAlt);
             }
             break;
 
           case MOTOR_ALT_POSITION:
             if (packet->arg1 < MOTOR_POSITION_MAX) {
-              darkSkyContext.motor2.position = packet->arg1;
+              darkSkyContext.motorAlt.position = packet->arg1;
             }
             break;
 
           case MOTOR_ALT_DELTA_POS:
-            MotorSetDelta(&darkSkyContext.motor2, packet->arg1);
+            MotorSetDelta(&darkSkyContext.motorAlt, packet->arg1);
             break;
 
+          case MOTOR_AZ_STATE:
+            switch (packet->arg1) {
+            case MOTOR_FORWARD:
+              MotorForward(&darkSkyContext.motorAz);
+              break;
+            case MOTOR_REVERSE:
+              MotorReverse(&darkSkyContext.motorAz);
+              break;
+            case MOTOR_STOP:
+            default:
+              MotorStop(&darkSkyContext.motorAz);
+            }
+            break;
+
+          case MOTOR_AZ_POSITION:
+            if (packet->arg1 < MOTOR_POSITION_MAX) {
+              darkSkyContext.motorAz.position = packet->arg1;
+            }
+            break;
+
+          case MOTOR_AZ_DELTA_POS:
+            MotorSetDelta(&darkSkyContext.motorAz, packet->arg1);
+            break;
 
           case STOP_ALL_MOTORS:
             darkSkyContext.allMotorStop = packet->arg1;
             if (darkSkyContext.allMotorStop) {
-              MotorStop(&darkSkyContext.motor1);
-              MotorStop(&darkSkyContext.motor2);
+              MotorStop(&darkSkyContext.motorAlt);
+              MotorStop(&darkSkyContext.motorAz);
             }
             break;
 
