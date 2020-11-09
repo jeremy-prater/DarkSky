@@ -74,6 +74,10 @@ void DarkSkyMain(void *data) {
     packet.arg1 = darkSkyContext.motorAlt.deltaPosition;
     SendCommPacket(&packet);
 
+    packet.command = MOTOR_ALT_PWM;
+    packet.arg1 = darkSkyContext.motorAlt.pwm.ul_duty;
+    SendCommPacket(&packet);
+
     packet.command = MOTOR_AZ_STATE;
     packet.arg1 = darkSkyContext.motorAz.state;
     SendCommPacket(&packet);
@@ -84,6 +88,10 @@ void DarkSkyMain(void *data) {
 
     packet.command = MOTOR_AZ_DELTA_POS;
     packet.arg1 = darkSkyContext.motorAz.deltaPosition;
+    SendCommPacket(&packet);
+
+    packet.command = MOTOR_AZ_PWM;
+    packet.arg1 = darkSkyContext.motorAz.pwm.ul_duty;
     SendCommPacket(&packet);
 
     packet.command = LNB_STATE;

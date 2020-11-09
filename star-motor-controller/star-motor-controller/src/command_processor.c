@@ -47,6 +47,7 @@ void CommandProcessorTask(void *data) {
 
         if (foundHeader) {
           ioport_toggle_pin_level(IOPORT_LED_ST);
+          SendCommPacket(packet);
           switch (packet->command) {
           // case BOOT:
           // break;
@@ -74,6 +75,10 @@ void CommandProcessorTask(void *data) {
             MotorSetDelta(&darkSkyContext.motorAlt, packet->arg1);
             break;
 
+          case MOTOR_ALT_PWM:
+            MotorSetPWM(&darkSkyContext.motorAlt, packet->arg1);
+            break;
+
           case MOTOR_AZ_STATE:
             switch (packet->arg1) {
             case MOTOR_FORWARD:
@@ -98,8 +103,13 @@ void CommandProcessorTask(void *data) {
             MotorSetDelta(&darkSkyContext.motorAz, packet->arg1);
             break;
 
+          case MOTOR_AZ_PWM:
+            MotorSetPWM(&darkSkyContext.motorAz, packet->arg1);
+            break;
+
           case STOP_ALL_MOTORS:
             darkSkyContext.allMotorStop = packet->arg1;
+            SendCommPacketArgs(STOP_ALL_MOTORS, darkSkyContext.allMotorStop, 0, 0);
             if (darkSkyContext.allMotorStop) {
               MotorStop(&darkSkyContext.motorAlt);
               MotorStop(&darkSkyContext.motorAz);
@@ -116,8 +126,6 @@ void CommandProcessorTask(void *data) {
           default:
             break;
           }
-
-          SendCommPacket(packet);
 
           memmove(ApplicationBuffer, &ApplicationBuffer[sizeof(CommPacket)], sizeof(CommPacket));
           ApplicationBufferLevel -= sizeof(CommPacket);

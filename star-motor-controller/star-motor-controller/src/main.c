@@ -10,10 +10,10 @@ int main(void) {
   sysclk_init();
   board_init();
 
+  CommInit();
   LNBInit();
   MotorInit();
   LedInit();
-  CommInit();
 
   for (uint32_t taskNum = 0; taskNum < (uint32_t)TASK_NUM_TASKS; taskNum++) {
     DarkSkyTask *task = &darkSkyTasks[taskNum];

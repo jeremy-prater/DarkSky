@@ -16,9 +16,11 @@ typedef enum {
   MOTOR_ALT_STATE = 0x0101,
   MOTOR_ALT_POSITION = 0x0102,
   MOTOR_ALT_DELTA_POS = 0x0103,
+  MOTOR_ALT_PWM = 0x0104,
   MOTOR_AZ_STATE = 0x0201,
   MOTOR_AZ_POSITION = 0x0202,
   MOTOR_AZ_DELTA_POS = 0x0203,
+  MOTOR_AZ_PWM = 0x0204,
   LNB_STATE = 0x0301,
   STOP_ALL_MOTORS = 0x1001,
   ERROR = 0x2000,
@@ -37,12 +39,15 @@ typedef struct {
 typedef struct {
   freertos_uart_if freertos_uart;
   xSemaphoreHandle txMutex;
+  xSemaphoreHandle txQueueMutex;
+  CommPacket txQueue[COMM_BUFFER_SIZE];
+  volatile uint16_t txHead;
+  volatile uint16_t txTail;
 } Comm;
 
 void CommInit(void);
-status_code_t SendCommPacket(const CommPacket *packet);
-status_code_t SendCommBlob(const uint8_t *blob, size_t length);
-status_code_t SendCommString(const char *message);
+void SendCommPacketArgs(uint16_t command, uint16_t arg1, uint16_t arg2, uint16_t arg3);
+void SendCommPacket(const CommPacket *packet);
 void CommTask(void *data);
 
 // Shared Comm variables

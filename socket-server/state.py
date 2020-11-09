@@ -45,9 +45,11 @@ class State(Singleton):
             'motors.az.state': 'unknown',
             'motors.az.position': 0,
             'motors.az.delta': 0,
+            'motors.az.pwm': 0,
             'motors.alt.state': 'unknown',
             'motors.alt.position': 0,
             'motors.alt.delta': 0,
+            'motors.alt.pwm': 0,
             'serial.port': '',
             'serial.connected': False,
             'time.jde': 0,
@@ -236,6 +238,9 @@ class State(Singleton):
     def updateAltDelta(self, packet: Packet):
         self.updateMotorDelta('alt', packet)
 
+    def updateAltPWM(self, packet: Packet):
+        self.updateMotorPWM('alt', packet)
+
     # RA motor updates
     def updateAzState(self, packet: Packet):
         self.updateMotorState('az', packet)
@@ -245,6 +250,9 @@ class State(Singleton):
 
     def updateAzDelta(self, packet: Packet):
         self.updateMotorDelta('az', packet)
+
+    def updateAzPWM(self, packet: Packet):
+        self.updateMotorPWM('az', packet)
 
     def updateStopAll(self, packet: Packet):
         self.update('motors.stopAll', packet.arg1)
@@ -259,6 +267,9 @@ class State(Singleton):
 
     def updateMotorDelta(self, motor: str, packet: Packet):
         self.update('motors.' + motor + '.delta', packet.arg1)
+
+    def updateMotorPWM(self, motor: str, packet: Packet):
+        self.update('motors.' + motor + '.pwm', packet.arg1)
 
     def updateLNBVoltage(self, packet: Packet):
         self.update(
