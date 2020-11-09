@@ -2,6 +2,7 @@
 #include "darksky.h"
 #include <pio.h>
 #include <pmc.h>
+#include <pwm.h>
 #include "motor.h"
 
 static inline void CheckMotorPositionBounds(Motor *motor) {
@@ -117,24 +118,27 @@ void MotorInit(void) {
 
   // Setup interrupts for Encoder GPIOs
   pmc_enable_periph_clk(ID_PIOC);
+  
+  // Enable PWM
+  pmc_enable_periph_clk(ID_PWM);
 
   // Az Encoder 1/2
-  pio_set_input(PIOC, PIO_PC17, PIO_DEFAULT);
-  pio_set_input(PIOC, PIO_PC19, PIO_DEFAULT);
+  pio_set_input(PIOC, PIO_PC2, PIO_DEFAULT);
+  pio_set_input(PIOC, PIO_PC4, PIO_DEFAULT);
 
   // Alt Encoder 1/2
-  pio_set_input(PIOC, PIO_PC16, PIO_DEFAULT);
-  pio_set_input(PIOC, PIO_PC18, PIO_DEFAULT);
+  pio_set_input(PIOC, PIO_PC6, PIO_DEFAULT);
+  pio_set_input(PIOC, PIO_PC8, PIO_DEFAULT);
 
-  pio_handler_set(PIOC, ID_PIOC, PIO_PC17, PIO_IT_EDGE, encoder_handler_az);
-  pio_handler_set(PIOC, ID_PIOC, PIO_PC19, PIO_IT_EDGE, encoder_handler_az);
-  pio_handler_set(PIOC, ID_PIOC, PIO_PC16, PIO_IT_EDGE, encoder_handler_alt);
-  pio_handler_set(PIOC, ID_PIOC, PIO_PC18, PIO_IT_EDGE, encoder_handler_alt);
+  pio_handler_set(PIOC, ID_PIOC, PIO_PC2, PIO_IT_EDGE, encoder_handler_az);
+  pio_handler_set(PIOC, ID_PIOC, PIO_PC4, PIO_IT_EDGE, encoder_handler_az);
+  pio_handler_set(PIOC, ID_PIOC, PIO_PC6, PIO_IT_EDGE, encoder_handler_alt);
+  pio_handler_set(PIOC, ID_PIOC, PIO_PC8, PIO_IT_EDGE, encoder_handler_alt);
 
-  pio_enable_interrupt(PIOC, PIO_PC17);
-  pio_enable_interrupt(PIOC, PIO_PC19);
-  pio_enable_interrupt(PIOC, PIO_PC16);
-  pio_enable_interrupt(PIOC, PIO_PC18);
+  pio_enable_interrupt(PIOC, PIO_PC2);
+  pio_enable_interrupt(PIOC, PIO_PC4);
+  pio_enable_interrupt(PIOC, PIO_PC6);
+  pio_enable_interrupt(PIOC, PIO_PC8);
 
   NVIC_EnableIRQ(PIOC_IRQn);
 }
@@ -209,8 +213,8 @@ void encoder_handler_alt(const uint32_t id, const uint32_t index) {
   //Assert((index == PIO_PC16) || (index == PIO_PC18));
 
   QUADRATURE_STATE newState =
-      GenerateQuadratureState(pio_get(PIOC, PIO_TYPE_PIO_INPUT, PIO_PC16),
-                              pio_get(PIOC, PIO_TYPE_PIO_INPUT, PIO_PC18));
+      GenerateQuadratureState(ioport_get_pin_level(MOTOR_ALT_ENC_1),
+                              ioport_get_pin_level(MOTOR_ALT_ENC_2));
 
   darkSkyContext.motorAlt.position +=
       GeneratePositionChange(darkSkyContext.motorAlt.quadratureState, newState);
@@ -223,8 +227,8 @@ void encoder_handler_az(const uint32_t id, const uint32_t index) {
   //Assert((index == PIO_PC17) || (index == PIO_PC19));
 
   QUADRATURE_STATE newState =
-      GenerateQuadratureState(pio_get(PIOC, PIO_TYPE_PIO_INPUT, PIO_PC17),
-                              pio_get(PIOC, PIO_TYPE_PIO_INPUT, PIO_PC19));
+      GenerateQuadratureState(ioport_get_pin_level(MOTOR_AZ_ENC_1),
+                              ioport_get_pin_level(MOTOR_AZ_ENC_2));
 
   darkSkyContext.motorAz.position +=
       GeneratePositionChange(darkSkyContext.motorAz.quadratureState, newState);
