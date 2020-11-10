@@ -223,7 +223,6 @@ void MotorStop(Motor *motor) {
 
 void MotorForward(Motor *motor) {
   if (darkSkyContext.allMotorStop || motor->deltaPosition == 0) {
-    MotorStop(motor);
     return;
   }
 
@@ -242,7 +241,6 @@ void MotorForward(Motor *motor) {
 
 void MotorReverse(Motor *motor) {
   if (darkSkyContext.allMotorStop || motor->deltaPosition == 0) {
-    MotorStop(motor);
     return;
   }
 

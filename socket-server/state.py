@@ -131,12 +131,16 @@ class State(Singleton):
     def processRequestedState(self):
         self.logger.info("Staring State Processing Thread")
         count = 0
+        lastState = ""
         while True:
             with self.requestedStateUpdatedCondition:
                 with self.requestedStateCondition:
                     while len(self.requestedState):
                         currentStateRequest = self.requestedState[-1]
                         state = currentStateRequest[0]
+                        if lastState != state:
+                            count = 0
+                            lastState = state
                         value = currentStateRequest[1]
                         self.logger.info(
                             "Processing state request : Ref {} : {} -> {}".format(count, state, value))
