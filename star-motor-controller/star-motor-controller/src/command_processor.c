@@ -47,7 +47,7 @@ void CommandProcessorTask(void *data) {
 
         if (foundHeader) {
           ioport_toggle_pin_level(IOPORT_LED_ST);
-          SendCommPacket(packet);
+          SendCommPacket(false, packet);
           switch (packet->command) {
           // case BOOT:
           // break;
@@ -61,7 +61,7 @@ void CommandProcessorTask(void *data) {
               break;
             case MOTOR_STOP:
             default:
-              MotorStop(&darkSkyContext.motorAlt);
+              MotorStop(false, &darkSkyContext.motorAlt);
             }
             break;
 
@@ -76,7 +76,7 @@ void CommandProcessorTask(void *data) {
             break;
 
           case MOTOR_ALT_PWM:
-            MotorSetPWM(&darkSkyContext.motorAlt, packet->arg1);
+            MotorSetPWM(false, &darkSkyContext.motorAlt, packet->arg1);
             break;
 
           case MOTOR_AZ_STATE:
@@ -89,7 +89,7 @@ void CommandProcessorTask(void *data) {
               break;
             case MOTOR_STOP:
             default:
-              MotorStop(&darkSkyContext.motorAz);
+              MotorStop(false, &darkSkyContext.motorAz);
             }
             break;
 
@@ -104,15 +104,15 @@ void CommandProcessorTask(void *data) {
             break;
 
           case MOTOR_AZ_PWM:
-            MotorSetPWM(&darkSkyContext.motorAz, packet->arg1);
+            MotorSetPWM(false, &darkSkyContext.motorAz, packet->arg1);
             break;
 
           case STOP_ALL_MOTORS:
             darkSkyContext.allMotorStop = packet->arg1;
             SendCommPacketArgs(false, STOP_ALL_MOTORS, darkSkyContext.allMotorStop, 0, 0);
             if (darkSkyContext.allMotorStop) {
-              MotorStop(&darkSkyContext.motorAlt);
-              MotorStop(&darkSkyContext.motorAz);
+              MotorStop(false, &darkSkyContext.motorAlt);
+              MotorStop(false, &darkSkyContext.motorAz);
             }
             break;
 

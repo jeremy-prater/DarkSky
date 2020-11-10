@@ -1,17 +1,18 @@
 #include <asf.h>
 #include <string.h>
+#include <queue.h>
 
 #include "conf_uart_serial.h"
 #include "darksky.h"
 #include "darksky_tasks.h"
 #include "leds.h"
+#include "comm.h"
 
 // Communication static variables
 xSemaphoreHandle ApplicationBufferMutex;
 uint8_t ApplicationBuffer[COMM_APP_BUFFER_SIZE];
 uint32_t ApplicationBufferLevel;
 static uint8_t CommRxBuffer[COMM_BUFFER_SIZE];
-static uint8_t CommTxBuffer[COMM_BUFFER_SIZE];
 
 // Configuration structure.
 static const freertos_peripheral_options_t driver_options = {
@@ -68,8 +69,7 @@ void CommInit(void)
 
   vSemaphoreCreateBinary(darkSkyContext.comm.txMutex);
   vSemaphoreCreateBinary(ApplicationBufferMutex);
-  darkSkyContext.comm.txQueue = xQueueCreateStatic(COMM_BUFFER_SIZE, sizeof(CommPacket), darkSkyContext.comm.txQueueBuffer, &darkSkyContext.comm.txQueueInternal);
-  // vSemaphoreCreateBinary(darkSkyContext.comm.txQueueMutex);
+  darkSkyContext.comm.txQueue = xQueueCreate(COMM_NUM_PACKETS, sizeof(CommPacket));
 }
 
 void SendCommPacketArgs(bool inISR, uint16_t command, uint16_t arg1, uint16_t arg2, uint16_t arg3)
@@ -87,8 +87,13 @@ void SendCommPacket(bool inISR, const CommPacket *packet)
 {
   if (inISR)
   {
-    BaseType_t highInterrupt;
-    xQueueSendToBackFromISR(darkSkyContext.comm.txQueue, packet, &highInterrupt);
+    // BaseType_t highPriTask;
+	  // xQueueSendToBackFromISR(darkSkyContext.comm.txQueue, packet, &highPriTask);
+    // if (highPriTask == pdTRUE)
+    // {
+    //   // Context switch back
+    //   taskYIELD();
+    // }
   }
   else
   {
@@ -100,7 +105,7 @@ static status_code_t TxCommBlob(const uint8_t *blob, size_t length)
 {
   return freertos_uart_write_packet(
       darkSkyContext.comm.freertos_uart, blob, length,
-      1000 / portTICK_RATE_MS); // context->comm.txMutex);
+      500 / portTICK_RATE_MS);
 }
 
 // Main communication loop
@@ -111,21 +116,19 @@ void CommTask(void *data)
   CommPacket tempPacket = {.header = COMM_PACKET_HEADER,
                            .command = BOOT};
 
-  SendCommPacket(&tempPacket);
+  SendCommPacket(false, &tempPacket);
 
   for (;;)
   {
     // Send all outgoing packets!
-    // xSemaphoreTake(darkSkyContext.comm.txQueueMutex, portMAX_DELAY);
     xSemaphoreTake(darkSkyContext.comm.txMutex, portMAX_DELAY);
 
-    while (xQueueReceive(darkSkyContext.comm.txQueue, &currentTxPacket, )
+    while (xQueueReceive(darkSkyContext.comm.txQueue, &currentTxPacket, 100 / portTICK_RATE_MS))
     {
       TxCommBlob(&currentTxPacket, sizeof(CommPacket));
     }
 
     xSemaphoreGive(darkSkyContext.comm.txMutex);
-    // xSemaphoreGive(darkSkyContext.comm.txQueueMutex);
 
     // Attempt to read COMM_BUFFER_SIZE bytes from freertos_uart.
     // If fewer than COMM_BUFFER_SIZE bytes are available,
@@ -138,7 +141,7 @@ void CommTask(void *data)
 
     uint32_t bytes_received = freertos_uart_serial_read_packet(
         darkSkyContext.comm.freertos_uart, CommRxBuffer, COMM_PACKET_SIZE,
-        100 / portTICK_RATE_MS); // context->comm.txMutex);
+        100 / portTICK_RATE_MS);
 
     if (bytes_received > 0)
     {

@@ -218,8 +218,8 @@ void MotorInit(void)
 void StopAllMotors(void)
 {
   // Set all motor drives of off
-  MotorStop(&darkSkyContext.motorAlt);
-  MotorStop(&darkSkyContext.motorAz);
+  MotorStop(false, &darkSkyContext.motorAlt);
+  MotorStop(false, &darkSkyContext.motorAz);
 }
 
 static void SetMotorState(bool inISR, Motor *motor, uint16_t state)
@@ -228,12 +228,12 @@ static void SetMotorState(bool inISR, Motor *motor, uint16_t state)
   SendCommPacketArgs(inISR, MOTOR_ALT_STATE + motor->id, state, 0, 0);
 }
 
-void MotorStop(Motor *motor)
+void MotorStop(bool isISR, Motor *motor)
 {
   ioport_set_pin_level(motor->pinForward, IOPORT_PIN_LEVEL_LOW);
   ioport_set_pin_level(motor->pinReverse, IOPORT_PIN_LEVEL_LOW);
-  MotorSetPWM(false, motor, 0);
-  SetMotorState(false, motor, MOTOR_STOP);
+  MotorSetPWM(isISR, motor, 0);
+  SetMotorState(isISR, motor, MOTOR_STOP);
 }
 
 void MotorForward(Motor *motor)
@@ -250,7 +250,7 @@ void MotorForward(Motor *motor)
 
   if (motor->state == MOTOR_REVERSE)
   {
-    MotorStop(motor);
+    MotorStop(false, motor);
   }
 
   MotorSetPWM(false, motor, 100);
@@ -272,7 +272,7 @@ void MotorReverse(Motor *motor)
 
   if (motor->state == MOTOR_FORWARD)
   {
-    MotorStop(motor);
+    MotorStop(false, motor);
   }
 
   MotorSetPWM(false, motor, 100);
@@ -292,11 +292,11 @@ void MotorSetPWM(bool inISR, Motor *motor, uint32_t pwmDuty)
   pwm_channel_update_duty(PWM, &motor->pwm, pwmDuty);
 }
 
-void MotorCompleteMove(Motor *motor)
+void MotorCompleteMove(bool inISR, Motor *motor)
 {
-  MotorStop(motor);
-  MotorSetDelta(true, motor, 0);
-  SetMotorState(true, motor, MOTOR_COMPLETE);
+  MotorStop(inISR, motor);
+  MotorSetDelta(inISR, motor, 0);
+  SetMotorState(inISR, motor, MOTOR_COMPLETE);
 }
 
 void encoder_handler_alt(const uint32_t id, const uint32_t index)

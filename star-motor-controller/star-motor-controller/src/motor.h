@@ -56,12 +56,13 @@ typedef struct {
 void MotorInit(void);
 void StopAllMotors(void);
 
-void MotorStop(Motor *motor);
 void MotorForward(Motor *motor);
 void MotorReverse(Motor *motor);
+
+void MotorStop(bool inISR, Motor *motor);
 void MotorSetDelta(bool inISR, Motor *motor, int16_t stopPos);
 void MotorSetPWM(bool inISR, Motor *motor, uint32_t pwmDuty);
-void MotorCompleteMove(Motor *motor);
+void MotorCompleteMove(bool inISR, Motor *motor);
 
 // Interrupt declarations
 void encoder_handler_alt(const uint32_t id, const uint32_t index);

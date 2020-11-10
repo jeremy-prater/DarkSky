@@ -64,7 +64,7 @@
 #define configCPU_CLOCK_HZ						( sysclk_get_cpu_hz() )
 #define configTICK_RATE_HZ						( 1000 )
 #define configMAX_PRIORITIES					( 5 )
-#define configMINIMAL_STACK_SIZE				( ( unsigned short ) 130 )
+#define configMINIMAL_STACK_SIZE				( ( unsigned short ) 256 )
 #define configTOTAL_HEAP_SIZE					( ( size_t ) ( 8 * 1024 ) )
 #define configMAX_TASK_NAME_LEN					( 10 )
 #define configUSE_TRACE_FACILITY				1
@@ -145,6 +145,11 @@ header file. */
 
 /* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
 standard names.Based on the architecture  choosen, the below definitons may be needed*/
+
+
+/* Memory allocation related definitions. */
+#define configSUPPORT_STATIC_ALLOCATION         1
+#define configSUPPORT_DYNAMIC_ALLOCATION        1
 
 #define xPortPendSVHandler PendSV_Handler
 #define vPortSVCHandler SVC_Handler

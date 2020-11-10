@@ -7,7 +7,8 @@
 #include <queue.h>
 
 #define COMM_PACKET_SIZE 16
-#define COMM_BUFFER_SIZE 64
+#define COMM_NUM_PACKETS 64
+#define COMM_BUFFER_SIZE (COMM_PACKET_SIZE * COMM_NUM_PACKETS)
 #define COMM_APP_BUFFER_SIZE 512
 
 #define COMM_PACKET_HEADER 0xDADAF00D
@@ -43,7 +44,6 @@ typedef struct {
   QueueHandle_t txQueue;
   StaticQueue_t txQueueInternal;
   CommPacket txQueueBuffer[COMM_BUFFER_SIZE];
-
 } Comm;
 
 void CommInit(void);

@@ -26,7 +26,7 @@ DarkSkyTask darkSkyTasks[TASK_NUM_TASKS] = {
      // name
      "Comm",
      // stackSize
-     configMINIMAL_STACK_SIZE + COMM_APP_BUFFER_SIZE + COMM_BUFFER_SIZE + 30,
+     configMINIMAL_STACK_SIZE + 30,
      // context
      &darkSkyContext,
      // priority
@@ -60,44 +60,44 @@ void DarkSkyMain(void *data) {
 
     packet.command = STOP_ALL_MOTORS;
     packet.arg1 = darkSkyContext.allMotorStop;
-    SendCommPacket(&packet);
+    SendCommPacket(false, &packet);
 
     packet.command = MOTOR_ALT_STATE;
     packet.arg1 = darkSkyContext.motorAlt.state;
-    SendCommPacket(&packet);
+    SendCommPacket(false, &packet);
 
     packet.command = MOTOR_ALT_POSITION;
     packet.arg1 = darkSkyContext.motorAlt.position;
-    SendCommPacket(&packet);
+    SendCommPacket(false, &packet);
 
     packet.command = MOTOR_ALT_DELTA_POS;
     packet.arg1 = darkSkyContext.motorAlt.deltaPosition;
-    SendCommPacket(&packet);
+    SendCommPacket(false, &packet);
 
     packet.command = MOTOR_ALT_PWM;
     packet.arg1 = darkSkyContext.motorAlt.pwm.ul_duty;
-    SendCommPacket(&packet);
+    SendCommPacket(false, &packet);
 
     packet.command = MOTOR_AZ_STATE;
     packet.arg1 = darkSkyContext.motorAz.state;
-    SendCommPacket(&packet);
+    SendCommPacket(false, &packet);
 
     packet.command = MOTOR_AZ_POSITION;
     packet.arg1 = darkSkyContext.motorAz.position;
-    SendCommPacket(&packet);
+    SendCommPacket(false, &packet);
 
     packet.command = MOTOR_AZ_DELTA_POS;
     packet.arg1 = darkSkyContext.motorAz.deltaPosition;
-    SendCommPacket(&packet);
+    SendCommPacket(false, &packet);
 
     packet.command = MOTOR_AZ_PWM;
     packet.arg1 = darkSkyContext.motorAz.pwm.ul_duty;
-    SendCommPacket(&packet);
+    SendCommPacket(false, &packet);
 
     packet.command = LNB_STATE;
     packet.arg1 = darkSkyContext.lnb.power;
     packet.arg2 = darkSkyContext.lnb.carrier;
-    SendCommPacket(&packet);
+    SendCommPacket(false, &packet);
   }
   vTaskDelete(NULL);
 }
