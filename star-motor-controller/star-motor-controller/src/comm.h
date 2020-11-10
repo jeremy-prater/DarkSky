@@ -4,6 +4,7 @@
 #include "asf.h"
 #include <freertos_uart_serial.h>
 #include <semphr.h>
+#include <queue.h>
 
 #define COMM_PACKET_SIZE 16
 #define COMM_BUFFER_SIZE 64
@@ -39,15 +40,15 @@ typedef struct {
 typedef struct {
   freertos_uart_if freertos_uart;
   xSemaphoreHandle txMutex;
-  xSemaphoreHandle txQueueMutex;
-  CommPacket txQueue[COMM_BUFFER_SIZE];
-  volatile uint16_t txHead;
-  volatile uint16_t txTail;
+  QueueHandle_t txQueue;
+  StaticQueue_t txQueueInternal;
+  CommPacket txQueueBuffer[COMM_BUFFER_SIZE];
+
 } Comm;
 
 void CommInit(void);
-void SendCommPacketArgs(uint16_t command, uint16_t arg1, uint16_t arg2, uint16_t arg3);
-void SendCommPacket(const CommPacket *packet);
+void SendCommPacketArgs(bool inISR, uint16_t command, uint16_t arg1, uint16_t arg2, uint16_t arg3);
+void SendCommPacket(bool inISR, const CommPacket *packet);
 void CommTask(void *data);
 
 // Shared Comm variables

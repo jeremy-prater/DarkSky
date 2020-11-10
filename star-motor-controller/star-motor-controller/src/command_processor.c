@@ -72,7 +72,7 @@ void CommandProcessorTask(void *data) {
             break;
 
           case MOTOR_ALT_DELTA_POS:
-            MotorSetDelta(&darkSkyContext.motorAlt, packet->arg1);
+            MotorSetDelta(false, &darkSkyContext.motorAlt, packet->arg1);
             break;
 
           case MOTOR_ALT_PWM:
@@ -100,7 +100,7 @@ void CommandProcessorTask(void *data) {
             break;
 
           case MOTOR_AZ_DELTA_POS:
-            MotorSetDelta(&darkSkyContext.motorAz, packet->arg1);
+            MotorSetDelta(false, &darkSkyContext.motorAz, packet->arg1);
             break;
 
           case MOTOR_AZ_PWM:
@@ -109,7 +109,7 @@ void CommandProcessorTask(void *data) {
 
           case STOP_ALL_MOTORS:
             darkSkyContext.allMotorStop = packet->arg1;
-            SendCommPacketArgs(STOP_ALL_MOTORS, darkSkyContext.allMotorStop, 0, 0);
+            SendCommPacketArgs(false, STOP_ALL_MOTORS, darkSkyContext.allMotorStop, 0, 0);
             if (darkSkyContext.allMotorStop) {
               MotorStop(&darkSkyContext.motorAlt);
               MotorStop(&darkSkyContext.motorAz);

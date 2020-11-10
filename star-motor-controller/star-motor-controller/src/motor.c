@@ -6,54 +6,66 @@
 #include "motor.h"
 #include "comm.h"
 
-static inline void CheckMotorPositionBounds(Motor *motor) {
-  if (motor->position < 0) {
+static inline void CheckMotorPositionBounds(Motor *motor)
+{
+  if (motor->position < 0)
+  {
     motor->position += MOTOR_POSITION_MAX;
-  } else if (motor->position >= MOTOR_POSITION_MAX) {
+  }
+  else if (motor->position >= MOTOR_POSITION_MAX)
+  {
     motor->position -= MOTOR_POSITION_MAX;
   }
 
   motor->deltaPosition--;
-  
-  if (motor->deltaPosition < 50) {
-    MotorSetPWM(motor, 50);
+
+  if (motor->deltaPosition < 50)
+  {
+    MotorSetPWM(true, motor, 50);
   }
-  else if (motor->deltaPosition < 100) {
-    MotorSetPWM(motor, 60);
+  else if (motor->deltaPosition < 100)
+  {
+    MotorSetPWM(true, motor, 60);
   }
-  else if (motor->deltaPosition < 150) {
-    MotorSetPWM(motor, 70);
+  else if (motor->deltaPosition < 150)
+  {
+    MotorSetPWM(true, motor, 70);
   }
-  else if (motor->deltaPosition < 200) {
-    MotorSetPWM(motor, 80);
+  else if (motor->deltaPosition < 200)
+  {
+    MotorSetPWM(true, motor, 80);
   }
-  else if (motor->deltaPosition < 250) {
-    MotorSetPWM(motor, 90);
+  else if (motor->deltaPosition < 250)
+  {
+    MotorSetPWM(true, motor, 90);
   }
 
   if (motor->deltaPosition == 0)
   {
-    MotorCompleteMove(motor);
+    MotorCompleteMove(true, motor);
   }
 
   if (motor->state != MOTOR_FORWARD && motor->state != MOTOR_REVERSE)
   {
-    MotorSetDelta(motor, 0);
+    MotorSetDelta(true, motor, 0);
   }
 }
 
 static inline QUADRATURE_STATE GenerateQuadratureState(bool encoder1,
-                                                       bool encoder2) {
+                                                       bool encoder2)
+{
   return (QUADRATURE_STATE)((encoder1 ? 0b01 : 0b00) +
                             (encoder2 ? 0b10 : 0b00));
 }
 
 static inline int16_t GeneratePositionChange(QUADRATURE_STATE oldState,
-                                             QUADRATURE_STATE newState) {
+                                             QUADRATURE_STATE newState)
+{
   if (oldState == newState)
     return 0;
 
-  switch (oldState) {
+  switch (oldState)
+  {
   case QUAD_LO_LO:
     if (newState == QUAD_LO_HI)
       return -1;
@@ -91,19 +103,20 @@ static inline int16_t GeneratePositionChange(QUADRATURE_STATE oldState,
   return 0;
 }
 
-static pwm_channel_t GeneratePWMStruct (uint32_t channel) {
+static pwm_channel_t GeneratePWMStruct(uint32_t channel)
+{
   pwm_channel_t pwmChannel = {
-    .channel = channel,
-    .ul_prescaler = PWM_CMR_CPRE_CLKA,
-    .alignment = PWM_ALIGN_LEFT,
-    .polarity = PWM_HIGH,
-    .ul_duty = 20,
-    .ul_period = 100
-    };
-    return pwmChannel;
+      .channel = channel,
+      .ul_prescaler = PWM_CMR_CPRE_CLKA,
+      .alignment = PWM_ALIGN_LEFT,
+      .polarity = PWM_HIGH,
+      .ul_duty = 20,
+      .ul_period = 100};
+  return pwmChannel;
 }
 
-void MotorInit(void) {
+void MotorInit(void)
+{
   darkSkyContext.motorAlt.id = 0x0000;
   darkSkyContext.motorAlt.pinForward = PIN_MOTOR_ALT_FORWARD;
   darkSkyContext.motorAlt.pinReverse = PIN_MOTOR_ALT_REVERSE;
@@ -151,7 +164,7 @@ void MotorInit(void) {
 
   // Setup interrupts for Encoder GPIOs
   pmc_enable_periph_clk(ID_PIOC);
-  
+
   // Az Encoder 1/2
   pio_set_input(PIOC, PIO_PC2, PIO_DEFAULT);
   pio_set_input(PIOC, PIO_PC4, PIO_DEFAULT);
@@ -178,7 +191,7 @@ void MotorInit(void) {
 
   // Enable PWM clock
   pmc_enable_periph_clk(ID_PWM);
-  
+
   // Disable all PWM channels
   pwm_channel_disable(PWM, darkSkyContext.motorAlt.pwm.channel);
   pwm_channel_disable(PWM, darkSkyContext.motorAz.pwm.channel);
@@ -187,8 +200,7 @@ void MotorInit(void) {
   pwm_clock_t clock_setting = {
       .ul_clka = 1000 * 100,
       .ul_clkb = 0,
-      .ul_mck = 48000000
-  };
+      .ul_mck = 48000000};
   pwm_init(PWM, &clock_setting);
 
   // Init PWM channels
@@ -203,79 +215,92 @@ void MotorInit(void) {
   pwm_channel_enable(PWM, darkSkyContext.motorAz.pwm.channel);
 }
 
-void StopAllMotors(void) {
+void StopAllMotors(void)
+{
   // Set all motor drives of off
   MotorStop(&darkSkyContext.motorAlt);
   MotorStop(&darkSkyContext.motorAz);
 }
 
-static void SetMotorState(Motor * motor, uint16_t state) {
+static void SetMotorState(bool inISR, Motor *motor, uint16_t state)
+{
   motor->state = state;
-  SendCommPacketArgs(MOTOR_ALT_STATE + motor->id, state, 0, 0);
+  SendCommPacketArgs(inISR, MOTOR_ALT_STATE + motor->id, state, 0, 0);
 }
 
-void MotorStop(Motor *motor) {
+void MotorStop(Motor *motor)
+{
   ioport_set_pin_level(motor->pinForward, IOPORT_PIN_LEVEL_LOW);
   ioport_set_pin_level(motor->pinReverse, IOPORT_PIN_LEVEL_LOW);
-  MotorSetPWM(motor, 0);
-  SetMotorState(motor, MOTOR_STOP);
+  MotorSetPWM(false, motor, 0);
+  SetMotorState(false, motor, MOTOR_STOP);
 }
 
-void MotorForward(Motor *motor) {
-  if (darkSkyContext.allMotorStop || motor->deltaPosition == 0) {
-    return;
-  }
-
-  if (motor->state == MOTOR_FORWARD) {
-    return;
-  }
-
-  if (motor->state == MOTOR_REVERSE) {
-    MotorStop(motor);
-  }
-
-  MotorSetPWM(motor, 100);
-  ioport_set_pin_level(motor->pinForward, IOPORT_PIN_LEVEL_HIGH);
-  SetMotorState(motor, MOTOR_FORWARD);
-}
-
-void MotorReverse(Motor *motor) {
-  if (darkSkyContext.allMotorStop || motor->deltaPosition == 0) {
-    return;
-  }
-
-  if (motor->state == MOTOR_REVERSE) {
-    return;
-  }
-
-  if (motor->state == MOTOR_FORWARD) {
-    MotorStop(motor);
-  }
-
-  MotorSetPWM(motor, 100);
-  ioport_set_pin_level(motor->pinReverse, IOPORT_PIN_LEVEL_HIGH);
-  SetMotorState(motor, MOTOR_REVERSE);
-}
-
-void MotorSetDelta(Motor *motor, int16_t deltaPos)
+void MotorForward(Motor *motor)
 {
-  SendCommPacketArgs(MOTOR_ALT_DELTA_POS + motor->id, deltaPos, 0, 0);
+  if (darkSkyContext.allMotorStop || motor->deltaPosition == 0)
+  {
+    return;
+  }
+
+  if (motor->state == MOTOR_FORWARD)
+  {
+    return;
+  }
+
+  if (motor->state == MOTOR_REVERSE)
+  {
+    MotorStop(motor);
+  }
+
+  MotorSetPWM(false, motor, 100);
+  ioport_set_pin_level(motor->pinForward, IOPORT_PIN_LEVEL_HIGH);
+  SetMotorState(false, motor, MOTOR_FORWARD);
+}
+
+void MotorReverse(Motor *motor)
+{
+  if (darkSkyContext.allMotorStop || motor->deltaPosition == 0)
+  {
+    return;
+  }
+
+  if (motor->state == MOTOR_REVERSE)
+  {
+    return;
+  }
+
+  if (motor->state == MOTOR_FORWARD)
+  {
+    MotorStop(motor);
+  }
+
+  MotorSetPWM(false, motor, 100);
+  ioport_set_pin_level(motor->pinReverse, IOPORT_PIN_LEVEL_HIGH);
+  SetMotorState(false, motor, MOTOR_REVERSE);
+}
+
+void MotorSetDelta(bool inISR, Motor *motor, int16_t deltaPos)
+{
+  SendCommPacketArgs(inISR, MOTOR_ALT_DELTA_POS + motor->id, deltaPos, 0, 0);
   motor->deltaPosition = deltaPos;
 }
 
-void MotorSetPWM(Motor *motor, uint32_t pwmDuty) {
-  SendCommPacketArgs(MOTOR_ALT_PWM + motor->id, pwmDuty, 0, 0);
+void MotorSetPWM(bool inISR, Motor *motor, uint32_t pwmDuty)
+{
+  SendCommPacketArgs(inISR, MOTOR_ALT_PWM + motor->id, pwmDuty, 0, 0);
   pwm_channel_update_duty(PWM, &motor->pwm, pwmDuty);
 }
 
-void MotorCompleteMove(Motor *motor) {
-  MotorStop(motor);  
-  MotorSetDelta(motor, 0);
-  SetMotorState(motor, MOTOR_COMPLETE);
+void MotorCompleteMove(Motor *motor)
+{
+  MotorStop(motor);
+  MotorSetDelta(true, motor, 0);
+  SetMotorState(true, motor, MOTOR_COMPLETE);
 }
 
-
-void encoder_handler_alt(const uint32_t id, const uint32_t index) {
+void encoder_handler_alt(const uint32_t id, const uint32_t index)
+{
   //Assert(id == ID_PIOC);
   //Assert((index == PIO_PC16) || (index == PIO_PC18));
 
@@ -289,7 +314,8 @@ void encoder_handler_alt(const uint32_t id, const uint32_t index) {
   darkSkyContext.motorAlt.quadratureState = newState;
 }
 
-void encoder_handler_az(const uint32_t id, const uint32_t index) {
+void encoder_handler_az(const uint32_t id, const uint32_t index)
+{
   //Assert(id == ID_PIOC);
   //Assert((index == PIO_PC17) || (index == PIO_PC19));
 

@@ -10,7 +10,6 @@
 xSemaphoreHandle ApplicationBufferMutex;
 uint8_t ApplicationBuffer[COMM_APP_BUFFER_SIZE];
 uint32_t ApplicationBufferLevel;
-static bool CommsReady;
 static uint8_t CommRxBuffer[COMM_BUFFER_SIZE];
 static uint8_t CommTxBuffer[COMM_BUFFER_SIZE];
 
@@ -52,7 +51,8 @@ static sam_uart_opt_t uart_settings = {
 
 // Communication function implementations
 
-void CommInit(void) {
+void CommInit(void)
+{
   uart_settings.ul_mck = sysclk_get_cpu_hz();
 
   sysclk_enable_peripheral_clock(ID_USART0);
@@ -67,69 +67,65 @@ void CommInit(void) {
   // freertos_usart_serial_init(CONF_USART, &usart_settings, &driver_options);
 
   vSemaphoreCreateBinary(darkSkyContext.comm.txMutex);
-  vSemaphoreCreateBinary(darkSkyContext.comm.txQueueMutex);
   vSemaphoreCreateBinary(ApplicationBufferMutex);
+  darkSkyContext.comm.txQueue = xQueueCreateStatic(COMM_BUFFER_SIZE, sizeof(CommPacket), darkSkyContext.comm.txQueueBuffer, &darkSkyContext.comm.txQueueInternal);
+  // vSemaphoreCreateBinary(darkSkyContext.comm.txQueueMutex);
 }
 
-void SendCommPacketArgs(uint16_t command, uint16_t arg1, uint16_t arg2, uint16_t arg3) {
+void SendCommPacketArgs(bool inISR, uint16_t command, uint16_t arg1, uint16_t arg2, uint16_t arg3)
+{
   static CommPacket packet;
   packet.header = COMM_PACKET_HEADER;
   packet.command = command;
   packet.arg1 = arg1;
   packet.arg2 = arg2;
   packet.arg3 = arg3;
-  return SendCommPacket(&packet);
+  return SendCommPacket(inISR, &packet);
 }
 
-
-void SendCommPacket(const CommPacket *packet) {
-  // I'll probably regret this...
-  // xSemaphoreHandle lock = darkSkyContext.comm.txQueueMutex;
-  // xSemaphoreTake(lock, portMAX_DELAY);
-  if (darkSkyContext.comm.txHead >= COMM_BUFFER_SIZE) {
-    darkSkyContext.comm.txHead = 0;
+void SendCommPacket(bool inISR, const CommPacket *packet)
+{
+  if (inISR)
+  {
+    BaseType_t highInterrupt;
+    xQueueSendToBackFromISR(darkSkyContext.comm.txQueue, packet, &highInterrupt);
   }
-  memcpy (&darkSkyContext.comm.txQueue[darkSkyContext.comm.txHead++], packet, sizeof (CommPacket));
-  // darkSkyContext.comm.txHead++;
-  // xSemaphoreGive(lock);
+  else
+  {
+    xQueueSendToBack(darkSkyContext.comm.txQueue, packet, portMAX_DELAY);
+  }
 }
 
-static status_code_t TxCommBlob(const uint8_t *blob, size_t length) {
-  status_code_t result;
-  xSemaphoreHandle lock = darkSkyContext.comm.txMutex;
-
-  xSemaphoreTake(lock, portMAX_DELAY);
-
-  result = freertos_uart_write_packet(
+static status_code_t TxCommBlob(const uint8_t *blob, size_t length)
+{
+  return freertos_uart_write_packet(
       darkSkyContext.comm.freertos_uart, blob, length,
       1000 / portTICK_RATE_MS); // context->comm.txMutex);
-
-  xSemaphoreGive(lock);
-  // ioport_toggle_pin_level(IOPORT_LED_TX);
-
-  return result;
 }
 
 // Main communication loop
 
-void CommTask(void *data) {
+void CommTask(void *data)
+{
+  CommPacket currentTxPacket;
   CommPacket tempPacket = {.header = COMM_PACKET_HEADER,
                            .command = BOOT};
 
-  CommsReady = true;
   SendCommPacket(&tempPacket);
 
-  for (;;) {
+  for (;;)
+  {
     // Send all outgoing packets!
-    xSemaphoreHandle lock = darkSkyContext.comm.txQueueMutex;
-    xSemaphoreTake(lock, portMAX_DELAY);
-    while (darkSkyContext.comm.txTail != darkSkyContext.comm.txHead) {
-      TxCommBlob(&darkSkyContext.comm.txQueue[darkSkyContext.comm.txTail++], sizeof (CommPacket));
-      if (darkSkyContext.comm.txTail == COMM_BUFFER_SIZE) {
-        darkSkyContext.comm.txTail = 0;
-      }
+    // xSemaphoreTake(darkSkyContext.comm.txQueueMutex, portMAX_DELAY);
+    xSemaphoreTake(darkSkyContext.comm.txMutex, portMAX_DELAY);
+
+    while (xQueueReceive(darkSkyContext.comm.txQueue, &currentTxPacket, )
+    {
+      TxCommBlob(&currentTxPacket, sizeof(CommPacket));
     }
-    xSemaphoreGive(lock);
+
+    xSemaphoreGive(darkSkyContext.comm.txMutex);
+    // xSemaphoreGive(darkSkyContext.comm.txQueueMutex);
 
     // Attempt to read COMM_BUFFER_SIZE bytes from freertos_uart.
     // If fewer than COMM_BUFFER_SIZE bytes are available,
@@ -144,11 +140,13 @@ void CommTask(void *data) {
         darkSkyContext.comm.freertos_uart, CommRxBuffer, COMM_PACKET_SIZE,
         100 / portTICK_RATE_MS); // context->comm.txMutex);
 
-    if (bytes_received > 0) {
+    if (bytes_received > 0)
+    {
       xSemaphoreTake(ApplicationBufferMutex, portMAX_DELAY);
-      if (ApplicationBufferLevel + bytes_received < COMM_APP_BUFFER_SIZE) {
+      if (ApplicationBufferLevel + bytes_received < COMM_APP_BUFFER_SIZE)
+      {
         memcpy(&ApplicationBuffer[ApplicationBufferLevel], CommRxBuffer,
-              bytes_received);
+               bytes_received);
         ApplicationBufferLevel += bytes_received;
         ioport_toggle_pin_level(IOPORT_LED_RX);
         xTaskNotifyGive(darkSkyTasks[TASK_CommandProcessor].taskHandle);

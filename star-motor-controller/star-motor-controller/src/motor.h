@@ -59,8 +59,8 @@ void StopAllMotors(void);
 void MotorStop(Motor *motor);
 void MotorForward(Motor *motor);
 void MotorReverse(Motor *motor);
-void MotorSetDelta(Motor *motor, int16_t stopPos);
-void MotorSetPWM(Motor *motor, uint32_t pwmDuty);
+void MotorSetDelta(bool inISR, Motor *motor, int16_t stopPos);
+void MotorSetPWM(bool inISR, Motor *motor, uint32_t pwmDuty);
 void MotorCompleteMove(Motor *motor);
 
 // Interrupt declarations

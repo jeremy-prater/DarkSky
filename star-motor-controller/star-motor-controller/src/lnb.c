@@ -39,7 +39,7 @@ void LNBPower(LNB_POWER_STATE powerState)
             ioport_set_pin_level(LNB_POWER, IOPORT_PIN_LEVEL_HIGH);
         }
     }
-    SendCommPacketArgs(LNB_STATE, darkSkyContext.lnb.power, darkSkyContext.lnb.carrier, 0);
+    SendCommPacketArgs(false, LNB_STATE, darkSkyContext.lnb.power, darkSkyContext.lnb.carrier, 0);
 }
 
 void LNBCarrier(LNB_CARRIER_STATE carrierState)
@@ -53,5 +53,5 @@ void LNBCarrier(LNB_CARRIER_STATE carrierState)
     {
         ioport_set_pin_level(LNB_CARRIER, IOPORT_PIN_LEVEL_HIGH);
     }
-    SendCommPacketArgs(LNB_STATE, darkSkyContext.lnb.power, darkSkyContext.lnb.carrier, 0);
+    SendCommPacketArgs(false, LNB_STATE, darkSkyContext.lnb.power, darkSkyContext.lnb.carrier, 0);
 }
