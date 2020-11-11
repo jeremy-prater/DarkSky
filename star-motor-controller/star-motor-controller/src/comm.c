@@ -87,13 +87,13 @@ void SendCommPacket(bool inISR, const CommPacket *packet)
 {
   if (inISR)
   {
-    // BaseType_t highPriTask;
-	  // xQueueSendToBackFromISR(darkSkyContext.comm.txQueue, packet, &highPriTask);
-    // if (highPriTask == pdTRUE)
-    // {
-    //   // Context switch back
-    //   taskYIELD();
-    // }
+    BaseType_t highPriTask = pdFALSE;
+	  xQueueSendToBackFromISR(darkSkyContext.comm.txQueue, packet, &highPriTask);
+    if (highPriTask == pdTRUE)
+    {
+      // Context switch back
+      taskYIELD();
+    }
   }
   else
   {

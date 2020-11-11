@@ -175,6 +175,8 @@ void MotorInit(void)
   pio_set_input(PIOC, PIO_PC6, PIO_DEFAULT);
   pio_set_input(PIOC, PIO_PC8, PIO_DEFAULT);
 
+  pio_handler_set_priority(PIOC, PIOC_IRQn, 4);
+
   pio_handler_set(PIOC, ID_PIOC, PIO_PC2, PIO_IT_EDGE, encoder_handler_az);
   pio_handler_set(PIOC, ID_PIOC, PIO_PC4, PIO_IT_EDGE, encoder_handler_az);
   pio_handler_set(PIOC, ID_PIOC, PIO_PC6, PIO_IT_EDGE, encoder_handler_alt);
@@ -184,9 +186,6 @@ void MotorInit(void)
   pio_enable_interrupt(PIOC, PIO_PC4);
   pio_enable_interrupt(PIOC, PIO_PC6);
   pio_enable_interrupt(PIOC, PIO_PC8);
-
-  NVIC_SetPriority(PIOC_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY + 1);
-  NVIC_EnableIRQ(PIOC_IRQn);
 
   // Setup PWM
   gpio_configure_pin(PIN_MOTOR_AZ_PWM, MOTOR_PWM_FLAGS);
