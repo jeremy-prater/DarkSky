@@ -185,7 +185,7 @@ void MotorInit(void)
   pio_enable_interrupt(PIOC, PIO_PC6);
   pio_enable_interrupt(PIOC, PIO_PC8);
 
-  NVIC_SetPriority(PIOC_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY);
+  NVIC_SetPriority(PIOC_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY + 1);
   NVIC_EnableIRQ(PIOC_IRQn);
 
   // Setup PWM

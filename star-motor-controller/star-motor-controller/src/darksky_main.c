@@ -14,7 +14,7 @@ DarkSkyTask darkSkyTasks[TASK_NUM_TASKS] = {
      // name
      "Main",
      // stackSize
-     configMINIMAL_STACK_SIZE + 100,
+     configMINIMAL_STACK_SIZE,
      // context
      &darkSkyContext,
      // priority [0,4]
@@ -26,7 +26,7 @@ DarkSkyTask darkSkyTasks[TASK_NUM_TASKS] = {
      // name
      "Comm",
      // stackSize
-     configMINIMAL_STACK_SIZE + 30,
+     configMINIMAL_STACK_SIZE,
      // context
      &darkSkyContext,
      // priority
