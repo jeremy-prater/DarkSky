@@ -19,27 +19,29 @@ static inline void CheckMotorPositionBounds(Motor *motor)
     motor->position -= MOTOR_POSITION_MAX;
   }
 
-  motor->deltaPosition--;
+  if (motor->autoDrive == false) {
+    motor->deltaPosition--;
 
-  if (motor->deltaPosition < 50)
-  {
-    MotorSetPWM(true, motor, 50);
-  }
-  else if (motor->deltaPosition < 100)
-  {
-    MotorSetPWM(true, motor, 60);
-  }
-  else if (motor->deltaPosition < 150)
-  {
-    MotorSetPWM(true, motor, 70);
-  }
-  else if (motor->deltaPosition < 200)
-  {
-    MotorSetPWM(true, motor, 80);
-  }
-  else if (motor->deltaPosition < 250)
-  {
-    MotorSetPWM(true, motor, 90);
+    if (motor->deltaPosition < 50)
+    {
+      MotorSetPWM(true, motor, 50);
+    }
+    else if (motor->deltaPosition < 100)
+    {
+      MotorSetPWM(true, motor, 60);
+    }
+    else if (motor->deltaPosition < 150)
+    {
+      MotorSetPWM(true, motor, 70);
+    }
+    else if (motor->deltaPosition < 200)
+    {
+      MotorSetPWM(true, motor, 80);
+    }
+    else if (motor->deltaPosition < 250)
+    {
+      MotorSetPWM(true, motor, 90);
+    }
   }
 
   if (motor->deltaPosition == 0)
@@ -228,6 +230,14 @@ static void SetMotorState(bool inISR, Motor *motor, uint16_t state)
 {
   motor->state = state;
   SendCommPacketArgs(inISR, MOTOR_ALT_STATE + motor->id, state, 0, 0);
+}
+
+void MotorAutoDrive(bool inISR, Motor *motor, int16_t autoDrive)
+{
+  if (motor->id == 0x100) {
+    motor->autoDrive = autoDrive;
+    SendCommPacketArgs(inISR, MOTOR_AZ_AUTODRIVE, autoDrive, 0, 0);
+  }
 }
 
 void MotorStop(bool isISR, Motor *motor)

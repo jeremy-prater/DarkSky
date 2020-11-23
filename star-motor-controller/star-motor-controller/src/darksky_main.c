@@ -94,6 +94,10 @@ void DarkSkyMain(void *data) {
     packet.arg1 = darkSkyContext.motorAz.pwm.ul_duty;
     SendCommPacket(false, &packet);
 
+    packet.command = MOTOR_AZ_AUTODRIVE;
+    packet.arg1 = darkSkyContext.motorAz.autoDrive;
+    SendCommPacket(false, &packet);
+
     packet.command = LNB_STATE;
     packet.arg1 = darkSkyContext.lnb.power;
     packet.arg2 = darkSkyContext.lnb.carrier;

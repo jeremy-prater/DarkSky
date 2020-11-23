@@ -9,14 +9,14 @@
 
 #define MOTOR_PWM_FLAGS (PIO_PERIPH_B | PIO_DEFAULT)
 
-#define PIN_MOTOR_AZ_FORWARD IOPORT_CREATE_PIN(PIOC, 5)    // Pin 35
-#define PIN_MOTOR_AZ_REVERSE IOPORT_CREATE_PIN(PIOC, 3)  // Pin 37
+#define PIN_MOTOR_AZ_FORWARD IOPORT_CREATE_PIN(PIOC, 3)  // Pin 37
+#define PIN_MOTOR_AZ_REVERSE IOPORT_CREATE_PIN(PIOC, 5)    // Pin 35
 #define PIN_MOTOR_AZ_PWM   IOPORT_CREATE_PIN(PIOC, 19) // Pin 44
 #define PIN_MOTOR_AZ_ENC_1 IOPORT_CREATE_PIN(PIOC, 4) // Pin 36
 #define PIN_MOTOR_AZ_ENC_2 IOPORT_CREATE_PIN(PIOC, 2) // Pin 34
 
-#define PIN_MOTOR_ALT_FORWARD IOPORT_CREATE_PIN(PIOC, 9)    // Pin 41
-#define PIN_MOTOR_ALT_REVERSE IOPORT_CREATE_PIN(PIOC, 7)  // Pin 39
+#define PIN_MOTOR_ALT_FORWARD IOPORT_CREATE_PIN(PIOC, 7)  // Pin 39
+#define PIN_MOTOR_ALT_REVERSE IOPORT_CREATE_PIN(PIOC, 9)    // Pin 41
 #define PIN_MOTOR_ALT_PWM   IOPORT_CREATE_PIN(PIOC, 18) // Pin 45
 #define PIN_MOTOR_ALT_ENC_1 IOPORT_CREATE_PIN(PIOC, 8) // Pin 40
 #define PIN_MOTOR_ALT_ENC_2 IOPORT_CREATE_PIN(PIOC, 6) // Pin 38
@@ -41,6 +41,7 @@ typedef struct {
   uint16_t id;
   int16_t position; // Range [0, 11000) pulses per revolution
   uint16_t deltaPosition;
+  int16_t autoDrive;
   QUADRATURE_STATE quadratureState;
 
   xSemaphoreHandle stateMutex;
@@ -58,7 +59,7 @@ void StopAllMotors(void);
 
 void MotorForward(Motor *motor);
 void MotorReverse(Motor *motor);
-
+void MotorAutoDrive(bool inISR, Motor *motor, int16_t autoDrive);
 void MotorStop(bool inISR, Motor *motor);
 void MotorSetDelta(bool inISR, Motor *motor, int16_t stopPos);
 void MotorSetPWM(bool inISR, Motor *motor, uint32_t pwmDuty);

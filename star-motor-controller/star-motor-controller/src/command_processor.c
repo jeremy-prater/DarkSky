@@ -107,6 +107,10 @@ void CommandProcessorTask(void *data) {
             MotorSetPWM(false, &darkSkyContext.motorAz, packet->arg1);
             break;
 
+          case MOTOR_AZ_AUTODRIVE:
+            MotorAutoDrive(false, &darkSkyContext.motorAz, packet->arg1);
+            break;
+
           case STOP_ALL_MOTORS:
             darkSkyContext.allMotorStop = packet->arg1;
             SendCommPacketArgs(false, STOP_ALL_MOTORS, darkSkyContext.allMotorStop, 0, 0);

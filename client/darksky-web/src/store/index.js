@@ -22,6 +22,7 @@ export default new Vuex.Store({
             'motors.az.state': 'unknown',
             'motors.az.position': 0,
             'motors.az.delta': 0,
+            'motors.az.autodrive': false,
             'motors.alt.state': 'unknown',
             'motors.alt.position': 0,
             'motors.alt.delta': 0,

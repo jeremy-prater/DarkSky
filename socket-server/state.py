@@ -46,6 +46,7 @@ class State(Singleton):
             'motors.az.position': 0,
             'motors.az.delta': 0,
             'motors.az.pwm': 0,
+            'motors.az.autodrive': False,
             'motors.alt.state': 'unknown',
             'motors.alt.position': 0,
             'motors.alt.delta': 0,
@@ -211,6 +212,11 @@ class State(Singleton):
             requestedState = Packet.CreateFromStruct(
                 PacketCommand.MOTOR_AZ_DELTA_POS, value, 0, 0)
 
+        # RA motor auto drive
+        elif (state == "motors.az.autodrive"):
+            requestedState = Packet.CreateFromStruct(
+                PacketCommand.MOTOR_AZ_AUTODRIVE, value, 0, 0)
+
         # LNB State
         elif (state == "lnb.voltage"):
             requestedState = Packet.CreateFromStruct(
@@ -257,6 +263,9 @@ class State(Singleton):
 
     def updateAzPWM(self, packet: Packet):
         self.updateMotorPWM('az', packet)
+
+    def updateAzAutoDrive(self, packet: Packet):
+        self.update('motors.az.autodrive', packet.arg1 == 1)
 
     def updateStopAll(self, packet: Packet):
         self.update('motors.stopAll', packet.arg1)

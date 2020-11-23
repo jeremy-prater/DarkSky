@@ -83,6 +83,10 @@ class MotorPowerController(Singleton):
             self.state.updateAzDelta(packet)
         elif packet.command == PacketCommand.MOTOR_AZ_PWM:
             self.state.updateAzPWM(packet)
+        elif packet.command == PacketCommand.MOTOR_AZ_AUTODRIVE:
+            self.state.updateAzAutoDrive(packet)
         elif packet.command == PacketCommand.LNB_STATE:
             self.state.updateLNBVoltage(packet)
             self.state.updateLNBCarrier(packet)
+        else:
+            self.logger.warning("Unknown State! {:04X} -> {} {} {}".format(packet.command, packet.arg1, packet.arg2, packet.arg3))
