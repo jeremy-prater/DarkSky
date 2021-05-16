@@ -11,3 +11,5 @@ socket-server/server_runtime
 
 client/darksky-desktop-qt/desktop_runtime
 client/darksky-desktop-kv/desktop_runtime
+
+pi-motor-controller/build
