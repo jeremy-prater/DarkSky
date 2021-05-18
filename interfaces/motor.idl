@@ -1,0 +1,15 @@
+// example IDL file
+
+namespace MyGame;
+
+attribute "priority";
+
+enum State : byte { Stopped, Forward, Reverse, Stalled }
+
+table Motor {
+  state:State = Stopped;
+  position:uint16;
+
+}
+
+root_type Motor;

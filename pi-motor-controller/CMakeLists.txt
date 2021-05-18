@@ -13,11 +13,22 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 add_executable(${PROJ_NAME}
-        blink.c
+        main.cpp
+        comms.cpp
+        led.cpp
         )
 
+pico_enable_stdio_usb(${PROJ_NAME} 1)
+pico_enable_stdio_uart(${PROJ_NAME} 0)
+
 # Pull in our pico_stdlib which pulls in commonly used features
-target_link_libraries(${PROJ_NAME} pico_stdlib)
+target_link_libraries(${PROJ_NAME}
+        pico_stdlib
+        pico_multicore
+        hardware_pio
+        hardware_pwm
+)
+
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(${PROJ_NAME})
