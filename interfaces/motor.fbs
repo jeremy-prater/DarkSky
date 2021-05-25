@@ -1,15 +1,18 @@
-// example IDL file
+// A PWM Motor
+//
+// It can rotate the dish on Az or Alt
+//
+// O7
 
-namespace MyGame;
+namespace Drive;
 
 attribute "priority";
 
 enum State : byte { Stopped, Forward, Reverse, Stalled }
 
-table Motor {
+table PWMMotor {
   state:State = Stopped;
   position:uint16;
-
 }
 
-root_type Motor;
+root_type PWMMotor;

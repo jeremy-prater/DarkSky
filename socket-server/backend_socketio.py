@@ -22,7 +22,9 @@ class SocketIOBackend(Singleton):
         self.sioLock = threading.Lock()
 
         self.sio = socketio.Server(
-            cors_allowed_origins='*', engineio_logger=True)
+            cors_allowed_origins=[],
+            cors_credentials=False,
+            engineio_logger=True)
         self.app = socketio.WSGIApp(self.sio)
         self.sio.on('connect', self.connect)
         self.sio.on('disconnect', self.disconnect)

@@ -1,0 +1,5 @@
+// Options to get from CMake
+
+#define SERVER_VERSION_MAJOR        @darksky-socket-server_VERSION_MAJOR@
+#define SERVER_VERSION_MINOR        @darksky-socket-server_VERSION_MINOR@
+#define SERVER_BUILD_SHA            "@darksky-socket-server_BUILD_SHA@"

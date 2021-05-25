@@ -1,3 +1,6 @@
 [submodule "pi-motor-controller/pico-sdk"]
 	path = pi-motor-controller/pico-sdk
 	url = https://github.com/raspberrypi/pico-sdk.git
+[submodule "socket-server-cpp/external/socket.io-client-cpp"]
+	path = socket-server-cpp/external/socket.io-client-cpp
+	url = https://github.com/socketio/socket.io-client-cpp.git
