@@ -1,7 +1,10 @@
+#include "darksky.hpp"
 #include "led.hpp"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
 #include <stdio.h>
+
+DarkSky *DarkSky::instance;
 
 LED green;
 
@@ -17,6 +20,8 @@ int main() {
   stdio_init_all();
 
   multicore_launch_core1(core1_entry);
+
+  DarkSky::instance = new DarkSky();
 
   while (true) {
     green.Toggle();

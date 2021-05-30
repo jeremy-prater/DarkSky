@@ -17,6 +17,8 @@ pico_sdk_init()
 
 add_executable(${PROJ_NAME}
         main.cpp
+        motor.cpp
+        darksky.cpp
         comms.cpp
         led.cpp
         )
