@@ -2,28 +2,28 @@
 #include "pins.hpp"
 #include <functional>
 
-MotorPins Motor::motorPins[NUM_MOTORS] = {
+MotorPins Motor::motorPins[static_cast<int>(MotorTypes::COUNT)] = {
     {
         .name = "ALT",
-        .pwm = MOTOR_A_PWM,
-        .forward = MOTOR_A_FORWARD,
-        .reverse = MOTOR_A_REVERSE,
-        .quad_a = MOTOR_A_QUAD_A,
-        .quad_b = MOTOR_A_QUAD_B,
+        .pwm = MOTOR_ALT_PWM,
+        .forward = MOTOR_ALT_FORWARD,
+        .reverse = MOTOR_ALT_REVERSE,
+        .quad_a = MOTOR_ALT_QUAD_A,
+        .quad_b = MOTOR_ALT_QUAD_B,
         .id = 0,
     },
     {
         .name = "AZ",
-        .pwm = MOTOR_B_PWM,
-        .forward = MOTOR_B_FORWARD,
-        .reverse = MOTOR_B_REVERSE,
-        .quad_a = MOTOR_B_QUAD_A,
-        .quad_b = MOTOR_B_QUAD_B,
+        .pwm = MOTOR_AZ_PWM,
+        .forward = MOTOR_AZ_FORWARD,
+        .reverse = MOTOR_AZ_REVERSE,
+        .quad_a = MOTOR_AZ_QUAD_A,
+        .quad_b = MOTOR_AZ_QUAD_B,
         .id = 1,
     },
 };
 
-Motor *Motor::motors[NUM_MOTORS] = {
+Motor *Motor::motors[static_cast<int>(MotorTypes::COUNT)] = {
     nullptr,
     nullptr,
 };
@@ -35,8 +35,9 @@ const int8_t Motor::quadLookup[4][4] = {
     {Q_ERR, Q_INC, Q_DEC, Q_NOP},
 };
 
-Motor::Motor(uint8_t motorID) : pins(&motorPins[motorID]) {
-  motors[pins->id] = this;
+Motor::Motor(MotorTypes mtrType)
+    : type(mtrType), pins(&motorPins[static_cast<int>(mtrType)]) {
+  motors[static_cast<int>(mtrType)] = this;
   gpio_init_mask(1 << pins->pwm || 1 << pins->forward || 1 << pins->reverse ||
                  1 << pins->quad_a || 1 << pins->quad_b);
 
@@ -70,14 +71,14 @@ Motor::QuadatureState Motor::generateQuadratureState() const {
 
 void Motor::quad_event_irq(uint gpio, uint32_t events) {
   switch (gpio) {
-  case MOTOR_A_QUAD_A:
-  case MOTOR_A_QUAD_B:
-    motors[0]->quad_event(gpio, events);
+  case MOTOR_ALT_QUAD_A:
+  case MOTOR_ALT_QUAD_B:
+    motors[static_cast<int>(MotorTypes::ALT)]->quad_event(gpio, events);
     break;
 
-  case MOTOR_B_QUAD_A:
-  case MOTOR_B_QUAD_B:
-    motors[1]->quad_event(gpio, events);
+  case MOTOR_AZ_QUAD_A:
+  case MOTOR_AZ_QUAD_B:
+    motors[static_cast<int>(MotorTypes::AZ)]->quad_event(gpio, events);
     break;
 
   default:
@@ -87,22 +88,17 @@ void Motor::quad_event_irq(uint gpio, uint32_t events) {
 }
 
 void Motor::quad_event(uint gpio, uint32_t events) {
-    QuadatureState newState = generateQuadratureState();
-    int8_t delta = quadLookup[static_cast<uint8_t>(quadState)][static_cast<uint8_t>(newState)];
-    quadState = newState;
-    if (delta == Q_ERR)
-    {
-        // Log a quadrature error!
-    }
-    else if(delta != Q_NOP)
-    {
-        onMove(delta);
-    }
-    else
-    {
-        // Maybe log Q_NOP??
-    }
-
+  QuadatureState newState = generateQuadratureState();
+  int8_t delta = quadLookup[static_cast<uint8_t>(quadState)]
+                           [static_cast<uint8_t>(newState)];
+  quadState = newState;
+  if (delta == Q_ERR) {
+    // Log a quadrature error!
+  } else if (delta != Q_NOP) {
+    onMove(delta);
+  } else {
+    // Maybe log Q_NOP??
+  }
 }
 
 void Motor::onMove(int delta) { position += delta; }

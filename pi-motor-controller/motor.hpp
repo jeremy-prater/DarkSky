@@ -3,8 +3,6 @@
 #include <pico/stdlib.h>
 #include <string>
 
-#define NUM_MOTORS 2
-
 #define Q_NOP 0
 #define Q_INC 1
 #define Q_DEC -1
@@ -33,14 +31,21 @@ public:
     HIGH_HIGH, // 3
   };
 
+  enum class MotorTypes
+  {
+    ALT,
+    AZ,
+    COUNT
+  };
 
-  Motor(uint8_t motorID);
+  Motor(MotorTypes mtrType);
 
 private:
-  static MotorPins motorPins[NUM_MOTORS];
-  static Motor *motors[NUM_MOTORS];
+  static MotorPins motorPins[static_cast<int>(MotorTypes::COUNT)];
+  static Motor *motors[static_cast<int>(MotorTypes::COUNT)];
   static const int8_t quadLookup[4][4];
 
+  MotorTypes type;
   const MotorPins *const pins;
 
   uint16_t position;

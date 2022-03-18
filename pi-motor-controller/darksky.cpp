@@ -1,3 +1,3 @@
 #include "darksky.hpp"
 
-DarkSky::DarkSky() : altMotor(0), azMotor(1) {}
+DarkSky::DarkSky() : altMotor(Motor::MotorTypes::ALT), azMotor(Motor::MotorTypes::AZ) {}

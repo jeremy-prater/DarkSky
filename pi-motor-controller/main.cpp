@@ -9,22 +9,16 @@ DarkSky *DarkSky::instance;
 LED green;
 
 void core1_entry() {
-  int count = 0;
-  while (true) {
-    printf("--- tick2 : %d\n", count++);
-    sleep_ms(1000);
-  }
+  DarkSky::instance = new DarkSky();
 }
 
 int main() {
   stdio_init_all();
 
-  multicore_launch_core1(core1_entry);
-
-  DarkSky::instance = new DarkSky();
-
   while (true) {
-    green.Toggle();
+    printf("---> 'ELLO!' : \n");
     sleep_ms(1000);
   }
+
+  multicore_launch_core1(core1_entry);
 }
