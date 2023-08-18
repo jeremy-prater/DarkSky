@@ -4,3 +4,9 @@
 [submodule "socket-server-cpp/external/socket.io-client-cpp"]
 	path = socket-server-cpp/external/socket.io-client-cpp
 	url = https://github.com/socketio/socket.io-client-cpp.git
+[submodule "rpi4-controller/modules/DynamixelSDK"]
+	path = rpi4-controller/modules/DynamixelSDK
+	url = https://github.com/ROBOTIS-GIT/DynamixelSDK.git
+[submodule "rpi4-controller/modules/redis-plus-plus"]
+	path = rpi4-controller/modules/redis-plus-plus
+	url = https://github.com/sewenew/redis-plus-plus.git
